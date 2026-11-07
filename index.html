@@ -1,0 +1,1971 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0a0a0b">
+<meta name="description" content="FLOW — Build your routine. Track your progress.">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="FLOW">
+<link rel="manifest" href="./manifest.json">
+<link rel="icon" href="./logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="./logo.svg">
+<title>FLOW</title>
+<style>
+:root{
+  --bg:#ffffff;
+  --surface:#f6f6f7;
+  --surface-2:#ebebee;
+  --text:#0b0b0c;
+  --muted:#6c6c73;
+  --border:#e3e3e7;
+  --ink-rgb:11,11,12;
+  --nav-bg:rgba(255,255,255,.94);
+  --nav-h:62px;
+  --radius:16px;
+}
+[data-theme="dark"]{
+  --bg:#0a0a0b;
+  --surface:#151517;
+  --surface-2:#202024;
+  --text:#f3f3f4;
+  --muted:#9a9aa2;
+  --border:#2a2a2f;
+  --ink-rgb:243,243,244;
+  --nav-bg:rgba(10,10,11,.94);
+}
+*,*::before,*::after{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:15px;
+  line-height:1.45;
+  -webkit-font-smoothing:antialiased;
+  -webkit-tap-highlight-color:transparent;
+  overscroll-behavior-y:contain;
+  transition:background-color .22s ease,color .22s ease;
+}
+body.no-scroll{overflow:hidden;}
+[hidden]{display:none !important;}
+button{font-family:inherit;font-size:inherit;color:inherit;background:none;border:none;padding:0;cursor:pointer;touch-action:manipulation;}
+input,textarea{font-family:inherit;font-size:16px;color:var(--text);}
+h1,h2,h3,h4,p,ul,li{margin:0;padding:0;}
+ul{list-style:none;}
+
+#app{max-width:480px;margin:0 auto;min-height:100dvh;position:relative;}
+.view{padding:calc(env(safe-area-inset-top) + 20px) 18px calc(var(--nav-h) + env(safe-area-inset-bottom) + 32px);}
+
+.app-brand{display:flex;align-items:center;gap:10px;margin-bottom:24px;}
+.app-logo-box{width:36px;height:36px;border-radius:10px;background:var(--text);color:var(--bg);display:grid;place-items:center;}
+.app-logo-box svg{width:20px;height:20px;stroke:var(--bg);fill:none;stroke-width:3;stroke-linecap:round;stroke-linejoin:round;}
+.app-brand-name{font-size:18px;font-weight:800;letter-spacing:.15em;}
+
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:8px;
+  height:48px;padding:0 22px;border-radius:14px;
+  font-size:15px;font-weight:650;letter-spacing:.01em;
+  border:1px solid transparent;transition:transform .12s ease,opacity .15s ease,background .15s ease;
+}
+.btn:active{transform:scale(.975);}
+.btn-primary{background:var(--text);color:var(--bg);}
+.btn-ghost{background:transparent;color:var(--text);border-color:var(--border);}
+.btn-small{height:36px;padding:0 14px;font-size:13.5px;border-radius:11px;}
+.btn:disabled{opacity:.4;pointer-events:none;}
+.icon-btn{
+  width:38px;height:38px;flex:none;border-radius:12px;
+  border:1px solid var(--border);background:var(--surface);
+  display:grid;place-items:center;font-size:15px;line-height:1;
+  transition:transform .12s ease,opacity .15s;
+}
+.icon-btn:active{transform:scale(.93);}
+.icon-btn.small{width:32px;height:32px;border-radius:10px;font-size:13px;border-color:transparent;background:transparent;}
+.link-btn{color:var(--text);font-weight:650;text-decoration:underline;text-underline-offset:3px;}
+
+.auth-screen{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:32px 22px calc(32px + env(safe-area-inset-bottom));}
+.auth-inner{width:100%;max-width:380px;}
+.brand{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:30px;}
+.brand-logo{width:66px;height:66px;border-radius:19px;display:block;margin-bottom:14px;}
+.brand h1{font-size:26px;font-weight:800;letter-spacing:.22em;margin-left:.22em;}
+.brand p{font-size:13px;color:var(--muted);margin-top:6px;letter-spacing:.01em;}
+.auth-form{display:flex;flex-direction:column;gap:14px;}
+.field{display:flex;flex-direction:column;gap:6px;}
+.field label{font-size:12px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);}
+.field input{
+  height:50px;padding:0 16px;border-radius:14px;
+  background:var(--surface);border:1px solid var(--border);
+  outline:none;transition:border-color .15s ease,background .15s;
+}
+.field input:focus{border-color:var(--muted);background:var(--bg);}
+.auth-error{font-size:13px;color:var(--text);background:var(--surface-2);border:1px solid var(--border);padding:10px 12px;border-radius:10px;}
+.auth-switch{margin-top:20px;text-align:center;font-size:14px;color:var(--muted);}
+.auth-foot{margin-top:26px;text-align:center;font-size:11.5px;color:var(--muted);line-height:1.6;}
+
+.user-name{font-size:26px;font-weight:800;letter-spacing:-.025em;line-height:1.2;}
+.today-date{font-size:13.5px;color:var(--muted);margin-top:4px;}
+.quote{
+  font-size:16px;line-height:1.5;font-style:italic;
+  margin:14px 0 24px;color:var(--text);opacity:.85;
+}
+
+.progress-ring-card{display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px 16px;margin-bottom:24px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);}
+.circular-progress{position:relative;width:110px;height:110px;display:grid;place-items:center;}
+.circular-progress svg{width:110px;height:110px;transform:rotate(-90deg);}
+.circular-progress circle{fill:none;stroke-width:8;}
+.circular-progress .bg-circle{stroke:var(--border);}
+.circular-progress .fg-circle{stroke:var(--text);stroke-linecap:round;transition:stroke-dashoffset .4s ease;}
+.circular-value{position:absolute;font-size:22px;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums;}
+.progress-subtext{font-size:13px;color:var(--muted);margin-top:10px;font-weight:600;}
+
+.routine-list{display:flex;flex-direction:column;gap:10px;}
+.routine-item{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:12px 16px;min-height:56px;
+  transition:opacity .2s;
+}
+.routine-label{flex:1;display:flex;align-items:center;gap:14px;min-width:0;cursor:pointer;}
+.rcheck{
+  -webkit-appearance:none;appearance:none;
+  width:22px;height:22px;flex:none;border-radius:50%;
+  border:2px solid var(--muted);position:relative;
+  transition:background .15s ease,border-color .15s ease;
+  cursor:pointer;
+}
+.rcheck:checked{background:var(--text);border-color:var(--text);}
+.rcheck:checked::after{
+  content:"";position:absolute;left:7px;top:3px;width:5px;height:10px;
+  border:solid var(--bg);border-width:0 2px 2px 0;transform:rotate(45deg);
+}
+.rcheck:disabled{opacity:.5;cursor:not-allowed;}
+.routine-name{font-size:15px;font-weight:600;overflow-wrap:anywhere;}
+.routine-item.done .routine-name{color:var(--muted);text-decoration:line-through;text-decoration-thickness:1.5px;}
+.readonly-note{
+  margin-top:14px;font-size:12.5px;color:var(--muted);text-align:center;
+  padding:9px;border:1px dashed var(--border);border-radius:11px;
+}
+.skipped-note{
+  margin-top:12px;font-size:12.5px;color:var(--muted);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;
+  padding:10px 12px;border:1px dashed var(--border);border-radius:11px;
+}
+.skipped-note button{font-weight:700;color:var(--text);text-decoration:underline;text-underline-offset:3px;font-size:12.5px;}
+.empty-state{
+  text-align:center;padding:34px 18px;border:1px dashed var(--border);
+  border-radius:var(--radius);color:var(--muted);font-size:14px;
+  display:flex;flex-direction:column;gap:16px;align-items:center;
+  line-height:1.55;
+}
+.empty-state .btn{width:100%;}
+
+.view-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:18px;}
+.view-title{font-size:26px;font-weight:800;letter-spacing:-.025em;}
+.diary-list{display:flex;flex-direction:column;gap:10px;}
+.diary-item{
+  width:100%;text-align:left;display:block;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:15px 16px;
+  transition:transform .12s ease;
+}
+.diary-item:active{transform:scale(.987);}
+.diary-title-row{display:flex;align-items:center;gap:8px;}
+.diary-title{font-size:15.5px;font-weight:700;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1;min-width:0;}
+.badge{
+  flex:none;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 7px;border-radius:6px;background:var(--text);color:var(--bg);
+}
+.diary-meta{font-size:12px;color:var(--muted);margin-top:3px;}
+.diary-preview{
+  font-size:13.5px;color:var(--muted);margin-top:7px;line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;
+}
+.today-badge{font-size:10px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);border:1px solid var(--border);padding:2px 6px;border-radius:6px;}
+
+#editorSheet{
+  position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;z-index:120;
+  background:var(--bg);display:flex;flex-direction:column;
+  padding-top:env(safe-area-inset-top);
+}
+.editor-head{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);}
+.editor-status{flex:1;font-size:11.5px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.editor-title{width:100%;border:none;outline:none;background:transparent;font-size:21px;font-weight:800;letter-spacing:-.02em;padding:18px 18px 6px;}
+.editor-body{
+  flex:1;width:100%;border:none;outline:none;background:transparent;resize:none;
+  padding:6px 18px 20px;font-size:16px;line-height:1.62;min-height:0;
+}
+.editor-foot{
+  display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:10px 16px calc(10px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--border);font-size:12px;color:var(--muted);
+}
+
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:20px;}
+.stat-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:14px 15px;}
+.stat-label{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);}
+.stat-value{font-size:25px;font-weight:800;letter-spacing:-.03em;margin-top:5px;font-variant-numeric:tabular-nums;}
+.segmented{display:flex;gap:4px;background:var(--surface);border:1px solid var(--border);border-radius:11px;padding:4px;}
+.segmented button{
+  flex:1;height:32px;border-radius:8px;font-size:12.5px;font-weight:700;color:var(--muted);
+  transition:background .15s,color .15s;
+}
+.segmented button.active{background:var(--text);color:var(--bg);}
+.chart{width:100%;height:auto;display:block;color:var(--text);}
+.chart-grid{stroke:var(--border);stroke-width:1;}
+.chart-label{fill:var(--muted);font-size:8.5px;font-weight:700;}
+.chart-line{fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
+.chart-area{fill:currentColor;opacity:.07;}
+.chart-dot{fill:var(--bg);stroke:currentColor;stroke-width:2;}
+
+.section-label{font-size:11.5px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--muted);margin:24px 0 10px;}
+.cal-head{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:12px;}
+.cal-title{font-size:15px;font-weight:750;letter-spacing:-.01em;}
+.cal-dows{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;margin-bottom:5px;}
+.cal-dow{text-align:center;font-size:10.5px;font-weight:800;color:var(--muted);letter-spacing:.06em;}
+.cal-grid{display:grid;grid-template-columns:repeat(7,1fr);gap:5px;}
+.cal-cell{
+  aspect-ratio:1/1;border-radius:9px;display:grid;place-items:center;
+  font-size:12.5px;font-weight:650;font-variant-numeric:tabular-nums;
+  border:1px solid transparent;transition:transform .12s ease;
+}
+.cal-cell.nodata{border-color:var(--border);color:var(--muted);}
+.cal-cell.future{color:var(--muted);opacity:.32;}
+.cal-cell.blank{border:none;pointer-events:none;}
+.cal-cell:not(.blank):not(.future):active{transform:scale(.93);}
+.cal-cell.today{outline:2px solid var(--text);outline-offset:1px;}
+.cal-legend{display:flex;align-items:center;flex-wrap:wrap;gap:7px;margin-top:14px;font-size:11px;color:var(--muted);}
+.cal-swatch{width:13px;height:13px;border-radius:4px;border:1px solid var(--border);}
+
+.consistency-list{display:flex;flex-direction:column;gap:9px;}
+.consistency-item{
+  display:flex;align-items:center;justify-content:space-between;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:14px 16px;
+}
+.consistency-name{font-size:15px;font-weight:600;}
+.consistency-pct{font-size:15px;font-weight:800;font-variant-numeric:tabular-nums;}
+
+.manage-list{display:flex;flex-direction:column;gap:9px;}
+.manage-item{
+  display:flex;align-items:center;gap:10px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:14px;padding:12px 14px;min-height:56px;
+}
+.manage-name{flex:1;font-size:15px;font-weight:600;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;text-align:left;}
+.manage-actions{display:flex;align-items:center;gap:6px;flex:none;}
+
+.profile-card{display:flex;align-items:center;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:17px;}
+.avatar{
+  width:54px;height:54px;flex:none;border-radius:17px;background:var(--text);color:var(--bg);
+  display:grid;place-items:center;font-size:22px;font-weight:800;letter-spacing:-.02em;
+}
+.profile-name{font-size:17px;font-weight:750;letter-spacing:-.01em;overflow-wrap:anywhere;}
+.profile-email{font-size:13px;color:var(--muted);margin-top:3px;overflow-wrap:anywhere;}
+.row-card{display:flex;align-items:center;justify-content:space-between;gap:14px;background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:15px 16px;}
+.row-title{font-size:14.5px;font-weight:650;}
+.row-sub{font-size:12px;color:var(--muted);margin-top:2px;}
+
+#bottomNav{
+  position:fixed;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;z-index:60;
+  display:flex;background:var(--nav-bg);
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+  border-top:1px solid var(--border);
+  padding-bottom:env(safe-area-inset-bottom);
+}
+.nav-item{
+  flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;height:var(--nav-h);color:var(--muted);
+  font-size:10px;font-weight:700;letter-spacing:.02em;
+  transition:color .16s ease,opacity .12s;
+}
+.nav-item svg{width:21px;height:21px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.nav-item.active{color:var(--text);}
+.nav-item:active{opacity:.55;}
+
+#modalBackdrop{
+  position:fixed;top:0;bottom:0;left:50%;transform:translateX(-50%);
+  width:100%;max-width:480px;z-index:200;
+  background:rgba(0,0,0,.42);
+  display:flex;align-items:flex-end;justify-content:center;
+  opacity:0;transition:opacity .2s ease;
+}
+#modalBackdrop.open{opacity:1;}
+.modal{
+  width:100%;background:var(--bg);
+  border-radius:22px 22px 0 0;
+  padding:22px 20px calc(22px + env(safe-area-inset-bottom));
+  border-top:1px solid var(--border);
+  transform:translateY(16px);transition:transform .24s cubic-bezier(.3,.9,.3,1);
+  max-height:86dvh;overflow-y:auto;
+}
+#modalBackdrop.open .modal{transform:translateY(0);}
+.modal-title{font-size:18px;font-weight:800;letter-spacing:-.02em;}
+.modal-text{font-size:14px;color:var(--muted);margin-top:9px;line-height:1.55;}
+.modal-actions{display:flex;gap:10px;margin-top:22px;}
+.modal-actions .btn{flex:1;}
+.text-input{
+  width:100%;height:50px;margin-top:16px;padding:0 15px;border-radius:13px;
+  background:var(--surface);border:1px solid var(--border);outline:none;
+  transition:border-color .15s;
+}
+.text-input:focus{border-color:var(--muted);background:var(--bg);}
+.modal-error{font-size:13px;color:var(--text);margin-top:10px;}
+
+.detail-row{display:flex;align-items:center;gap:11px;padding:11px 0;border-bottom:1px solid var(--border);}
+.detail-row:last-child{border-bottom:none;}
+.detail-mark{
+  width:20px;height:20px;flex:none;border-radius:6px;border:2px solid var(--muted);
+  display:grid;place-items:center;font-size:11px;line-height:1;
+}
+.detail-row.done .detail-mark{background:var(--text);border-color:var(--text);color:var(--bg);}
+.detail-name{flex:1;font-size:14.5px;overflow-wrap:anywhere;}
+.detail-row.done .detail-name{color:var(--muted);}
+.detail-score{font-size:32px;font-weight:800;letter-spacing:-.035em;font-variant-numeric:tabular-nums;}
+.detail-sub{font-size:12.5px;color:var(--muted);margin-top:2px;}
+
+#toast{
+  position:fixed;left:50%;bottom:calc(var(--nav-h) + env(safe-area-inset-bottom) + 18px);
+  transform:translate(-50%,10px);z-index:300;
+  background:var(--text);color:var(--bg);
+  font-size:13px;font-weight:650;padding:10px 16px;border-radius:11px;
+  opacity:0;pointer-events:none;transition:opacity .22s ease,transform .22s ease;
+  max-width:88vw;text-align:center;
+}
+#toast.show{opacity:1;transform:translate(-50%,0);}
+</style>
+</head>
+<body>
+
+<div id="app">
+
+  <!-- ================= AUTH ================= -->
+  <section id="authScreen" class="auth-screen">
+    <div class="auth-inner">
+      <div class="brand">
+        <svg viewBox="0 0 512 512" class="brand-logo" aria-hidden="true">
+          <rect width="512" height="512" rx="118" fill="var(--text)"/>
+          <path d="M146 268l68 68 152-152" fill="none" stroke="var(--bg)" stroke-width="44"
+                stroke-linecap="round" stroke-linejoin="round"/>
+        </svg>
+        <h1>FLOW</h1>
+        <p>Build your routine. Track your progress.</p>
+      </div>
+
+      <form id="authForm" class="auth-form" autocomplete="on" novalidate>
+        <div class="field" id="nameField" hidden>
+          <label for="authName">Name</label>
+          <input id="authName" type="text" autocomplete="name" placeholder="Your name" maxlength="40">
+        </div>
+        <div class="field">
+          <label for="authEmail">Email</label>
+          <input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" required>
+        </div>
+        <div class="field">
+          <label for="authPassword">Password</label>
+          <input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••" required>
+        </div>
+        <p class="auth-error" id="authError" hidden></p>
+        <button type="submit" class="btn btn-primary" id="authSubmit">Log in</button>
+      </form>
+
+      <p class="auth-switch">
+        <span id="authSwitchText">New here?</span>
+        <button type="button" class="link-btn" id="authSwitchBtn">Create an account</button>
+      </p>
+      <p class="auth-foot">Everything stays on this device.<br>No cloud. No internet required.</p>
+    </div>
+  </section>
+
+  <!-- ================= MAIN APP ================= -->
+  <div id="mainApp" hidden>
+
+    <main id="viewContainer">
+
+      <!-- ---------- TODAY ---------- -->
+      <section id="view-today" class="view">
+        <div class="app-brand">
+          <div class="app-logo-box">
+            <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+          </div>
+          <span class="app-brand-name">FLOW</span>
+        </div>
+
+        <header style="margin-bottom:14px;">
+          <h1 class="user-name" id="userNameAndGreeting">Good evening, User</h1>
+          <p class="today-date" id="todayDate">—</p>
+        </header>
+
+        <p class="quote">“Action speaks louder than words.”</p>
+
+        <div class="card progress-ring-card">
+          <div class="circular-progress" id="circularProgress">
+            <svg viewBox="0 0 100 100">
+              <circle class="bg-circle" cx="50" cy="50" r="42"></circle>
+              <circle class="fg-circle" id="fgCircle" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="263.89"></circle>
+            </svg>
+            <div class="circular-value" id="progressPct">0%</div>
+          </div>
+          <div class="progress-subtext" id="progressCount">0 / 0 completed</div>
+        </div>
+
+        <p class="readonly-note" id="readonlyNote" hidden>Past dates are read-only.</p>
+        <div class="skipped-note" id="skippedNote" hidden>
+          <span id="skippedText">0 removed for this day</span>
+          <button type="button" id="restoreSkipped">Restore</button>
+        </div>
+
+        <ul class="routine-list" id="routineList"></ul>
+      </section>
+
+      <!-- ---------- DIARY ---------- -->
+      <section id="view-diary" class="view" hidden>
+        <div class="app-brand">
+          <div class="app-logo-box">
+            <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+          </div>
+          <span class="app-brand-name">FLOW</span>
+        </div>
+        <div class="view-head">
+          <h1 class="view-title">Diary</h1>
+          <button class="btn btn-primary btn-small" id="newNoteBtn">＋ New</button>
+        </div>
+        <ul class="diary-list" id="diaryList"></ul>
+      </section>
+
+      <!-- ---------- PROGRESS ---------- -->
+      <section id="view-progress" class="view" hidden>
+        <div class="app-brand">
+          <div class="app-logo-box">
+            <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+          </div>
+          <span class="app-brand-name">FLOW</span>
+        </div>
+        <div class="view-head"><h1 class="view-title">Progress</h1></div>
+
+        <div class="stat-grid">
+          <div class="stat-card">
+            <div class="stat-label">Today's Score</div>
+            <div class="stat-value" id="statToday">0%</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Current Streak</div>
+            <div class="stat-value" id="statStreak">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Best Streak</div>
+            <div class="stat-value" id="statBest">0</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Days Tracked</div>
+            <div class="stat-value" id="statTracked">0</div>
+          </div>
+        </div>
+
+        <p class="section-label">Completion Trend</p>
+        <div class="card" style="margin-bottom:24px;">
+          <div class="segmented" id="chartToggle" style="margin-bottom:14px;">
+            <button data-range="7" class="active">Last 7 Days</button>
+            <button data-range="30">Last 30 Days</button>
+          </div>
+          <div id="chartWrap"></div>
+        </div>
+
+        <p class="section-label">Calendar History</p>
+        <div class="card">
+          <div class="cal-head">
+            <button class="icon-btn small" id="calPrev" aria-label="Previous month">‹</button>
+            <span class="cal-title" id="calTitle">—</span>
+            <button class="icon-btn small" id="calNext" aria-label="Next month">›</button>
+          </div>
+          <div class="cal-dows">
+            <div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div>
+            <div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div>
+            <div class="cal-dow">S</div>
+          </div>
+          <div class="cal-grid" id="calGrid"></div>
+          <div class="cal-legend">
+            <span class="cal-swatch" style="background:transparent"></span><span>No data</span>
+            <span class="cal-swatch" style="background:rgba(var(--ink-rgb),.35);margin-left:10px"></span><span>Partial</span>
+            <span class="cal-swatch" style="background:var(--text);margin-left:10px"></span><span>100%</span>
+          </div>
+        </div>
+
+        <p class="section-label">Routine Consistency</p>
+        <ul class="consistency-list" id="consistencyList"></ul>
+      </section>
+
+      <!-- ---------- MANAGE ---------- -->
+      <section id="view-manage" class="view" hidden>
+        <div class="app-brand">
+          <div class="app-logo-box">
+            <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+          </div>
+          <span class="app-brand-name">FLOW</span>
+        </div>
+        <div class="view-head">
+          <div>
+            <h1 class="view-title">Manage</h1>
+            <p style="font-size:13px;color:var(--muted);margin-top:2px;">Your routines.</p>
+          </div>
+          <button class="btn btn-primary btn-small" id="addRoutineBtn">＋ Add</button>
+        </div>
+        <ul class="manage-list" id="manageList"></ul>
+      </section>
+
+      <!-- ---------- PROFILE ---------- -->
+      <section id="view-profile" class="view" hidden>
+        <div class="app-brand">
+          <div class="app-logo-box">
+            <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+          </div>
+          <span class="app-brand-name">FLOW</span>
+        </div>
+        <div class="view-head"><h1 class="view-title">Profile</h1></div>
+
+        <div class="profile-card" style="margin-bottom:20px;">
+          <div class="avatar" id="avatarInitial">F</div>
+          <div style="min-width:0">
+            <div class="profile-name" id="profileName">—</div>
+            <div class="profile-email" id="profileEmail">—</div>
+          </div>
+        </div>
+
+        <p class="section-label">Appearance</p>
+        <div class="card" style="margin-bottom:20px;">
+          <div class="row-card" style="background:transparent;border:none;padding:0;">
+            <div>
+              <div class="row-title">Theme</div>
+              <div class="row-sub" id="themeSubLabel">Dark</div>
+            </div>
+          </div>
+          <div class="segmented" id="themeToggle" style="margin-top:14px;">
+            <button data-theme="light">Light</button>
+            <button data-theme="dark">Dark</button>
+          </div>
+        </div>
+
+        <p class="section-label">Account</p>
+        <button class="row-card" id="logoutBtn" style="width:100%;text-align:left;background:var(--surface);">
+          <div>
+            <div class="row-title">Log out</div>
+            <div class="row-sub">Your data stays on this device</div>
+          </div>
+          <span style="font-size:18px;color:var(--muted)">›</span>
+        </button>
+
+        <div style="margin-top:34px;display:flex;flex-direction:column;align-items:center;gap:8px;">
+          <p style="font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6;">
+            FLOW · v1.0<br>100% private
+          </p>
+        </div>
+      </section>
+
+    </main>
+
+    <!-- ---------- BOTTOM NAV ---------- -->
+    <nav id="bottomNav" aria-label="Primary">
+      <button class="nav-item active" data-view="today">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M8.3 12.3l2.5 2.5 4.9-5.2"/></svg>
+        <span>Today</span>
+      </button>
+      <button class="nav-item" data-view="diary">
+        <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+        <span>Diary</span>
+      </button>
+      <button class="nav-item" data-view="progress">
+        <svg viewBox="0 0 24 24"><path d="M3.5 20.5h17"/><path d="M6 20.5V12M12 20.5V5M18 20.5v-5.5"/></svg>
+        <span>Progress</span>
+      </button>
+      <button class="nav-item" data-view="manage">
+        <svg viewBox="0 0 24 24"><path d="M4 7h16M4 12h16M4 17h16"/><circle cx="9" cy="7" r="1.6" fill="currentColor" stroke="none"/><circle cx="15" cy="12" r="1.6" fill="currentColor" stroke="none"/><circle cx="8" cy="17" r="1.6" fill="currentColor" stroke="none"/></svg>
+        <span>Manage</span>
+      </button>
+      <button class="nav-item" data-view="profile">
+        <svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 20a7.2 7.2 0 0 1 14.4 0"/></svg>
+        <span>Profile</span>
+      </button>
+    </nav>
+
+  </div>
+
+  <!-- ---------- DIARY EDITOR SHEET ---------- -->
+  <div id="editorSheet" hidden>
+    <div class="editor-head">
+      <button class="icon-btn" id="editorBack" aria-label="Close editor">←</button>
+      <span class="editor-status" id="editorStatus">Draft</span>
+      <button class="btn btn-primary btn-small" id="editorSave">Save</button>
+    </div>
+    <input id="editorTitle" class="editor-title" placeholder="Title" maxlength="120" autocomplete="off">
+    <textarea id="editorBody" class="editor-body" placeholder="Write your thoughts…"></textarea>
+    <div class="editor-foot">
+      <span id="editorDate">—</span>
+      <button class="btn btn-ghost btn-small" id="editorDelete">Delete</button>
+    </div>
+  </div>
+
+  <!-- ---------- MODAL ---------- -->
+  <div id="modalBackdrop" hidden><div class="modal" id="modal" role="dialog" aria-modal="true"></div></div>
+
+  <!-- ---------- TOAST ---------- -->
+  <div id="toast" role="status" aria-live="polite"></div>
+
+</div>
+
+<script>
+(function () {
+'use strict';
+
+try {
+  var __t = localStorage.getItem('flow_theme');
+  if (__t === 'dark' || __t === 'light') document.documentElement.setAttribute('data-theme', __t);
+} catch (e) {}
+
+const $  = (s, r) => (r || document).querySelector(s);
+const $$ = (s, r) => Array.prototype.slice.call((r || document).querySelectorAll(s));
+const pad = n => String(n).padStart(2, '0');
+const uid = () => (self.crypto && crypto.randomUUID)
+  ? crypto.randomUUID()
+  : 'id-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 9);
+
+const ESC_MAP = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' };
+const esc = s => String(s == null ? '' : s).replace(/[&<>"']/g, c => ESC_MAP[c]);
+
+const MONTHS = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+const MONTHS_SHORT = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const DAYS_FULL = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+const dateKey  = (d = new Date()) => d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate());
+const todayKey = () => dateKey(new Date());
+const parseKey = k => { const p = k.split('-').map(Number); return new Date(p[0], p[1] - 1, p[2]); };
+const addDays  = (k, n) => { const d = parseKey(k); d.setDate(d.getDate() + n); return dateKey(d); };
+
+function longDate(d) {
+  return DAYS_FULL[d.getDay()] + ' ' + d.getDate() + ' ' + MONTHS[d.getMonth()];
+}
+function time12(ts) {
+  const d = new Date(ts);
+  let h = d.getHours();
+  const m = pad(d.getMinutes());
+  const ap = h >= 12 ? 'PM' : 'AM';
+  h = h % 12;
+  if (h === 0) h = 12;
+  return h + ':' + m + ' ' + ap;
+}
+function dateTime12(ts) {
+  const d = new Date(ts);
+  return MONTHS_SHORT[d.getMonth()] + ' ' + d.getDate() + ', ' + d.getFullYear() + ' · ' + time12(ts);
+}
+function isSameLocalDay(ts, nowTs) {
+  const a = new Date(ts), b = new Date(nowTs);
+  return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+}
+
+/* ============================================================
+   STORAGE LAYER
+   ============================================================ */
+const STORES = {
+  users:       { keyPath: 'id', indexes: [{ name: 'email', keyPath: 'email', unique: true }] },
+  routines:    { keyPath: 'id', indexes: [{ name: 'userId', keyPath: 'userId' }] },
+  completions: { keyPath: 'id', indexes: [{ name: 'userId', keyPath: 'userId' }] },
+  skips:       { keyPath: 'id', indexes: [{ name: 'userId', keyPath: 'userId' }] },
+  notes:       { keyPath: 'id', indexes: [{ name: 'userId', keyPath: 'userId' }] }
+};
+const STORE_NAMES = Object.keys(STORES);
+const LS_PREFIX = 'flowdb:';
+
+let DB = null;
+
+function idbReq(req) {
+  return new Promise((res, rej) => {
+    req.onsuccess = () => res(req.result);
+    req.onerror = () => rej(req.error);
+  });
+}
+
+function openIDB() {
+  return new Promise((resolve, reject) => {
+    if (typeof indexedDB === 'undefined' || !indexedDB) {
+      reject(new Error('IndexedDB unavailable'));
+      return;
+    }
+    let req;
+    try {
+      req = indexedDB.open('flow-db', 1);
+    } catch (err) {
+      reject(err);
+      return;
+    }
+    req.onupgradeneeded = () => {
+      const db = req.result;
+      STORE_NAMES.forEach(name => {
+        if (!db.objectStoreNames.contains(name)) {
+          const cfg = STORES[name];
+          const os = db.createObjectStore(name, { keyPath: cfg.keyPath });
+          (cfg.indexes || []).forEach(ix => {
+            os.createIndex(ix.name, ix.keyPath, { unique: !!ix.unique });
+          });
+        }
+      });
+    };
+    req.onsuccess = () => resolve(req.result);
+    req.onerror = () => reject(req.error || new Error('IndexedDB open failed'));
+    req.onblocked = () => reject(new Error('IndexedDB blocked'));
+  });
+}
+
+function makeIDB(db) {
+  return {
+    kind: 'indexeddb',
+    async init() {},
+    async getAll(store, indexName, value) {
+      const tx = db.transaction(store, 'readonly');
+      const os = tx.objectStore(store);
+      let req;
+      if (indexName && value !== undefined) {
+        req = os.index(indexName).getAll(value);
+      } else {
+        req = os.getAll();
+      }
+      const out = await idbReq(req);
+      return out || [];
+    },
+    async get(store, key) {
+      const tx = db.transaction(store, 'readonly');
+      return idbReq(tx.objectStore(store).get(key));
+    },
+    async put(store, obj) {
+      const tx = db.transaction(store, 'readwrite');
+      await idbReq(tx.objectStore(store).put(obj));
+      return obj[STORES[store].keyPath];
+    },
+    async remove(store, key) {
+      const tx = db.transaction(store, 'readwrite');
+      await idbReq(tx.objectStore(store).delete(key));
+    },
+    async clear(store) {
+      const tx = db.transaction(store, 'readwrite');
+      await idbReq(tx.objectStore(store).clear());
+    }
+  };
+}
+
+function makeFallbackDB() {
+  const mem = {};
+  function load(name) {
+    if (!mem[name]) {
+      let parsed = {};
+      try {
+        parsed = JSON.parse(localStorage.getItem(LS_PREFIX + name) || '{}') || {};
+      } catch (e) { parsed = {}; }
+      mem[name] = parsed;
+    }
+    return mem[name];
+  }
+  function persist(name) {
+    try { localStorage.setItem(LS_PREFIX + name, JSON.stringify(load(name))); } catch (e) {}
+  }
+  return {
+    kind: 'localStorage',
+    async init() { STORE_NAMES.forEach(load); },
+    async getAll(store, indexName, value) {
+      const all = Object.keys(load(store)).map(k => load(store)[k]);
+      if (!indexName || value === undefined) return all;
+      return all.filter(o => o[indexName] === value);
+    },
+    async get(store, key) { return load(store)[key] || undefined; },
+    async put(store, obj) {
+      const kp = STORES[store].keyPath;
+      load(store)[obj[kp]] = obj;
+      persist(store);
+      return obj[kp];
+    },
+    async remove(store, key) { delete load(store)[key]; persist(store); },
+    async clear(store) { mem[store] = {}; persist(store); }
+  };
+}
+
+async function initStorage() {
+  try {
+    const idb = await openIDB();
+    DB = makeIDB(idb);
+  } catch (e) {
+    DB = makeFallbackDB();
+  }
+  try {
+    await DB.init();
+  } catch (e) {
+    DB = makeFallbackDB();
+    await DB.init();
+  }
+}
+
+async function hashPassword(pw) {
+  const salted = 'flow::v1::' + pw;
+  if (self.crypto && crypto.subtle && crypto.subtle.digest) {
+    try {
+      const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(salted));
+      return 'sha256:' + Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+    } catch (e) {}
+  }
+  let h1 = 0xdeadbeef, h2 = 0x41c6ce57;
+  for (let i = 0; i < salted.length; i++) {
+    const ch = salted.charCodeAt(i);
+    h1 = Math.imul(h1 ^ ch, 2654435761);
+    h2 = Math.imul(h2 ^ ch, 1597334677);
+  }
+  h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+  h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+  return 'fallback:' + (h2 >>> 0).toString(16) + (h1 >>> 0).toString(16);
+}
+
+/* ============================================================
+   APP STATE
+   ============================================================ */
+const state = {
+  user: null,
+  view: 'today',
+  selectedDate: todayKey(),
+  routines: [],
+  completions: {},
+  skips: {},
+  notes: [],
+  chartRange: 7,
+  calMonth: { y: new Date().getFullYear(), m: new Date().getMonth() },
+  editor: null
+};
+
+function routinesForDate(dk) {
+  return state.routines
+    .filter(r => r.createdKey <= dk)
+    .filter(r => !r.deletedKey || dk < r.deletedKey)
+    .filter(r => !state.skips[dk + '|' + r.id])
+    .slice()
+    .sort((a, b) => (a.order || 0) - (b.order || 0));
+}
+
+function countsFor(dk) {
+  const items = routinesForDate(dk);
+  let done = 0;
+  for (let i = 0; i < items.length; i++) {
+    if (state.completions[dk + '|' + items[i].id]) done++;
+  }
+  const total = items.length;
+  const pct = total ? Math.round((done / total) * 100) : 0;
+  return { total, done, pct };
+}
+
+function scoreFor(dk) { return countsFor(dk).pct; }
+
+function computeStreak() {
+  const tk = todayKey();
+  let d = tk;
+  if (scoreFor(d) !== 100) d = addDays(d, -1);
+  let streak = 0;
+  let guard = 0;
+  while (guard++ < 2500) {
+    if (scoreFor(d) === 100) {
+      streak++;
+      d = addDays(d, -1);
+    } else break;
+  }
+  return streak;
+}
+
+function computeBestStreak() {
+  const tk = todayKey();
+  let earliest = tk;
+  state.routines.forEach(r => { if (r.createdKey && r.createdKey < earliest) earliest = r.createdKey; });
+  Object.keys(state.completions).forEach(k => {
+    const d = k.split('|')[0];
+    if (d < earliest) earliest = d;
+  });
+  const cap = addDays(tk, -1095);
+  if (earliest < cap) earliest = cap;
+
+  let best = 0, cur = 0, d = earliest, guard = 0;
+  while (d <= tk && guard++ < 4000) {
+    if (scoreFor(d) === 100) {
+      cur++;
+      if (cur > best) best = cur;
+    } else cur = 0;
+    d = addDays(d, 1);
+  }
+  return best;
+}
+
+function daysTracked() {
+  const set = new Set();
+  Object.keys(state.completions).forEach(k => set.add(k.split('|')[0]));
+  return set.size;
+}
+
+async function loadUserData() {
+  const u = state.user.id;
+  state.routines = (await DB.getAll('routines', 'userId', u)) || [];
+  state.routines.sort((a, b) => (a.order || 0) - (b.order || 0));
+
+  state.completions = {};
+  (await DB.getAll('completions', 'userId', u) || []).forEach(c => {
+    state.completions[c.dateKey + '|' + c.routineId] = c;
+  });
+
+  state.skips = {};
+  (await DB.getAll('skips', 'userId', u) || []).forEach(s => {
+    state.skips[s.dateKey + '|' + s.routineId] = s;
+  });
+
+  state.notes = (await DB.getAll('notes', 'userId', u) || []);
+  state.notes.sort((a, b) => b.createdAt - a.createdAt);
+}
+
+/* ============================================================
+   UI HELPERS
+   ============================================================ */
+let toastTimer = null;
+function toast(msg) {
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.classList.remove('show'), 2200);
+}
+
+let modalCloseTimer = null;
+function showModal(html) {
+  clearTimeout(modalCloseTimer);
+  const bd = $('#modalBackdrop');
+  $('#modal').innerHTML = html;
+  bd.hidden = false;
+  requestAnimationFrame(() => bd.classList.add('open'));
+}
+function hideModal() {
+  const bd = $('#modalBackdrop');
+  bd.classList.remove('open');
+  clearTimeout(modalCloseTimer);
+  modalCloseTimer = setTimeout(() => {
+    bd.hidden = true;
+    $('#modal').innerHTML = '';
+  }, 190);
+}
+
+function confirmModal(title, message, confirmText, onConfirm) {
+  showModal(
+    '<h2 class="modal-title">' + esc(title) + '</h2>' +
+    (message ? '<p class="modal-text">' + esc(message) + '</p>' : '') +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-ghost" data-act="cancel">Cancel</button>' +
+      '<button class="btn btn-primary" data-act="ok">' + esc(confirmText || 'Confirm') + '</button>' +
+    '</div>'
+  );
+  $('#modal').onclick = function (e) {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    if (b.dataset.act === 'cancel') hideModal();
+    else if (b.dataset.act === 'ok') { hideModal(); onConfirm(); }
+  };
+}
+
+function promptModal(opts) {
+  showModal(
+    '<h2 class="modal-title">' + esc(opts.title) + '</h2>' +
+    (opts.message ? '<p class="modal-text">' + esc(opts.message) + '</p>' : '') +
+    '<input class="text-input" id="modalInput" maxlength="60" autocomplete="off" ' +
+      'placeholder="' + esc(opts.placeholder || '') + '" value="' + esc(opts.value || '') + '">' +
+    '<p class="modal-error" id="modalError" hidden></p>' +
+    '<div class="modal-actions">' +
+      '<button class="btn btn-ghost" data-act="cancel">Cancel</button>' +
+      '<button class="btn btn-primary" data-act="ok">' + esc(opts.confirmText || 'Save') + '</button>' +
+    '</div>'
+  );
+  const input = $('#modalInput');
+  setTimeout(() => { try { input.focus(); input.select(); } catch (e) {} }, 80);
+
+  function ok() {
+    const v = input.value.trim();
+    if (!v) {
+      const errEl = $('#modalError');
+      errEl.textContent = 'Please enter a name.';
+      errEl.hidden = false;
+      input.focus();
+      return;
+    }
+    hideModal();
+    opts.onConfirm(v);
+  }
+  input.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); ok(); }
+  });
+  $('#modal').onclick = function (e) {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    if (b.dataset.act === 'cancel') hideModal();
+    else if (b.dataset.act === 'ok') ok();
+  };
+}
+
+/* ============================================================
+   THEME
+   ============================================================ */
+function getStoredTheme() {
+  try {
+    const t = localStorage.getItem('flow_theme');
+    if (t === 'dark' || t === 'light') return t;
+  } catch (e) {}
+  return 'dark';
+}
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  const meta = document.querySelector('meta[name="theme-color"]');
+  if (meta) meta.setAttribute('content', t === 'dark' ? '#0a0a0b' : '#ffffff');
+  try { localStorage.setItem('flow_theme', t); } catch (e) {}
+  const toggle = $('#themeToggle');
+  if (toggle) {
+    $$('button', toggle).forEach(b => b.classList.toggle('active', b.dataset.theme === t));
+  }
+  const sub = $('#themeSubLabel');
+  if (sub) sub.textContent = t.charAt(0).toUpperCase() + t.slice(1);
+}
+
+/* ============================================================
+   AUTH
+   ============================================================ */
+let authMode = 'login';
+
+function setAuthMode(m) {
+  authMode = m;
+  $('#nameField').hidden = (m !== 'register');
+  $('#authSubmit').textContent = (m === 'register') ? 'Create account' : 'Log in';
+  $('#authSwitchText').textContent = (m === 'register') ? 'Already have an account?' : 'New here?';
+  $('#authSwitchBtn').textContent = (m === 'register') ? 'Log in' : 'Create an account';
+  $('#authPassword').setAttribute('autocomplete', (m === 'register') ? 'new-password' : 'current-password');
+  $('#authError').hidden = true;
+}
+
+async function handleAuth(e) {
+  e.preventDefault();
+  const errEl = $('#authError');
+  errEl.hidden = true;
+
+  const email = $('#authEmail').value.trim().toLowerCase();
+  const pass = $('#authPassword').value;
+  const name = $('#authName').value.trim();
+
+  function fail(msg) { errEl.textContent = msg; errEl.hidden = false; }
+
+  if (!email || !/^\S+@\S+\.\S+$/.test(email)) return fail('Please enter a valid email address.');
+  if (!pass || pass.length < 4) return fail('Password must be at least 4 characters.');
+
+  const users = await DB.getAll('users') || [];
+
+  if (authMode === 'register') {
+    if (!name) return fail('Please enter your name.');
+    if (users.some(u => (u.email || '').toLowerCase() === email)) {
+      return fail('An account with this email already exists on this device.');
+    }
+    const user = {
+      id: uid(),
+      name: name,
+      email: email,
+      passHash: await hashPassword(pass),
+      createdAt: Date.now()
+    };
+    await DB.put('users', user);
+    await startSession(user);
+  } else {
+    let user = users.find(u => (u.email || '').toLowerCase() === email);
+    if (!user) {
+      return fail('No account found with this email on this device.');
+    }
+    const h = await hashPassword(pass);
+    if (h !== user.passHash) return fail('Incorrect password.');
+    await startSession(user);
+  }
+}
+
+async function startSession(user) {
+  state.user = user;
+  try { localStorage.setItem('flow_session', user.id); } catch (e) {}
+  await loadUserData();
+  state.selectedDate = todayKey();
+  state.calMonth = { y: new Date().getFullYear(), m: new Date().getMonth() };
+  $('#authScreen').hidden = true;
+  $('#mainApp').hidden = false;
+  $('#authPassword').value = '';
+  applyTheme(getStoredTheme());
+  switchView('today');
+}
+
+function doLogout() {
+  confirmModal(
+    'Log out?',
+    'You can log back in anytime with this email. Your data stays saved on this device.',
+    'Log out',
+    function () {
+      try { localStorage.removeItem('flow_session'); } catch (e) {}
+      state.user = null;
+      state.routines = [];
+      state.completions = {};
+      state.skips = {};
+      state.notes = [];
+      state.selectedDate = todayKey();
+      state.editor = null;
+      $('#mainApp').hidden = true;
+      $('#authScreen').hidden = false;
+      $('#authPassword').value = '';
+      setAuthMode('login');
+    }
+  );
+}
+
+/* ============================================================
+   NAVIGATION
+   ============================================================ */
+function switchView(name) {
+  state.view = name;
+  $$('.view').forEach(v => { v.hidden = (v.id !== 'view-' + name); });
+  $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === name));
+  window.scrollTo(0, 0);
+
+  if (name === 'today') renderToday();
+  else if (name === 'diary') renderDiary();
+  else if (name === 'progress') renderProgress();
+  else if (name === 'manage') renderManage();
+  else if (name === 'profile') renderProfile();
+}
+
+/* ============================================================
+   TODAY VIEW
+   ============================================================ */
+function renderToday() {
+  const dk = state.selectedDate;
+  const tk = todayKey();
+  const readOnly = dk < tk;
+
+  const hour = new Date().getHours();
+  const greeting = hour < 12 ? 'Good morning'
+                 : hour < 17 ? 'Good afternoon'
+                 : hour < 21 ? 'Good evening'
+                 : 'Good night';
+  const name = (state.user && state.user.name) ? state.user.name : 'User';
+  $('#userNameAndGreeting').textContent = greeting + ', ' + name;
+  $('#todayDate').textContent = longDate(parseKey(dk));
+
+  const c = countsFor(dk);
+  $('#progressCount').textContent = c.done + ' / ' + c.total + ' completed';
+  $('#progressPct').textContent = c.pct + '%';
+  
+  const circ = 263.89;
+  const offset = circ - (c.pct / 100) * circ;
+  const fg = $('#fgCircle');
+  if (fg) fg.style.strokeDashoffset = offset;
+
+  $('#readonlyNote').hidden = !readOnly;
+
+  const skipsForDay = Object.keys(state.skips).filter(k => k.indexOf(dk + '|') === 0).length;
+  $('#skippedNote').hidden = (skipsForDay === 0);
+  $('#skippedText').textContent = skipsForDay + ' routine' + (skipsForDay === 1 ? '' : 's') + ' removed for this day';
+
+  const items = routinesForDate(dk);
+  const list = $('#routineList');
+
+  if (!items.length) {
+    const anyActive = state.routines.some(r => !r.deletedKey);
+    let msg = anyActive ? 'Nothing scheduled for this day.' : 'No routines yet. Add your first routine to start building your flow.';
+    list.innerHTML =
+      '<li class="empty-state"><span>' + esc(msg) + '</span>' +
+      (anyActive ? '' : '<button class="btn btn-primary" data-goto-manage>Add a routine</button>') +
+      '</li>';
+    return;
+  }
+
+  list.innerHTML = items.map(function (r) {
+    const done = !!state.completions[dk + '|' + r.id];
+    return '<li class="routine-item' + (done ? ' done' : '') + '" data-row="' + esc(r.id) + '">' +
+      '<label class="routine-label">' +
+        '<input type="checkbox" class="rcheck" data-check="' + esc(r.id) + '"' +
+          (done ? ' checked' : '') + (readOnly ? ' disabled' : '') + '>' +
+        '<span class="routine-name">' + esc(r.name) + '</span>' +
+      '</label>' +
+      (readOnly ? '' :
+        '<button class="icon-btn small" data-skip="' + esc(r.id) + '" aria-label="Remove for this day">✕</button>') +
+    '</li>';
+  }).join('');
+}
+
+async function toggleCompletion(routineId, checked, rowEl) {
+  const dk = state.selectedDate;
+  if (dk < todayKey()) return;
+  const id = state.user.id + '|' + dk + '|' + routineId;
+  const key = dk + '|' + routineId;
+
+  try {
+    if (checked) {
+      const rec = { id: id, userId: state.user.id, dateKey: dk, routineId: routineId, ts: Date.now() };
+      await DB.put('completions', rec);
+      state.completions[key] = rec;
+    } else {
+      await DB.remove('completions', id);
+      delete state.completions[key];
+    }
+  } catch (e) {
+    toast('Could not save. Try again.');
+    return;
+  }
+
+  if (rowEl) rowEl.classList.toggle('done', !!checked);
+
+  const c = countsFor(dk);
+  $('#progressCount').textContent = c.done + ' / ' + c.total + ' completed';
+  $('#progressPct').textContent = c.pct + '%';
+  const circ = 263.89;
+  const offset = circ - (c.pct / 100) * circ;
+  const fg = $('#fgCircle');
+  if (fg) fg.style.strokeDashoffset = offset;
+}
+
+async function skipRoutineForDay(routineId) {
+  const dk = state.selectedDate;
+  if (dk < todayKey()) return;
+
+  try {
+    const rec = {
+      id: state.user.id + '|' + dk + '|' + routineId,
+      userId: state.user.id,
+      dateKey: dk,
+      routineId: routineId,
+      ts: Date.now()
+    };
+    await DB.put('skips', rec);
+    state.skips[dk + '|' + routineId] = rec;
+
+    const ckey = dk + '|' + routineId;
+    if (state.completions[ckey]) {
+      await DB.remove('completions', state.user.id + '|' + dk + '|' + routineId);
+      delete state.completions[ckey];
+    }
+  } catch (e) {
+    toast('Could not update. Try again.');
+    return;
+  }
+  renderToday();
+}
+
+async function restoreSkippedForDay() {
+  const dk = state.selectedDate;
+  const keys = Object.keys(state.skips).filter(k => k.indexOf(dk + '|') === 0);
+  try {
+    for (let i = 0; i < keys.length; i++) {
+      const rec = state.skips[keys[i]];
+      await DB.remove('skips', rec.id);
+      delete state.skips[keys[i]];
+    }
+  } catch (e) {
+    toast('Could not restore. Try again.');
+    return;
+  }
+  renderToday();
+}
+
+/* ============================================================
+   DIARY VIEW
+   ============================================================ */
+function renderDiary() {
+  const list = $('#diaryList');
+  if (!state.notes.length) {
+    list.innerHTML =
+      '<li class="empty-state">' +
+        '<span>No diary entries yet. Capture a thought — it saves automatically.</span>' +
+        '<button class="btn btn-primary" data-new>Write your first note</button>' +
+      '</li>';
+    return;
+  }
+
+  const now = Date.now();
+  list.innerHTML = state.notes.map(function (n) {
+    const title = (n.title && n.title.trim()) ? n.title.trim() : time12(n.createdAt);
+    const meta = dateTime12(n.createdAt);
+    const preview = (n.body || '').replace(/\s+/g, ' ').trim();
+    const todayFlag = isSameLocalDay(n.createdAt, now)
+      ? '<span class="today-badge">Today</span>' : '';
+
+    return '<li>' +
+      '<button class="diary-item" data-note="' + esc(n.id) + '">' +
+        '<div class="diary-title-row">' +
+          '<span class="diary-title">' + esc(title) + '</span>' +
+          (n.isDraft ? '<span class="badge">Draft</span>' : '') +
+          todayFlag +
+        '</div>' +
+        '<div class="diary-meta">' + esc(meta) + '</div>' +
+        (preview ? '<div class="diary-preview">' + esc(preview) + '</div>' : '') +
+      '</button>' +
+    '</li>';
+  }).join('');
+}
+
+let draftTimer = null;
+
+function openEditor(noteId) {
+  const note = noteId ? state.notes.find(n => n.id === noteId) : null;
+
+  state.editor = {
+    id: note ? note.id : null,
+    createdAt: note ? note.createdAt : Date.now()
+  };
+
+  $('#editorTitle').value = note ? (note.title || '') : '';
+  $('#editorBody').value = note ? (note.body || '') : '';
+  $('#editorDate').textContent = dateTime12(state.editor.createdAt);
+  $('#editorStatus').textContent = note ? (note.isDraft ? 'Draft · auto-saved' : 'Saved') : 'New entry';
+  $('#editorDelete').hidden = !note;
+
+  const sheet = $('#editorSheet');
+  sheet.hidden = false;
+  document.body.classList.add('no-scroll');
+
+  setTimeout(function () {
+    try { $('#editorTitle').focus(); } catch (e) {}
+  }, 120);
+}
+
+function updateEditorStatus() {
+  const ed = state.editor;
+  if (!ed || !ed.id) {
+    $('#editorStatus').textContent = 'New entry';
+    $('#editorDelete').hidden = true;
+    return;
+  }
+  const note = state.notes.find(n => n.id === ed.id);
+  $('#editorStatus').textContent = (note && note.isDraft) ? 'Draft · auto-saved' : 'Saved';
+  $('#editorDelete').hidden = false;
+}
+
+function scheduleDraftSave() {
+  clearTimeout(draftTimer);
+  draftTimer = setTimeout(flushDraft, 500);
+}
+
+async function flushDraft() {
+  clearTimeout(draftTimer);
+  draftTimer = null;
+
+  const ed = state.editor;
+  if (!ed) return;
+
+  const title = $('#editorTitle').value.trim();
+  const body = $('#editorBody').value;
+
+  if (!title && !body.trim()) return;
+
+  let note = ed.id ? state.notes.find(n => n.id === ed.id) : null;
+
+  if (!note) {
+    note = {
+      id: uid(),
+      userId: state.user.id,
+      title: '',
+      body: '',
+      createdAt: ed.createdAt,
+      updatedAt: Date.now(),
+      isDraft: true
+    };
+    state.notes.unshift(note);
+    state.notes.sort((a, b) => b.createdAt - a.createdAt);
+    ed.id = note.id;
+  }
+
+  note.title = title;
+  note.body = body;
+  note.updatedAt = Date.now();
+  if (note.isDraft === undefined) note.isDraft = true;
+
+  try {
+    await DB.put('notes', note);
+  } catch (e) {}
+
+  updateEditorStatus();
+}
+
+async function closeEditor(skipFlush) {
+  clearTimeout(draftTimer);
+  draftTimer = null;
+
+  if (!skipFlush) {
+    await flushDraft();
+  }
+
+  state.editor = null;
+  $('#editorSheet').hidden = true;
+  document.body.classList.remove('no-scroll');
+  $('#editorTitle').value = '';
+  $('#editorBody').value = '';
+  renderDiary();
+}
+
+async function saveNote() {
+  clearTimeout(draftTimer);
+  draftTimer = null;
+
+  const ed = state.editor;
+  if (!ed) return;
+
+  const title = $('#editorTitle').value.trim();
+  const body = $('#editorBody').value;
+
+  if (!title && !body.trim()) {
+    toast('Write something first');
+    return;
+  }
+
+  let note = ed.id ? state.notes.find(n => n.id === ed.id) : null;
+
+  if (!note) {
+    note = {
+      id: uid(),
+      userId: state.user.id,
+      title: '',
+      body: '',
+      createdAt: ed.createdAt,
+      updatedAt: Date.now(),
+      isDraft: false
+    };
+    state.notes.unshift(note);
+  }
+
+  note.title = title;
+  note.body = body;
+  note.updatedAt = Date.now();
+  note.isDraft = false;
+
+  try {
+    await DB.put('notes', note);
+  } catch (e) {
+    toast('Could not save. Try again.');
+    return;
+  }
+
+  state.notes.sort((a, b) => b.createdAt - a.createdAt);
+  toast('Saved');
+  await closeEditor(true);
+}
+
+function deleteCurrentNote() {
+  const ed = state.editor;
+  if (!ed || !ed.id) return;
+
+  confirmModal('Delete this diary entry?', 'This cannot be undone.', 'Delete', async function () {
+    const id = ed.id;
+    try { await DB.remove('notes', id); } catch (e) {}
+    state.notes = state.notes.filter(n => n.id !== id);
+    await closeEditor(true);
+    toast('Entry deleted');
+  });
+}
+
+/* ============================================================
+   PROGRESS VIEW
+   ============================================================ */
+function renderProgress() {
+  $('#statToday').textContent = scoreFor(todayKey()) + '%';
+  $('#statStreak').textContent = computeStreak();
+  $('#statBest').textContent = computeBestStreak();
+  $('#statTracked').textContent = daysTracked();
+
+  $$('#chartToggle button').forEach(function (b) {
+    b.classList.toggle('active', Number(b.dataset.range) === state.chartRange);
+  });
+
+  renderChart();
+  renderCalendar();
+  renderRoutineConsistency();
+}
+
+function renderChart() {
+  const n = state.chartRange;
+  const tk = todayKey();
+  const days = [];
+  for (let i = n - 1; i >= 0; i--) days.push(addDays(tk, -i));
+  const vals = days.map(d => scoreFor(d));
+
+  const W = 320, H = 132, PL = 26, PR = 10, PT = 12, PB = 24;
+  const iw = W - PL - PR;
+  const ih = H - PT - PB;
+  const x = i => PL + (n === 1 ? iw / 2 : (i * iw) / (n - 1));
+  const y = v => PT + ih - (v / 100) * ih;
+
+  let grid = '';
+  [0, 50, 100].forEach(function (v) {
+    const yy = y(v);
+    grid += '<line class="chart-grid" x1="' + PL + '" y1="' + yy + '" x2="' + (W - PR) + '" y2="' + yy + '"/>';
+    grid += '<text class="chart-label" x="' + (PL - 6) + '" y="' + (yy + 3) + '" text-anchor="end">' + v + '</text>';
+  });
+
+  const pts = vals.map((v, i) => x(i).toFixed(1) + ',' + y(v).toFixed(1)).join(' ');
+
+  let area = 'M ' + x(0).toFixed(1) + ',' + y(0).toFixed(1);
+  vals.forEach(function (v, i) { area += ' L ' + x(i).toFixed(1) + ',' + y(v).toFixed(1); });
+  area += ' L ' + x(n - 1).toFixed(1) + ',' + y(0).toFixed(1) + ' Z';
+
+  const step = n <= 7 ? 1 : 5;
+  let labels = '';
+  days.forEach(function (d, i) {
+    if (i % step !== 0 && i !== n - 1) return;
+    const dd = parseKey(d);
+    labels += '<text class="chart-label" x="' + x(i).toFixed(1) + '" y="' + (H - 6) +
+              '" text-anchor="middle">' + dd.getDate() + '</text>';
+  });
+
+  const dots = (n <= 7)
+    ? vals.map((v, i) => '<circle class="chart-dot" cx="' + x(i).toFixed(1) + '" cy="' + y(v).toFixed(1) + '" r="3"/>').join('')
+    : '';
+
+  $('#chartWrap').innerHTML =
+    '<svg class="chart" viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="Completion trend">' +
+      grid +
+      '<path class="chart-area" d="' + area + '"/>' +
+      '<polyline class="chart-line" points="' + pts + '"/>' +
+      dots +
+      labels +
+    '</svg>';
+}
+
+function renderCalendar() {
+  const y = state.calMonth.y;
+  const m = state.calMonth.m;
+  $('#calTitle').textContent = MONTHS[m] + ' ' + y;
+
+  const startDow = new Date(y, m, 1).getDay();
+  const dim = new Date(y, m + 1, 0).getDate();
+  const tk = todayKey();
+
+  let html = '';
+  for (let i = 0; i < startDow; i++) html += '<div class="cal-cell blank"></div>';
+
+  for (let d = 1; d <= dim; d++) {
+    const dk = dateKey(new Date(y, m, d));
+    const c = countsFor(dk);
+    const isFuture = dk > tk;
+
+    let cls = 'cal-cell';
+    let style = '';
+
+    if (isFuture) {
+      cls += ' future';
+    } else if (c.pct === 0) {
+      cls += ' nodata';
+    } else {
+      const a = 0.18 + (c.pct / 100) * 0.82;
+      const fg = c.pct > 55 ? 'var(--bg)' : 'var(--text)';
+      style = 'background:rgba(var(--ink-rgb),' + a.toFixed(2) + ');color:' + fg + ';';
+    }
+
+    if (dk === tk) cls += ' today';
+
+    html += '<button class="' + cls + '" style="' + style + '" data-date="' + dk + '">' + d + '</button>';
+  }
+
+  $('#calGrid').innerHTML = html;
+}
+
+function renderRoutineConsistency() {
+  const activeRoutines = state.routines.filter(r => !r.deletedKey);
+  const list = $('#consistencyList');
+  if (!activeRoutines.length) {
+    list.innerHTML = '<li class="empty-state"><span>No routines available.</span></li>';
+    return;
+  }
+
+  const tk = todayKey();
+  list.innerHTML = activeRoutines.map(function (r) {
+    let totalDays = 0;
+    let completedDays = 0;
+    let d = r.createdKey || tk;
+    let guard = 0;
+    while (d <= tk && guard++ < 365) {
+      if (!state.skips[d + '|' + r.id]) {
+        totalDays++;
+        if (state.completions[d + '|' + r.id]) completedDays++;
+      }
+      d = addDays(d, 1);
+    }
+    const pct = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
+    return '<li class="consistency-item">' +
+      '<span class="consistency-name">' + esc(r.name) + '</span>' +
+      '<span class="consistency-pct">' + pct + '%</span>' +
+    '</li>';
+  }).join('');
+}
+
+function openDateDetail(dk) {
+  const items = routinesForDate(dk);
+  const c = countsFor(dk);
+
+  const rows = items.map(function (r) {
+    const done = !!state.completions[dk + '|' + r.id];
+    return '<div class="detail-row' + (done ? ' done' : '') + '">' +
+      '<span class="detail-mark">' + (done ? '✓' : '') + '</span>' +
+      '<span class="detail-name">' + esc(r.name) + '</span>' +
+    '</div>';
+  }).join('');
+
+  showModal(
+    '<h2 class="modal-title">' + esc(longDate(parseKey(dk))) + '</h2>' +
+    '<div style="margin:14px 0 6px">' +
+      '<div class="detail-score">' + c.pct + '%</div>' +
+      '<div class="detail-sub">' + c.done + ' of ' + c.total + ' routines completed</div>' +
+    '</div>' +
+    '<div style="margin-top:8px">' +
+      (rows || '<p class="modal-text">No routines tracked on this day.</p>') +
+    '</div>' +
+    '<div class="modal-actions"><button class="btn btn-primary" data-act="close">Close</button></div>'
+  );
+
+  $('#modal').onclick = function (e) {
+    if (e.target.closest('[data-act="close"]')) hideModal();
+  };
+}
+
+/* ============================================================
+   MANAGE VIEW
+   ============================================================ */
+function renderManage() {
+  const active = state.routines.filter(r => !r.deletedKey).sort((a, b) => (a.order || 0) - (b.order || 0));
+  const list = $('#manageList');
+
+  if (!active.length) {
+    list.innerHTML =
+      '<li class="empty-state">' +
+        '<span>No routines yet. Add your first one to start building your flow.</span>' +
+        '<button class="btn btn-primary" data-add>Add routine</button>' +
+      '</li>';
+    return;
+  }
+
+  list.innerHTML = active.map(function (r, i) {
+    return '<li class="manage-item">' +
+      '<div style="display:flex;flex-direction:column;gap:2px;">' +
+        '<button class="icon-btn small" data-up="' + esc(r.id) + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move up">↑</button>' +
+        '<button class="icon-btn small" data-down="' + esc(r.id) + '"' + (i === active.length - 1 ? ' disabled' : '') + ' aria-label="Move down">↓</button>' +
+      '</div>' +
+      '<span class="manage-name">' + esc(r.name) + '</span>' +
+      '<div class="manage-actions">' +
+        '<button class="icon-btn small" data-edit="' + esc(r.id) + '" aria-label="Edit routine">✎</button>' +
+        '<button class="icon-btn small" data-del="' + esc(r.id) + '" aria-label="Delete routine">🗑</button>' +
+      '</div>' +
+    '</li>';
+  }).join('');
+}
+
+async function addRoutine() {
+  promptModal({
+    title: 'New routine',
+    message: 'What do you want to do every day?',
+    placeholder: 'e.g. Meditate 10 minutes',
+    confirmText: 'Add',
+    onConfirm: async function (name) {
+      let maxOrder = -1;
+      state.routines.filter(r => !r.deletedKey).forEach(function (r) {
+        if ((r.order || 0) > maxOrder) maxOrder = r.order || 0;
+      });
+      const rec = {
+        id: uid(),
+        userId: state.user.id,
+        name: name,
+        order: maxOrder + 1,
+        createdKey: todayKey(),
+        deletedKey: null,
+        createdAt: Date.now()
+      };
+      try {
+        await DB.put('routines', rec);
+        state.routines.push(rec);
+      } catch (e) {
+        toast('Could not add routine.');
+        return;
+      }
+      renderManage();
+      toast('Routine added');
+    }
+  });
+}
+
+function editRoutine(id) {
+  const r = state.routines.find(x => x.id === id);
+  if (!r) return;
+
+  promptModal({
+    title: 'Rename routine',
+    value: r.name,
+    placeholder: 'Routine name',
+    confirmText: 'Save',
+    onConfirm: async function (name) {
+      r.name = name;
+      try { await DB.put('routines', r); } catch (e) {}
+      renderManage();
+      toast('Routine renamed');
+    }
+  });
+}
+
+function deleteRoutine(id) {
+  const r = state.routines.find(x => x.id === id);
+  if (!r) return;
+
+  confirmModal(
+    'Delete routine?',
+    '“' + r.name + '” will be hidden from today onwards. Past history is preserved.',
+    'Delete',
+    async function () {
+      r.deletedKey = todayKey();
+      try { await DB.put('routines', r); } catch (e) {}
+      renderManage();
+      toast('Routine deleted');
+    }
+  );
+}
+
+async function moveRoutine(id, dir) {
+  const active = state.routines.filter(r => !r.deletedKey).sort((a, b) => (a.order || 0) - (b.order || 0));
+  const i = active.findIndex(r => r.id === id);
+  const j = i + dir;
+  if (i < 0 || j < 0 || j >= active.length) return;
+
+  const tmp = active[i];
+  active[i] = active[j];
+  active[j] = tmp;
+
+  try {
+    for (let k = 0; k < active.length; k++) {
+      active[k].order = k;
+      await DB.put('routines', active[k]);
+    }
+  } catch (e) {
+    toast('Could not reorder.');
+    return;
+  }
+
+  state.routines.sort((a, b) => (a.order || 0) - (b.order || 0));
+  renderManage();
+}
+
+/* ============================================================
+   PROFILE VIEW
+   ============================================================ */
+function renderProfile() {
+  const u = state.user;
+  $('#profileName').textContent = (u && u.name) ? u.name : '—';
+  $('#profileEmail').textContent = (u && u.email) ? u.email : '—';
+  const initial = ((u && (u.name || u.email)) || 'F').trim().charAt(0).toUpperCase();
+  $('#avatarInitial').textContent = initial || 'F';
+
+  const theme = document.documentElement.getAttribute('data-theme') || 'dark';
+  $$('#themeToggle button').forEach(function (b) {
+    b.classList.toggle('active', b.dataset.theme === theme);
+  });
+}
+
+/* ============================================================
+   EVENT WIRING
+   ============================================================ */
+$('#authForm').addEventListener('submit', handleAuth);
+$('#authSwitchBtn').addEventListener('click', function () {
+  setAuthMode(authMode === 'login' ? 'register' : 'login');
+  if (authMode === 'register') setTimeout(function () { try { $('#authName').focus(); } catch (e) {} }, 60);
+});
+
+$$('.nav-item').forEach(function (b) {
+  b.addEventListener('click', function () { switchView(b.dataset.view); });
+});
+
+$('#routineList').addEventListener('change', function (e) {
+  const cb = e.target.closest('[data-check]');
+  if (!cb) return;
+  toggleCompletion(cb.dataset.check, cb.checked, cb.closest('.routine-item'));
+});
+
+$('#routineList').addEventListener('click', function (e) {
+  const skipBtn = e.target.closest('[data-skip]');
+  if (skipBtn) { skipRoutineForDay(skipBtn.dataset.skip); return; }
+
+  if (e.target.closest('[data-goto-manage]')) switchView('manage');
+});
+
+$('#restoreSkipped').addEventListener('click', restoreSkippedForDay);
+
+$('#newNoteBtn').addEventListener('click', function () { openEditor(null); });
+
+$('#diaryList').addEventListener('click', function (e) {
+  if (e.target.closest('[data-new]')) { openEditor(null); return; }
+  const item = e.target.closest('[data-note]');
+  if (item) openEditor(item.dataset.note);
+});
+
+$('#editorBack').addEventListener('click', function () { closeEditor(false); });
+$('#editorSave').addEventListener('click', saveNote);
+$('#editorDelete').addEventListener('click', deleteCurrentNote);
+$('#editorTitle').addEventListener('input', scheduleDraftSave);
+$('#editorBody').addEventListener('input', scheduleDraftSave);
+
+window.addEventListener('pagehide', function () {
+  if (state.editor && draftTimer) {
+    clearTimeout(draftTimer);
+    draftTimer = null;
+    flushDraft();
+  }
+});
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState === 'hidden' && state.editor && draftTimer) {
+    clearTimeout(draftTimer);
+    draftTimer = null;
+    flushDraft();
+  }
+});
+
+$('#chartToggle').addEventListener('click', function (e) {
+  const b = e.target.closest('button[data-range]');
+  if (!b) return;
+  state.chartRange = Number(b.dataset.range);
+  $$('#chartToggle button').forEach(function (x) {
+    x.classList.toggle('active', Number(x.dataset.range) === state.chartRange);
+  });
+  renderChart();
+});
+
+$('#calPrev').addEventListener('click', function () {
+  let m = state.calMonth.m - 1;
+  let y = state.calMonth.y;
+  if (m < 0) { m = 11; y -= 1; }
+  state.calMonth = { y: y, m: m };
+  renderCalendar();
+});
+$('#calNext').addEventListener('click', function () {
+  let m = state.calMonth.m + 1;
+  let y = state.calMonth.y;
+  if (m > 11) { m = 0; y += 1; }
+  state.calMonth = { y: y, m: m };
+  renderCalendar();
+});
+
+$('#calGrid').addEventListener('click', function (e) {
+  const cell = e.target.closest('[data-date]');
+  if (!cell) return;
+  openDateDetail(cell.dataset.date);
+});
+
+$('#addRoutineBtn').addEventListener('click', addRoutine);
+
+$('#manageList').addEventListener('click', function (e) {
+  if (e.target.closest('[data-add]')) { addRoutine(); return; }
+
+  const up = e.target.closest('[data-up]');
+  if (up) { moveRoutine(up.dataset.up, -1); return; }
+
+  const down = e.target.closest('[data-down]');
+  if (down) { moveRoutine(down.dataset.down, 1); return; }
+
+  const del = e.target.closest('[data-del]');
+  if (del) { deleteRoutine(del.dataset.del); return; }
+
+  const ed = e.target.closest('[data-edit]');
+  if (ed) { editRoutine(ed.dataset.edit); return; }
+});
+
+$('#themeToggle').addEventListener('click', function (e) {
+  const b = e.target.closest('button[data-theme]');
+  if (!b) return;
+  applyTheme(b.dataset.theme);
+  if (state.view === 'progress') renderChart();
+});
+
+$('#logoutBtn').addEventListener('click', doLogout);
+
+$('#modalBackdrop').addEventListener('click', function (e) {
+  if (e.target === $('#modalBackdrop')) hideModal();
+});
+
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape') {
+    if (!$('#modalBackdrop').hidden) hideModal();
+  }
+});
+
+/* ============================================================
+   PWA & BOOT
+   ============================================================ */
+(function setupPWA() {
+  const logoSvg =
+    '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">' +
+      '<rect width="512" height="512" rx="118" fill="#0b0b0c"/>' +
+      '<path d="M146 268l68 68 152-152" fill="none" stroke="#ffffff" stroke-width="44" ' +
+        'stroke-linecap="round" stroke-linejoin="round"/>' +
+    '</svg>';
+
+  const link = document.querySelector('link[rel="manifest"]');
+
+  function buildManifest() {
+    const iconUrl = 'data:image/svg+xml,' + encodeURIComponent(logoSvg);
+    return {
+      name: 'FLOW',
+      short_name: 'FLOW',
+      description: 'Build your routine. Track your progress.',
+      start_url: '.',
+      scope: '.',
+      display: 'standalone',
+      orientation: 'portrait',
+      background_color: '#0a0a0b',
+      theme_color: '#0a0a0b',
+      icons: [
+        { src: iconUrl, sizes: 'any', type: 'image/svg+xml', purpose: 'any' },
+        { src: iconUrl, sizes: 'any', type: 'image/svg+xml', purpose: 'maskable' }
+      ]
+    };
+  }
+
+  if (link) {
+    fetch('./manifest.json', { cache: 'no-store' })
+      .then(function (r) { if (!r.ok) throw new Error('no manifest'); })
+      .catch(function () {
+        try {
+          const blob = new Blob([JSON.stringify(buildManifest())], { type: 'application/manifest+json' });
+          link.href = URL.createObjectURL(blob);
+        } catch (e) {}
+      });
+  }
+})();
+
+async function boot() {
+  await initStorage();
+  applyTheme(getStoredTheme());
+
+  let sessionId = null;
+  try { sessionId = localStorage.getItem('flow_session'); } catch (e) {}
+
+  if (sessionId) {
+    let user = null;
+    try { user = await DB.get('users', sessionId); } catch (e) {}
+    if (user) {
+      await startSession(user);
+      return;
+    }
+    try { localStorage.removeItem('flow_session'); } catch (e) {}
+  }
+
+  setAuthMode('login');
+  $('#authScreen').hidden = false;
+  $('#mainApp').hidden = true;
+}
+
+boot().catch(function (err) {
+  console.error('FLOW boot error', err);
+  const screen = document.getElementById('authScreen');
+  if (screen) screen.hidden = false;
+});
+
+})();
+</script>
+</body>
+</html>
