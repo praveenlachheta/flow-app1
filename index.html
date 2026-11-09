@@ -13,6 +13,9 @@
 <link rel="icon" href="./logo.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./logo.svg">
 <title>FLOW</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
 <style>
 :root{
   --bg:#ffffff;
@@ -351,18 +354,59 @@ ul{list-style:none;}
 
   /* Only apply grid layout when mainApp is visible (logged in) */
   #app:has(#mainApp:not([hidden])) {
-    max-width: 1440px;
-    height: 92vh;
-    max-height: 900px;
-    margin: 4vh auto;
-    border-radius: 20px;
-    border: 1px solid var(--border);
-    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.7);
+    width: 100%;
+    max-width: none;
+    height: 100vh;
+    height: 100dvh;
+    margin: 0;
+    border-radius: 0;
+    border: none;
     display: grid;
-    grid-template-columns: 260px 1fr 340px;
+    grid-template-columns: 210px minmax(0, 1fr);   /* iPad portrait: sidebar + content */
     grid-template-rows: 100%;
     overflow: hidden;
     background: var(--bg);
+  }
+  /* Sidebar / center / insights live inside #mainApp — let them be #app's grid items */
+  #mainApp:not([hidden]) { display: contents; }
+
+  /* iPad portrait: right insights hidden (calendar & consistency live in Progress) */
+  .desktop-insights { display: none !important; }
+
+  /* Keep page content readable, centered */
+  .view > * { max-width: 880px; margin-left: auto; margin-right: auto; }
+  .view { padding: 28px 28px 40px; }
+  .stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .desktop-sidebar { padding: 20px 12px; }
+
+  /* iPad landscape / small laptop: 3 columns, narrower */
+  @media (min-width: 1024px) {
+    #app:has(#mainApp:not([hidden])) { grid-template-columns: 230px minmax(0, 1fr) 300px; }
+    .desktop-insights { display: flex !important; padding: 20px 16px; }
+    .view { padding: 32px; }
+  }
+
+  /* Large desktop */
+  @media (min-width: 1280px) {
+    #app:has(#mainApp:not([hidden])) { grid-template-columns: 260px minmax(0, 1fr) 340px; }
+    .desktop-insights { padding: 24px 20px; }
+    .view { padding: 40px 48px; }
+  }
+
+  /* Very large screens: floating framed window */
+  @media (min-width: 1700px) and (min-height: 820px) {
+    #app:has(#mainApp:not([hidden])) {
+      max-width: 1600px; height: 92vh; max-height: 1000px; margin: 4vh auto;
+      border-radius: 20px; border: 1px solid var(--border);
+      box-shadow: 0 25px 50px -12px rgba(0,0,0,.7);
+    }
+  }
+
+  /* Touch devices (iPad): bigger tap targets, no sticky hover */
+  @media (hover: none) {
+    .desktop-nav .nav-item-desk { padding: 14px 16px; }
+    .desktop-nav .nav-item-desk:hover { background: transparent; color: var(--muted); }
+    .desktop-nav .nav-item-desk.active:hover { background: var(--text); color: var(--bg); }
   }
 
   /* When logged out, keep auth screen centered nicely */
@@ -444,7 +488,6 @@ ul{list-style:none;}
 
   /* Right Insights Panel */
   .desktop-insights {
-    display: flex !important;
     flex-direction: column;
     background: var(--surface);
     border-left: 1px solid var(--border);
@@ -508,6 +551,192 @@ ul{list-style:none;}
 
 /* Hide desktop elements on mobile */
 .desktop-sidebar, .desktop-insights { display: none; }
+
+/* =====================================================================
+   PREMIUM DESIGN LAYER — tokens, typography, elevation, accent
+   ===================================================================== */
+:root{
+  --bg:#fbfbfc; --surface:#ffffff; --surface-2:#f2f3f5;
+  --text:#0d1117; --muted:#667085; --border:#e6e8ec; --border-strong:#d5d8de;
+  --ink-rgb:13,17,23; --nav-bg:rgba(255,255,255,.86);
+  --accent:#0d9488; --accent-rgb:13,148,136; --accent-soft:rgba(13,148,136,.10); --on-accent:#ffffff;
+  --shadow-sm:0 1px 2px rgba(16,24,40,.05);
+  --shadow-md:0 1px 2px rgba(16,24,40,.04),0 8px 24px -6px rgba(16,24,40,.08);
+  --chrome:#f4f5f7; --ring:0 0 0 3px rgba(13,148,136,.22);
+  --radius:16px;
+}
+[data-theme="dark"]{
+  --bg:#0b0d11; --surface:#12151b; --surface-2:#1a1e26;
+  --text:#eef0f3; --muted:#8b93a1; --border:#20252e; --border-strong:#2c323d;
+  --ink-rgb:238,240,243; --nav-bg:rgba(11,13,17,.82);
+  --accent:#2dd4bf; --accent-rgb:45,212,191; --accent-soft:rgba(45,212,191,.12); --on-accent:#04201c;
+  --shadow-sm:0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:0 1px 0 rgba(255,255,255,.03) inset,0 10px 30px -10px rgba(0,0,0,.6);
+  --chrome:#0e1116; --ring:0 0 0 3px rgba(45,212,191,.25);
+}
+body{
+  font-family:"Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-feature-settings:"cv11","ss01","ss03";
+  letter-spacing:-.006em;
+}
+:focus-visible{outline:none;box-shadow:var(--ring);border-radius:10px;}
+::selection{background:rgba(var(--accent-rgb),.28);}
+*{scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:10px;border:3px solid transparent;background-clip:content-box;}
+
+/* Buttons */
+.btn{font-weight:600;border-radius:12px;transition:transform .12s ease,background .15s,box-shadow .15s,border-color .15s;}
+.btn-primary{background:var(--text);color:var(--bg);box-shadow:var(--shadow-sm);}
+.btn-primary:hover{opacity:.92;}
+.btn-ghost:hover{background:var(--surface-2);}
+.icon-btn{background:var(--surface);border-color:var(--border);color:var(--muted);transition:background .15s,color .15s,transform .12s;}
+.icon-btn:hover{background:var(--surface-2);color:var(--text);}
+
+/* Auth */
+.auth-screen{background:
+  radial-gradient(900px 500px at 50% -10%,rgba(var(--accent-rgb),.12),transparent 60%),var(--bg);}
+.auth-inner{background:var(--surface);border:1px solid var(--border);border-radius:24px;padding:36px 30px 28px;box-shadow:var(--shadow-md);max-width:420px;}
+.brand h1{font-weight:800;}
+.field label{font-size:12px;font-weight:600;letter-spacing:0;text-transform:none;color:var(--text);}
+.field input{height:46px;border-radius:12px;background:var(--bg);font-size:15px;}
+.field input:focus,.text-input:focus{border-color:var(--accent);box-shadow:var(--ring);background:var(--bg);}
+#authSubmit{margin-top:6px;}
+
+/* Headings */
+.user-name,.view-title{font-weight:700;letter-spacing:-.03em;}
+.today-date{font-weight:500;}
+.quote{font-style:normal;font-size:14.5px;color:var(--muted);opacity:1;padding-left:12px;border-left:2px solid var(--accent);}
+.section-label{font-size:12px;font-weight:600;letter-spacing:.04em;}
+
+/* Cards */
+.card,.progress-ring-card,.stat-card,.routine-item,.diary-item,.manage-item,.consistency-item,.profile-card,.row-card{
+  background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm);
+}
+.card{border-radius:var(--radius);padding:18px;}
+.routine-item,.diary-item,.manage-item,.row-card{transition:border-color .15s,box-shadow .15s,transform .12s,background .15s;}
+.routine-item:hover,.diary-item:hover,.manage-item:hover,button.row-card:hover{border-color:var(--border-strong);box-shadow:var(--shadow-md);}
+
+/* Progress ring */
+.progress-ring-card{
+  background:
+    radial-gradient(420px 220px at 50% 0%,rgba(var(--accent-rgb),.10),transparent 70%),var(--surface);
+  border-radius:20px;padding:30px 16px;
+}
+.circular-progress,.circular-progress svg{width:132px;height:132px;}
+.circular-progress circle{stroke-width:7;}
+.circular-progress .bg-circle{stroke:var(--surface-2);}
+.circular-progress .fg-circle{stroke:var(--accent);filter:drop-shadow(0 0 6px rgba(var(--accent-rgb),.35));transition:stroke-dashoffset .6s cubic-bezier(.3,.9,.3,1);}
+:root:not([data-theme="dark"]) .circular-progress .fg-circle{filter:none;}
+.circular-value{font-size:28px;font-weight:700;letter-spacing:-.04em;}
+.progress-subtext{font-weight:500;}
+
+/* Routine checkboxes */
+.routine-item{border-radius:14px;padding:12px 16px;}
+.rcheck{border:2px solid var(--border-strong);transition:background .18s,border-color .18s,transform .12s;}
+.rcheck:hover{border-color:var(--accent);}
+.rcheck:checked{background:var(--accent);border-color:var(--accent);}
+.rcheck:checked::after{border-color:var(--on-accent);}
+.routine-item.done{background:var(--surface);opacity:.75;}
+.routine-name{font-weight:500;}
+
+/* Badges, segmented */
+.badge{background:var(--accent-soft);color:var(--accent);font-weight:700;}
+.segmented{background:var(--surface-2);border-color:transparent;border-radius:10px;}
+.segmented button{font-weight:600;}
+.segmented button.active{background:var(--surface);color:var(--text);box-shadow:0 1px 3px rgba(0,0,0,.18);}
+[data-theme="dark"] .segmented button.active{background:var(--border-strong);}
+
+/* Stats & chart */
+.stat-card{border-radius:14px;padding:16px;}
+.stat-label{font-size:12px;font-weight:500;letter-spacing:0;text-transform:none;}
+.stat-value{font-size:28px;font-weight:700;margin-top:6px;}
+.chart{color:var(--accent);}
+.chart-area{opacity:.12;}
+
+/* Calendar */
+.cal-cell{border-radius:8px;font-weight:500;font-size:12px;}
+.cal-cell.nodata{border-color:transparent;background:var(--surface-2);}
+.cal-cell:not(.blank):not(.future):hover{box-shadow:inset 0 0 0 1px var(--border-strong);}
+.cal-cell.full{font-weight:700;}
+.cal-cell.today{outline:2px solid var(--accent);outline-offset:1px;}
+.cal-dow{font-weight:600;}
+
+/* Consistency bars */
+.consistency-item{flex-direction:column;align-items:stretch;gap:10px;}
+.cons-top{display:flex;align-items:center;justify-content:space-between;gap:10px;min-width:0;}
+.consistency-name,.cons-name{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;}
+.consistency-pct,.cons-pct{font-weight:600;color:var(--muted);font-variant-numeric:tabular-nums;flex:none;}
+.cons-bar{height:6px;border-radius:99px;background:var(--surface-2);overflow:hidden;}
+.cons-bar i{display:block;height:100%;border-radius:inherit;background:linear-gradient(90deg,rgba(var(--accent-rgb),.65),var(--accent));transition:width .5s ease;}
+.cons-row{display:flex;flex-direction:column;gap:7px;}
+.cons-row + .cons-row{margin-top:14px;}
+.cons-name,.cons-pct{font-size:13px;}
+
+/* Profile */
+.avatar,.sidebar-avatar{background:linear-gradient(135deg,var(--accent),rgba(var(--accent-rgb),.55));color:var(--on-accent);}
+
+/* Mobile nav & modal & toast */
+#bottomNav{-webkit-backdrop-filter:saturate(180%) blur(18px);backdrop-filter:saturate(180%) blur(18px);}
+.nav-item{font-weight:600;}
+.nav-item.active{color:var(--accent);}
+#modalBackdrop{background:rgba(5,7,10,.55);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);}
+.modal{background:var(--surface);box-shadow:0 24px 60px -12px rgba(0,0,0,.5);}
+.modal-title{font-weight:700;}
+.text-input{background:var(--bg);border-radius:12px;}
+#toast{background:var(--text);border-radius:12px;box-shadow:var(--shadow-md);font-weight:600;}
+.empty-state{background:var(--surface);border-color:var(--border-strong);}
+
+/* Streak card */
+.streak-main{display:flex;align-items:center;gap:14px;}
+.streak-flame{width:44px;height:44px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none;}
+.streak-flame svg{width:22px;height:22px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.streak-label{font-size:12.5px;color:var(--muted);font-weight:500;}
+.streak-value{font-size:22px;font-weight:700;letter-spacing:-.03em;font-variant-numeric:tabular-nums;}
+.streak-sub{display:flex;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);}
+.streak-sub span:last-child{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums;}
+
+/* ---- Desktop / iPad shell polish ---- */
+@media (min-width:768px){
+  body{background:var(--chrome);}
+  .desktop-sidebar{background:var(--chrome);border-right:1px solid var(--border);}
+  .desktop-insights{background:var(--chrome);border-left:1px solid var(--border);}
+  .desktop-center,.view{background:var(--bg);}
+  .desktop-logo-box{padding-left:10px;margin-bottom:22px;}
+  .desktop-logo-box svg{width:30px;height:30px;}
+  .desktop-logo-box h1{font-size:16px;font-weight:800;letter-spacing:.18em;}
+  .sidebar-profile{background:var(--surface);border:1px solid var(--border);box-shadow:var(--shadow-sm);}
+  .sidebar-avatar{width:34px;height:34px;border-radius:10px;font-size:14px;}
+  .sidebar-user-name{font-size:13.5px;font-weight:600;}
+  .sidebar-user-email{font-size:11.5px;}
+  .desktop-nav{gap:2px;}
+  .desktop-nav .nav-item-desk{padding:10px 12px;font-size:14px;font-weight:500;border-radius:9px;position:relative;}
+  .desktop-nav .nav-item-desk:hover{background:var(--surface-2);color:var(--text);}
+  .desktop-nav .nav-item-desk.active{background:var(--surface);color:var(--text);box-shadow:var(--shadow-sm),inset 0 0 0 1px var(--border);}
+  .desktop-nav .nav-item-desk.active svg{color:var(--accent);}
+  .insights-title{font-size:12px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;}
+  .insight-card-box{background:var(--surface);border-radius:14px;box-shadow:var(--shadow-sm);}
+  .user-name{font-size:30px;}
+  .view-title{font-size:28px;}
+  .view-head{margin-bottom:22px;}
+  #view-today header{margin-bottom:6px !important;}
+  .routine-list{gap:8px;}
+  #calGrid .cal-cell{aspect-ratio:auto;height:42px;font-size:13px;}
+  .diary-list,.manage-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px;}
+}
+@media (min-width:1280px){
+  .user-name{font-size:34px;}
+  /* Today: ring left, routines right on wide screens */
+  #view-today{display:grid;grid-template-columns:300px minmax(0,1fr);column-gap:28px;align-content:start;}
+  #view-today > *{grid-column:1 / -1;max-width:none;width:100%;}
+  #view-today > .progress-ring-card{grid-column:1;grid-row:span 4;align-self:start;position:sticky;top:0;margin:0;}
+  #view-today > .readonly-note,#view-today > .skipped-note,#view-today > .routine-list{grid-column:2;}
+  #view-today > .readonly-note,#view-today > .skipped-note{margin-top:0;margin-bottom:12px;}
+  #view-today{max-width:1040px;margin:0 auto;width:100%;}
+}
+@media (min-width:1700px) and (min-height:820px){
+  body{background:radial-gradient(1200px 600px at 50% -20%,rgba(var(--accent-rgb),.08),transparent 60%),var(--chrome);}
+}
 </style>
 </head>
 <body>
@@ -558,7 +787,7 @@ ul{list-style:none;}
     <!-- DESKTOP SIDEBAR -->
     <aside class="desktop-sidebar">
       <div class="desktop-logo-box">
-        <svg viewBox="0 0 512 512" style="width:100%;height:100%" aria-hidden="true">
+        <svg viewBox="0 0 512 512" aria-hidden="true">
           <rect width="512" height="512" rx="118" fill="var(--text)"/>
           <path d="M146 268l68 68 152-152" fill="none" stroke="var(--bg)" stroke-width="44" stroke-linecap="round" stroke-linejoin="round"/>
         </svg>
@@ -705,8 +934,8 @@ ul{list-style:none;}
             <div class="cal-grid" id="calGrid"></div>
             <div class="cal-legend">
               <span class="cal-swatch" style="background:transparent"></span><span>No data</span>
-              <span class="cal-swatch" style="background:rgba(var(--ink-rgb),.35);margin-left:10px"></span><span>Partial</span>
-              <span class="cal-swatch" style="background:var(--text);margin-left:10px"></span><span>100%</span>
+              <span class="cal-swatch" style="background:rgba(var(--accent-rgb),.4);margin-left:10px"></span><span>Partial</span>
+              <span class="cal-swatch" style="background:var(--accent);margin-left:10px"></span><span>100%</span>
             </div>
           </div>
 
@@ -787,14 +1016,19 @@ ul{list-style:none;}
     <aside class="desktop-insights">
       <div>
         <div class="insights-title" style="margin-bottom:10px;">Streak &amp; Focus</div>
-        <div class="insight-card-box" style="margin-bottom:10px;">
-          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
-            <span style="font-size:13px;color:var(--muted);font-weight:600;">Current Streak</span>
-            <span id="deskStreakVal" style="font-size:18px;font-weight:800;">0 days</span>
+        <div class="insight-card-box streak-card">
+          <div class="streak-main">
+            <div class="streak-flame" aria-hidden="true">
+              <svg viewBox="0 0 24 24"><path d="M12 3c.6 3.2 4.5 5.2 4.5 9.6A4.5 4.5 0 0 1 12 17a4.5 4.5 0 0 1-4.5-4.4c0-2 1-3.3 2-4.3.2 1.4.9 2.3 1.8 2.6C11 8.6 11.4 5.6 12 3z"/><path d="M8 21h8"/></svg>
+            </div>
+            <div>
+              <div class="streak-label">Current streak</div>
+              <div class="streak-value" id="deskStreakVal">0 days</div>
+            </div>
           </div>
-          <div style="display:flex;align-items:center;justify-content:space-between;">
-            <span style="font-size:13px;color:var(--muted);font-weight:600;">Best Streak</span>
-            <span id="deskBestVal" style="font-size:18px;font-weight:800;">0 days</span>
+          <div class="streak-sub">
+            <span>Best streak</span>
+            <span id="deskBestVal">0 days</span>
           </div>
         </div>
       </div>
@@ -1826,9 +2060,10 @@ function buildCalendarHtml() {
     } else if (c.pct === 0) {
       cls += ' nodata';
     } else {
-      const a = 0.18 + (c.pct / 100) * 0.82;
-      const fg = c.pct > 55 ? 'var(--bg)' : 'var(--text)';
-      style = 'background:rgba(var(--ink-rgb),' + a.toFixed(2) + ');color:' + fg + ';';
+      const a = 0.16 + (c.pct / 100) * 0.84;
+      const fg = c.pct > 55 ? 'var(--on-accent)' : 'var(--text)';
+      style = 'background:rgba(var(--accent-rgb),' + a.toFixed(2) + ');color:' + fg + ';';
+      if (c.pct >= 100) cls += ' full';
     }
 
     if (dk === tk) cls += ' today';
@@ -1875,9 +2110,10 @@ function renderDesktopSidebarWidgets() {
       d = addDays(d, 1);
     }
     const pct = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
-    return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
-      '<span style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;">' + esc(r.name) + '</span>' +
-      '<span style="font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;">' + pct + '%</span>' +
+    return '<div class="cons-row">' +
+      '<div class="cons-top"><span class="cons-name">' + esc(r.name) + '</span>' +
+      '<span class="cons-pct">' + pct + '%</span></div>' +
+      '<div class="cons-bar"><i style="width:' + pct + '%"></i></div>' +
     '</div>';
   }).join('');
 }
@@ -1905,8 +2141,9 @@ function renderRoutineConsistency() {
     }
     const pct = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
     return '<li class="consistency-item">' +
-      '<span class="consistency-name">' + esc(r.name) + '</span>' +
-      '<span class="consistency-pct">' + pct + '%</span>' +
+      '<div class="cons-top"><span class="consistency-name">' + esc(r.name) + '</span>' +
+      '<span class="consistency-pct">' + pct + '%</span></div>' +
+      '<div class="cons-bar"><i style="width:' + pct + '%"></i></div>' +
     '</li>';
   }).join('');
 }
