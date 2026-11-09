@@ -37,7 +37,7 @@
   --nav-bg:rgba(10,10,11,.94);
 }
 *,*::before,*::after{box-sizing:border-box;}
-html,body{margin:0;padding:0;}
+html,body{margin:0;padding:0;height:100%;}
 html{-webkit-text-size-adjust:100%;}
 body{
   background:var(--bg);
@@ -421,16 +421,10 @@ ul{list-style:none;}
     overflow-y: auto;
   }
   .view {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
     height: 100%;
     overflow-y: auto;
     padding: 32px;
-    display: none;
   }
-  .view.active { display: block; }
   .view .app-brand { display: none; }
 
   /* Right Insights Panel */
@@ -558,7 +552,7 @@ ul{list-style:none;}
       <div class="views-container" id="viewContainer">
 
         <!-- ---------- TODAY ---------- -->
-        <section id="view-today" class="view active">
+        <section id="view-today" class="view">
           <div class="app-brand">
             <div class="app-logo-box">
               <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
@@ -594,7 +588,7 @@ ul{list-style:none;}
         </section>
 
         <!-- ---------- DIARY ---------- -->
-        <section id="view-diary" class="view">
+        <section id="view-diary" class="view" hidden>
           <div class="app-brand">
             <div class="app-logo-box">
               <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
@@ -609,7 +603,7 @@ ul{list-style:none;}
         </section>
 
         <!-- ---------- PROGRESS ---------- -->
-        <section id="view-progress" class="view">
+        <section id="view-progress" class="view" hidden>
           <div class="app-brand">
             <div class="app-logo-box">
               <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
@@ -671,7 +665,7 @@ ul{list-style:none;}
         </section>
 
         <!-- ---------- MANAGE ---------- -->
-        <section id="view-manage" class="view">
+        <section id="view-manage" class="view" hidden>
           <div class="app-brand">
             <div class="app-logo-box">
               <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
@@ -689,7 +683,7 @@ ul{list-style:none;}
         </section>
 
         <!-- ---------- PROFILE ---------- -->
-        <section id="view-profile" class="view">
+        <section id="view-profile" class="view" hidden>
           <div class="app-brand">
             <div class="app-logo-box">
               <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
@@ -1319,7 +1313,6 @@ function doLogout() {
 function switchView(name) {
   state.view = name;
   $$('.view').forEach(v => {
-    v.classList.toggle('active', v.id === 'view-' + name);
     v.hidden = (v.id !== 'view-' + name);
   });
   $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === name));
