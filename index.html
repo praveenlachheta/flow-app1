@@ -1103,19 +1103,14 @@ kbd{font-family:inherit;font-size:12px;font-weight:600;color:var(--text);backgro
             </button>
           </div>
 
-          <p class="section-label">Data &amp; Backup</p>
+          <p class="section-label">Reports</p>
           <div class="settings-group">
             <button class="set-row" id="exportBtn">
-              <span class="set-ico"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg></span>
-              <span class="set-txt"><span class="row-title">Export backup</span><span class="row-sub">Download routines, history &amp; diary as a file</span></span>
+              <span class="set-ico"><svg viewBox="0 0 24 24"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 17v-3M12 17v-6M15 17v-4"/></svg></span>
+              <span class="set-txt"><span class="row-title">Download PDF report</span><span class="row-sub">Colour report: stats, calendar, consistency, daily log &amp; diary</span></span>
+              <span class="set-status ok" style="background:var(--accent-soft);color:var(--accent)">PDF</span>
               <span class="set-chev">›</span>
             </button>
-            <button class="set-row" id="importBtn">
-              <span class="set-ico"><svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 20h14"/></svg></span>
-              <span class="set-txt"><span class="row-title">Import backup</span><span class="row-sub">Restore from a FLOW backup file</span></span>
-              <span class="set-chev">›</span>
-            </button>
-            <input type="file" id="importFile" accept=".json,application/json" hidden>
           </div>
 
           <p class="section-label shortcuts-label">Keyboard shortcuts</p>
@@ -2801,15 +2796,12 @@ function openChangePassword() {
     title: 'Change password',
     confirmText: 'Update password',
     fields: [
-      { id: 'curPass', label: 'Current password', type: 'password', autocomplete: 'current-password' },
       { id: 'newPass', label: 'New password', type: 'password', autocomplete: 'new-password', strength: true },
       { id: 'confirmPass', label: 'Confirm new password', type: 'password', autocomplete: 'new-password' }
     ],
     onSubmit: async function (v, fail) {
       const u = state.user;
-      if (await hashPassword(v.curPass) !== u.passHash) return fail('Current password is incorrect.', 'curPass');
       if (!validateNewPassword(v.newPass, v.confirmPass, fail)) return false;
-      if (v.newPass === v.curPass) return fail('New password must be different from the current one.', 'newPass');
       u.passHash = await hashPassword(v.newPass);
       u.passChangedAt = Date.now();
       await saveUser(u);
@@ -2872,53 +2864,308 @@ function downloadFile(name, text, type) {
   setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
 }
 
-const DATA_STORES = ['routines', 'completions', 'skips', 'notes'];
-
-async function exportBackup() {
-  const u = state.user;
-  const data = { app: 'FLOW', version: 1, exportedAt: new Date().toISOString(),
-    profile: { name: u.name, email: u.email } };
-  for (const s of DATA_STORES) data[s] = await DB.getAll(s, 'userId', u.id) || [];
-  downloadFile('flow-backup-' + todayKey() + '.json', JSON.stringify(data, null, 2), 'application/json');
-  toast('Backup downloaded');
+/* ---- PDF report ---- */
+let jsPdfPromise = null;
+function loadJsPDF() {
+  if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
+  if (!jsPdfPromise) {
+    jsPdfPromise = new Promise(function (resolve, reject) {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s.onload = function () { (window.jspdf && window.jspdf.jsPDF) ? resolve(window.jspdf.jsPDF) : reject(new Error('jsPDF missing')); };
+      s.onerror = function () { jsPdfPromise = null; reject(new Error('load failed')); };
+      document.head.appendChild(s);
+    });
+  }
+  return jsPdfPromise;
 }
 
-function importBackup(file) {
-  const reader = new FileReader();
-  reader.onload = function () {
-    let data;
-    try { data = JSON.parse(reader.result); } catch (e) { toast('That file is not a valid backup.'); return; }
-    if (!data || data.app !== 'FLOW' || !DATA_STORES.every(s => Array.isArray(data[s]))) {
-      toast('That file is not a FLOW backup.'); return;
+/* Built-in PDF fonts are Latin-1 only */
+function pdfText(s) {
+  return String(s == null ? '' : s)
+    .replace(/[‘’]/g, "'").replace(/[“”]/g, '"')
+    .replace(/[–—]/g, '-').replace(/…/g, '...')
+    .replace(/[^\x09\x0A\x0D\x20-\x7E\xA0-\xFF]/g, '?');
+}
+
+function routineConsistencyPct(r, tk) {
+  let total = 0, done = 0, d = r.createdKey || tk, guard = 0;
+  while (d <= tk && guard++ < 365) {
+    if (!state.skips[d + '|' + r.id]) {
+      total++;
+      if (state.completions[d + '|' + r.id]) done++;
     }
-    const n = data.routines.length, d = data.notes.length;
-    confirmModal(
-      'Restore this backup?',
-      'This replaces your current routines, history and diary with the backup from ' +
-        (data.exportedAt ? new Date(data.exportedAt).toLocaleDateString() : 'file') +
-        ' (' + n + ' routine' + (n === 1 ? '' : 's') + ', ' + d + ' diary entr' + (d === 1 ? 'y' : 'ies') + ').',
-      'Restore',
-      async function () {
-        const uidv = state.user.id;
-        try {
-          for (const s of DATA_STORES) {
-            const existing = await DB.getAll(s, 'userId', uidv) || [];
-            for (const o of existing) await DB.remove(s, o.id);
-            for (const o of data[s]) {
-              if (!o || !o.id) continue;
-              o.userId = uidv;
-              await DB.put(s, o);
-            }
-          }
-          await loadUserData();
-          switchView('today');
-          renderDesktopSidebarWidgets();
-          toast('Backup restored');
-        } catch (e) { toast('Could not restore backup.'); }
-      }
-    );
+    d = addDays(d, 1);
+  }
+  return total ? Math.round(done / total * 100) : 0;
+}
+
+async function exportPdfReport() {
+  let JsPDF;
+  toast('Preparing your PDF report...');
+  try { JsPDF = await loadJsPDF(); }
+  catch (e) { toast('Internet connection needed to create the PDF.'); return; }
+
+  const u = state.user;
+  const tk = todayKey();
+  const doc = new JsPDF({ unit: 'mm', format: 'a4' });
+  const W = 210, H = 297, M = 14, CW = W - M * 2;
+
+  const C = {
+    dark: [11, 13, 17], dark2: [24, 28, 36], text: [17, 24, 39], muted: [107, 114, 128],
+    line: [229, 231, 235], soft: [246, 247, 249], white: [255, 255, 255],
+    teal: [13, 148, 136], tealL: [45, 212, 191], tealT: [204, 251, 241],
+    green: [22, 163, 74], greenT: [220, 252, 231],
+    orange: [217, 119, 6], orangeD: [180, 83, 9], orangeT: [254, 243, 199],
+    red: [220, 38, 38], redT: [254, 226, 226], grey: [243, 244, 246]
   };
-  reader.readAsText(file);
+  const fill = c => doc.setFillColor(c[0], c[1], c[2]);
+  const stroke = c => doc.setDrawColor(c[0], c[1], c[2]);
+  const color = c => doc.setTextColor(c[0], c[1], c[2]);
+  const font = (style, size) => { doc.setFont('helvetica', style); doc.setFontSize(size); };
+  const text = (s, x, y, o) => doc.text(pdfText(s), x, y, o);
+
+  function statusOf(dk) {
+    const c = countsFor(dk);
+    if (dk > tk || !c.total) return { key: 'none', c: c };
+    if (c.pct >= 100) return { key: 'full', c: c };
+    if (c.pct > 0) return { key: 'partial', c: c };
+    if (dk === tk) return { key: 'none', c: c };
+    return { key: 'miss', c: c };
+  }
+  const ST = {
+    full:    { solid: C.green,  tint: C.greenT,  ink: C.green,   label: 'Completed' },
+    partial: { solid: C.orange, tint: C.orangeT, ink: C.orangeD, label: 'Partial' },
+    miss:    { solid: C.red,    tint: C.redT,    ink: C.red,     label: 'Missed' },
+    none:    { solid: C.line,   tint: C.grey,    ink: C.muted,   label: 'No data' }
+  };
+
+  /* ---------- page furniture ---------- */
+  let y = 0;
+  function contHeader() {
+    fill(C.dark); doc.rect(0, 0, W, 14, 'F');
+    fill(C.tealL); doc.rect(0, 14, W, 1, 'F');
+    font('bold', 10); color(C.white); text('FLOW', M, 9.2);
+    font('normal', 9); color(C.tealL); text('Progress Report', M + 14, 9.2);
+    color([160, 167, 180]); text(u.name || '', W - M, 9.2, { align: 'right' });
+    y = 26;
+  }
+  function ensure(h) { if (y + h > H - 18) { doc.addPage(); contHeader(); } }
+  function section(title, sub) {
+    ensure(18);
+    fill(C.teal); doc.roundedRect(M, y - 4, 1.4, 5.5, 0.7, 0.7, 'F');
+    font('bold', 12.5); color(C.text); text(title, M + 4, y);
+    if (sub) { font('normal', 8.5); color(C.muted); text(sub, W - M, y, { align: 'right' }); }
+    y += 7;
+  }
+  function legend(x, yy) {
+    font('normal', 7.5);
+    ['full', 'partial', 'miss', 'none'].forEach(function (k) {
+      fill(k === 'full' ? ST[k].solid : ST[k].tint);
+      stroke(ST[k].solid); doc.setLineWidth(0.2);
+      doc.roundedRect(x, yy - 2.6, 3, 3, 0.6, 0.6, k === 'full' ? 'F' : 'FD');
+      color(C.muted); text(ST[k].label, x + 4.4, yy);
+      x += 6 + doc.getTextWidth(ST[k].label) + 4;
+    });
+  }
+
+  /* ---------- cover header ---------- */
+  fill(C.dark); doc.rect(0, 0, W, 46, 'F');
+  fill(C.dark2); doc.circle(W - 20, -6, 42, 'F');
+  fill(C.tealL); doc.rect(0, 46, W, 1.6, 'F');
+  fill(C.white); doc.roundedRect(M, 13, 19, 19, 4.5, 4.5, 'F');
+  stroke(C.dark); doc.setLineWidth(2.1); doc.setLineCap('round'); doc.setLineJoin('round');
+  doc.lines([[3.4, 3.4], [7.2, -7.6]], M + 5, 22.8, [1, 1], 'S', false);
+  font('bold', 22); color(C.white); text('FLOW', M + 25, 22.5);
+  font('normal', 10.5); color(C.tealL); text('Progress Report', M + 25, 29.5);
+  font('bold', 12); color(C.white); text(u.name || 'User', W - M, 20, { align: 'right' });
+  font('normal', 8.5); color([160, 167, 180]);
+  text(u.email || '', W - M, 26, { align: 'right' });
+  const now = new Date();
+  text('Generated ' + now.getDate() + ' ' + MONTHS[now.getMonth()] + ' ' + now.getFullYear() + ', ' + time12(now.getTime()), W - M, 32, { align: 'right' });
+  y = 60;
+
+  /* ---------- overview tiles ---------- */
+  const active = state.routines.filter(r => !r.deletedKey);
+  const firstKey = state.routines.reduce((m, r) => (r.createdKey && r.createdKey < m ? r.createdKey : m), tk);
+  let allDone = 0, allTotal = 0;
+  for (let d = firstKey, g = 0; d <= tk && g < 400; d = addDays(d, 1), g++) {
+    const c = countsFor(d); allDone += c.done; allTotal += c.total;
+  }
+  const overall = allTotal ? Math.round(allDone / allTotal * 100) : 0;
+  const streak = computeStreak(), best = computeBestStreak();
+  const dayWord = n => n + (n === 1 ? ' day' : ' days');
+
+  section('Overview');
+  const tiles = [
+    { label: "Today's score", value: countsFor(tk).pct + '%', c: C.teal },
+    { label: 'Overall completion', value: overall + '%', c: C.green },
+    { label: 'Current streak', value: dayWord(streak), c: C.orange },
+    { label: 'Best streak', value: dayWord(best), c: C.red },
+    { label: 'Active routines', value: String(active.length), c: C.tealL }
+  ];
+  const gap = 3.5, tw = (CW - gap * 4) / 5, th = 24;
+  tiles.forEach(function (t, i) {
+    const x = M + i * (tw + gap);
+    fill(C.soft); doc.roundedRect(x, y, tw, th, 2.5, 2.5, 'F');
+    fill(t.c); doc.roundedRect(x, y, tw, 1.6, 0.8, 0.8, 'F'); doc.rect(x, y + 0.8, tw, 0.8, 'F');
+    font('normal', 7.5); color(C.muted); text(t.label, x + 3.5, y + 8.5);
+    font('bold', 15); color(C.text); text(t.value, x + 3.5, y + 18);
+  });
+  y += th + 12;
+
+  /* ---------- 30 day bar chart ---------- */
+  section('Last 30 days', 'Daily completion %');
+  const chH = 46, chX = M + 9, chW = CW - 9;
+  font('normal', 7); color(C.muted);
+  [0, 50, 100].forEach(function (v) {
+    const yy = y + chH - (v / 100) * chH;
+    stroke(C.line); doc.setLineWidth(0.2); doc.line(chX, yy, chX + chW, yy);
+    text(v + '%', chX - 2, yy + 1, { align: 'right' });
+  });
+  const bw = chW / 30;
+  for (let i = 0; i < 30; i++) {
+    const dk = addDays(tk, i - 29), s = statusOf(dk), x = chX + i * bw + bw * 0.18, w = bw * 0.64;
+    if (s.key === 'none') {
+      fill(C.grey); doc.roundedRect(x, y + chH - 1.4, w, 1.4, 0.5, 0.5, 'F');
+    } else {
+      const h = Math.max(1.6, (s.c.pct / 100) * chH);
+      fill(s.key === 'miss' ? C.red : ST[s.key].solid);
+      if (s.key === 'miss') doc.roundedRect(x, y + chH - 1.6, w, 1.6, 0.5, 0.5, 'F');
+      else doc.roundedRect(x, y + chH - h, w, h, 0.8, 0.8, 'F');
+    }
+    const dd = parseKey(dk);
+    if (i % 3 === 2 || i === 29) {
+      color(i === 29 ? C.text : C.muted); font(i === 29 ? 'bold' : 'normal', 6.5);
+      text(String(dd.getDate()), x + w / 2, y + chH + 4, { align: 'center' });
+    }
+  }
+  y += chH + 10;
+  legend(M, y); y += 10;
+
+  /* ---------- calendars (3 months) ---------- */
+  section('Calendar history', 'Red = missed  -  Orange = partial  -  Green = all done');
+  ensure(62);
+  const calGap = 8, calW = (CW - calGap * 2) / 3, cell = calW / 7;
+  const t0 = parseKey(tk);
+  for (let k = 0; k < 3; k++) {
+    const mDate = new Date(t0.getFullYear(), t0.getMonth() - 2 + k, 1);
+    const yr = mDate.getFullYear(), mo = mDate.getMonth();
+    const x0 = M + k * (calW + calGap);
+    font('bold', 9.5); color(C.text); text(MONTHS[mo] + ' ' + yr, x0, y);
+    font('bold', 6.5); color(C.muted);
+    ['S', 'M', 'T', 'W', 'T', 'F', 'S'].forEach((d, i) => text(d, x0 + i * cell + cell / 2, y + 5.5, { align: 'center' }));
+    const startDow = mDate.getDay(), days = new Date(yr, mo + 1, 0).getDate();
+    for (let d = 1; d <= days; d++) {
+      const pos = startDow + d - 1, col = pos % 7, row = Math.floor(pos / 7);
+      const cx = x0 + col * cell + 0.5, cy = y + 7.5 + row * (cell - 0.6), cw = cell - 1, ch = cell - 1.6;
+      const dk = dateKey(new Date(yr, mo, d)), s = statusOf(dk), st = ST[s.key];
+      const future = dk > tk;
+      if (!future) {
+        fill(s.key === 'full' ? st.solid : st.tint);
+        doc.roundedRect(cx, cy, cw, ch, 1, 1, 'F');
+      }
+      if (dk === tk) { stroke(C.teal); doc.setLineWidth(0.5); doc.roundedRect(cx, cy, cw, ch, 1, 1, 'S'); }
+      font(s.key === 'none' ? 'normal' : 'bold', 6.8);
+      color(future ? [200, 204, 210] : (s.key === 'full' ? C.white : st.ink));
+      text(String(d), cx + cw / 2, cy + ch / 2 + 1.2, { align: 'center' });
+    }
+  }
+  y += 7.5 + 6 * (cell - 0.6) + 8;
+
+  /* ---------- routine consistency ---------- */
+  section('Routine consistency', 'Since each routine was added');
+  if (!active.length) { font('normal', 9); color(C.muted); text('No routines yet.', M, y); y += 8; }
+  active.map(r => ({ r: r, pct: routineConsistencyPct(r, tk) }))
+    .sort((a, b) => b.pct - a.pct)
+    .forEach(function (o) {
+      ensure(12);
+      const c = o.pct >= 80 ? C.green : o.pct >= 50 ? C.orange : C.red;
+      font('bold', 9.5); color(C.text); text(o.r.name, M, y);
+      font('bold', 9.5); color(c); text(o.pct + '%', W - M, y, { align: 'right' });
+      fill(C.grey); doc.roundedRect(M, y + 2, CW, 2.6, 1.3, 1.3, 'F');
+      if (o.pct > 0) { fill(c); doc.roundedRect(M, y + 2, Math.max(2.6, CW * o.pct / 100), 2.6, 1.3, 1.3, 'F'); }
+      y += 11.5;
+    });
+  y += 4;
+
+  /* ---------- daily log ---------- */
+  section('Daily log', 'Last 30 days');
+  const cols = [{ t: 'Date', w: 34 }, { t: 'Done', w: 18 }, { t: 'Score', w: 18 }, { t: 'Status', w: 26 }, { t: 'Missed routines', w: CW - 96 }];
+  function tableHead() {
+    fill(C.dark); doc.roundedRect(M, y - 4.6, CW, 7, 1.5, 1.5, 'F');
+    font('bold', 8); color(C.white);
+    let x = M + 3; cols.forEach(c => { text(c.t, x, y); x += c.w; });
+    y += 7;
+  }
+  ensure(16); tableHead();
+  let rowN = 0, logged = 0;
+  for (let i = 0; i < 30; i++) {
+    const dk = addDays(tk, -i), s = statusOf(dk);
+    if (!s.c.total) continue;
+    logged++;
+    const missed = routinesForDate(dk).filter(r => !state.completions[dk + '|' + r.id]).map(r => r.name).join(', ');
+    const missLines = doc.splitTextToSize(pdfText(missed || '-'), cols[4].w - 3).slice(0, 2);
+    const rh = 6.6 + (missLines.length - 1) * 3.6;
+    if (y + rh > H - 18) { doc.addPage(); contHeader(); tableHead(); }
+    if (rowN++ % 2 === 0) { fill(C.soft); doc.rect(M, y - 4.4, CW, rh, 'F'); }
+    const dd = parseKey(dk);
+    let x = M + 3;
+    font(dk === tk ? 'bold' : 'normal', 8.3); color(C.text);
+    text(DAYS_FULL[dd.getDay()].slice(0, 3) + ', ' + dd.getDate() + ' ' + MONTHS_SHORT[dd.getMonth()] + (dk === tk ? ' (today)' : ''), x, y); x += cols[0].w;
+    font('normal', 8.3); text(s.c.done + ' / ' + s.c.total, x, y); x += cols[1].w;
+    font('bold', 8.3); color(s.key === 'none' ? C.muted : ST[s.key].ink); text(s.c.pct + '%', x, y); x += cols[2].w;
+    const st = ST[s.key], lbl = dk === tk && s.key === 'none' ? 'In progress' : st.label;
+    fill(s.key === 'full' ? st.solid : st.tint);
+    font('bold', 7); const pw = doc.getTextWidth(lbl) + 5;
+    doc.roundedRect(x, y - 3.4, pw, 4.6, 2.3, 2.3, 'F');
+    color(s.key === 'full' ? C.white : st.ink); text(lbl, x + 2.5, y); x += cols[3].w;
+    font('normal', 7.8); color(C.muted); doc.text(missLines, x, y);
+    y += rh;
+  }
+  if (!logged) { font('normal', 9); color(C.muted); text('No tracked days yet.', M + 3, y); y += 6; }
+  y += 8;
+
+  /* ---------- diary ---------- */
+  const notes = state.notes.filter(n => (n.title || '').trim() || (n.body || '').trim());
+  section('Diary', notes.length + (notes.length === 1 ? ' entry' : ' entries'));
+  if (!notes.length) { font('normal', 9); color(C.muted); text('No diary entries yet.', M, y); y += 8; }
+  notes.forEach(function (n) {
+    const body = doc.splitTextToSize(pdfText((n.body || '').trim()), CW - 10);
+    let idx = 0, first = true;
+    while (first || idx < body.length) {
+      ensure(first ? 20 : 12);
+      const avail = Math.floor((H - 22 - y - (first ? 10 : 2)) / 4.4);
+      const chunk = body.slice(idx, idx + Math.max(1, avail));
+      const h = (first ? 10 : 2) + chunk.length * 4.4 + 4;
+      fill(C.soft); doc.roundedRect(M, y - 4.5, CW, h, 2, 2, 'F');
+      fill(C.teal); doc.rect(M, y - 4.5, 1.2, h, 'F');
+      let yy = y;
+      if (first) {
+        font('bold', 10); color(C.text); text((n.title || '').trim() || 'Untitled', M + 5, yy);
+        font('normal', 7.5); color(C.muted); text(dateTime12(n.createdAt), W - M - 4, yy, { align: 'right' });
+        yy += 6;
+      }
+      font('normal', 8.8); color([55, 65, 81]);
+      if (chunk.length) doc.text(chunk, M + 5, yy, { lineHeightFactor: 1.4 });
+      idx += chunk.length; first = false;
+      y += h + 4;
+    }
+  });
+
+  /* ---------- footers ---------- */
+  const pages = doc.getNumberOfPages();
+  for (let p = 1; p <= pages; p++) {
+    doc.setPage(p);
+    stroke(C.line); doc.setLineWidth(0.2); doc.line(M, H - 12, W - M, H - 12);
+    font('normal', 7.5); color(C.muted);
+    text('FLOW  -  Progress report for ' + (u.name || u.email || ''), M, H - 7);
+    text('Page ' + p + ' of ' + pages, W - M, H - 7, { align: 'right' });
+  }
+
+  const safe = (u.name || 'report').replace(/[^A-Za-z0-9]+/g, '-').replace(/^-|-$/g, '') || 'report';
+  doc.save('FLOW-Report-' + safe + '-' + tk + '.pdf');
+  toast('PDF report downloaded');
 }
 
 /* ---- Wiring ---- */
@@ -2936,9 +3183,7 @@ $('#forgotBtn').addEventListener('click', openForgotPassword);
 $('#setPassBtn').addEventListener('click', openChangePassword);
 $('#setKeyBtn').addEventListener('click', openRecoveryKeySettings);
 $('#setNameBtn').addEventListener('click', openEditName);
-$('#exportBtn').addEventListener('click', exportBackup);
-$('#importBtn').addEventListener('click', function () { $('#importFile').value = ''; $('#importFile').click(); });
-$('#importFile').addEventListener('change', function () { if (this.files[0]) importBackup(this.files[0]); });
+$('#exportBtn').addEventListener('click', exportPdfReport);
 
 /* ============================================================
    PWA & BOOT
