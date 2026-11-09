@@ -959,6 +959,34 @@ label.set-row{cursor:pointer;}
 .set-row:disabled{opacity:.5;}
 .set-hint{margin:8px 4px 0;}
 
+/* ---- Device sync ---- */
+.sync-qr{width:220px;height:220px;margin:18px auto 12px;border-radius:18px;background:#fff;display:grid;place-items:center;padding:8px;box-shadow:var(--shadow-md);}
+.sync-qr svg{width:100%;height:100%;display:block;}
+.sync-qr .spinner{border-color:rgba(0,0,0,.15);border-top-color:#0d9488;}
+.sync-code{text-align:center;font-family:"Geist Mono",ui-monospace,Consolas,monospace;font-size:30px;font-weight:600;letter-spacing:.16em;margin:4px 0 12px;}
+.sync-code-input{font-family:"Geist Mono",ui-monospace,Consolas,monospace;font-size:20px !important;letter-spacing:.2em;text-transform:uppercase;text-align:center;}
+.sync-status{display:flex;align-items:center;justify-content:center;gap:9px;min-height:22px;margin-top:12px;font-size:13px;font-weight:500;color:var(--muted);text-align:center;}
+.sync-status.ok{color:var(--st-full);}
+.sync-status.err{color:var(--st-miss);}
+.sync-status.idle{min-height:0;margin-top:0;}
+.sync-note{text-align:center;margin-top:12px;}
+.spinner{width:16px;height:16px;flex:none;border-radius:50%;border:2px solid var(--border-strong);border-top-color:var(--accent);animation:spin .8s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg)}}
+.sync-login{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:18px;height:44px;border-radius:12px;border:1px dashed var(--border-strong);font-size:13.5px;font-weight:600;color:var(--text);}
+.sync-login:hover{border-color:var(--accent);color:var(--accent);}
+.sync-login svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+
+.sync-pill{display:inline-flex;align-items:center;gap:7px;margin-top:8px;padding:4px 10px 4px 9px;border-radius:99px;font-size:12px;font-weight:500;color:var(--muted);background:var(--surface-2);max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.sync-pill i{width:7px;height:7px;border-radius:50%;background:var(--muted);flex:none;}
+.sync-pill.live{color:var(--st-full);background:rgba(34,197,94,.12);}
+.sync-pill.live i{background:var(--st-full);box-shadow:0 0 0 3px rgba(34,197,94,.2);animation:livePulse 2s ease-in-out infinite;}
+@keyframes livePulse{50%{box-shadow:0 0 0 6px rgba(34,197,94,0)}}
+.pair-list{margin-bottom:10px;}
+.pair-row{display:flex;align-items:center;gap:14px;padding:12px 16px;}
+.pair-row + .pair-row{border-top:1px solid var(--border);}
+.pair-dot{width:10px;height:10px;border-radius:50%;background:var(--border-strong);flex:none;margin:0 13px;}
+.pair-dot.live{background:var(--st-full);box-shadow:0 0 0 4px rgba(34,197,94,.18);}
+
 /* Confetti */
 .confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:400;}
 
@@ -1051,7 +1079,11 @@ label.set-row{cursor:pointer;}
         <span id="authSwitchText">New here?</span>
         <button type="button" class="link-btn" id="authSwitchBtn">Create an account</button>
       </p>
-      <p class="auth-foot">Everything stays on this device.<br>No cloud. No internet required.</p>
+      <button type="button" class="sync-login" id="syncLoginBtn">
+        <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4M20 17v4"/></svg>
+        Sync from another device
+      </button>
+      <p class="auth-foot">Everything stays on your devices.<br>No cloud storage.</p>
     </div>
   </section>
 
@@ -1116,6 +1148,7 @@ label.set-row{cursor:pointer;}
           <header style="margin-bottom:14px;">
             <h1 class="user-name" id="userNameAndGreeting">Good evening, User</h1>
             <p class="today-date" id="todayDate">—</p>
+            <button class="sync-pill" id="syncPill" hidden></button>
           </header>
 
           <p class="quote">“Action speaks louder than words.”</p>
@@ -1297,6 +1330,22 @@ label.set-row{cursor:pointer;}
             </button>
           </div>
           <p class="hint set-hint" id="notifHint">Per-routine reminder times are set in Manage → edit a routine.</p>
+
+          <p class="section-label">Devices</p>
+          <div class="settings-group pair-list" id="pairList" hidden></div>
+          <div class="settings-group">
+            <button class="set-row" id="syncBtn">
+              <span class="set-ico"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4M20 17v4"/></svg></span>
+              <span class="set-txt"><span class="row-title">Sync with another device</span><span class="row-sub">Show a QR code — scan it on your phone or iPad</span></span>
+              <span class="set-chev">›</span>
+            </button>
+            <button class="set-row" id="syncJoinBtn">
+              <span class="set-ico"><svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg></span>
+              <span class="set-txt"><span class="row-title">Enter a sync code</span><span class="row-sub">Get data from your other device</span></span>
+              <span class="set-chev">›</span>
+            </button>
+          </div>
+          <p class="hint set-hint">Data travels directly between your devices on the same Wi-Fi — it is never stored online.</p>
 
           <p class="section-label">Account &amp; Security</p>
           <div class="settings-group">
@@ -1801,15 +1850,17 @@ async function loadUserData() {
 
   state.completions = {};
   (await DB.getAll('completions', 'userId', u) || []).forEach(c => {
+    if (c.count === 0) return;                 /* sync tombstone */
     state.completions[c.dateKey + '|' + c.routineId] = c;
   });
 
   state.skips = {};
   (await DB.getAll('skips', 'userId', u) || []).forEach(s => {
+    if (s.removed) return;                     /* sync tombstone */
     state.skips[s.dateKey + '|' + s.routineId] = s;
   });
 
-  state.notes = (await DB.getAll('notes', 'userId', u) || []);
+  state.notes = (await DB.getAll('notes', 'userId', u) || []).filter(n => !n.deleted);
   state.notes.sort((a, b) => b.createdAt - a.createdAt);
 }
 
@@ -1826,14 +1877,17 @@ function toast(msg) {
 }
 
 let modalCloseTimer = null;
+let modalOnClose = null;
 function showModal(html) {
   clearTimeout(modalCloseTimer);
+  if (modalOnClose) { const f = modalOnClose; modalOnClose = null; try { f(); } catch (e) {} }
   const bd = $('#modalBackdrop');
   $('#modal').innerHTML = html;
   bd.hidden = false;
   requestAnimationFrame(() => bd.classList.add('open'));
 }
 function hideModal() {
+  if (modalOnClose) { const f = modalOnClose; modalOnClose = null; try { f(); } catch (e) {} }
   const bd = $('#modalBackdrop');
   bd.classList.remove('open');
   clearTimeout(modalCloseTimer);
@@ -2007,6 +2061,7 @@ async function startSession(user) {
   checkBadges();
   syncReminderState();
   setTimeout(reminderTick, 1500);
+  startLiveSync();
 }
 
 function doLogout() {
@@ -2017,6 +2072,7 @@ function doLogout() {
     function () {
       try { localStorage.removeItem('flow_session'); } catch (e) {}
       clearReminderState();
+      stopLiveSync();
       state.user = null;
       state.routines = [];
       state.completions = {};
@@ -2181,22 +2237,27 @@ async function setCompletionCount(routineId, count) {
   const id = state.user.id + '|' + dk + '|' + routineId;
   const key = dk + '|' + routineId;
   const prevPct = countsFor(todayKey()).pct;
-  try {
-    if (count <= 0) {
-      await DB.remove('completions', id);
-      delete state.completions[key];
-    } else {
-      const old = state.completions[key];
-      const rec = { id: id, userId: state.user.id, dateKey: dk, routineId: routineId, count: count,
-        ts: (count >= target) ? ((old && old.count >= target && old.ts) || Date.now()) : Date.now() };
-      await DB.put('completions', rec);
-      state.completions[key] = rec;
-    }
-  } catch (e) {
-    toast('Could not save. Try again.');
-    return;
+  /* Update state + UI synchronously (rapid taps always see the latest value),
+     then persist through an ordered write queue. */
+  let rec;
+  if (count <= 0) {
+    /* tombstone (count 0) so device sync knows it was un-done */
+    rec = { id: id, userId: state.user.id, dateKey: dk, routineId: routineId, count: 0, ts: Date.now() };
+    delete state.completions[key];
+  } else {
+    const old = state.completions[key];
+    rec = { id: id, userId: state.user.id, dateKey: dk, routineId: routineId, count: count,
+      ts: (count >= target) ? ((old && old.count >= target && old.ts) || Date.now()) : Date.now() };
+    state.completions[key] = rec;
   }
   afterProgressChange(prevPct);
+  queueWrite(() => DB.put('completions', rec));
+}
+
+let writeQ = Promise.resolve();
+function queueWrite(fn) {
+  writeQ = writeQ.then(fn).catch(function () { toast('Could not save. Try again.'); });
+  return writeQ;
 }
 
 async function toggleCompletion(routineId, checked) {
@@ -2223,7 +2284,7 @@ async function skipRoutineForDay(routineId) {
 
     const ckey = dk + '|' + routineId;
     if (state.completions[ckey]) {
-      await DB.remove('completions', state.user.id + '|' + dk + '|' + routineId);
+      await DB.put('completions', { id: state.user.id + '|' + dk + '|' + routineId, userId: state.user.id, dateKey: dk, routineId: routineId, count: 0, ts: Date.now() });
       delete state.completions[ckey];
     }
   } catch (e) {
@@ -2239,7 +2300,7 @@ async function restoreSkippedForDay() {
   try {
     for (let i = 0; i < keys.length; i++) {
       const rec = state.skips[keys[i]];
-      await DB.remove('skips', rec.id);
+      await DB.put('skips', Object.assign({}, rec, { removed: true, ts: Date.now() }));
       delete state.skips[keys[i]];
     }
   } catch (e) {
@@ -2443,7 +2504,10 @@ function deleteCurrentNote() {
 
   confirmModal('Delete this diary entry?', 'This cannot be undone.', 'Delete', async function () {
     const id = ed.id;
-    try { await DB.remove('notes', id); } catch (e) {}
+    try {
+      const n = state.notes.find(x => x.id === id);
+      if (n) await DB.put('notes', { id: n.id, userId: n.userId, createdAt: n.createdAt, updatedAt: Date.now(), deleted: true, title: '', body: '' });
+    } catch (e) {}
     state.notes = state.notes.filter(n => n.id !== id);
     await closeEditor(true);
     toast('Entry deleted');
@@ -2842,6 +2906,7 @@ function routineEditor(r) {
         state.routines.push(rec);
       } else {
         r.name = o.name; r.days = days.length === 7 ? null : days; r.target = o.target; r.unit = o.unit; r.remindAt = o.remindAt;
+        r.updatedAt = Date.now();
         await DB.put('routines', r);
       }
     } catch (e2) { err.textContent = 'Could not save. Try again.'; err.hidden = false; return; }
@@ -2868,6 +2933,7 @@ function deleteRoutine(id) {
     'Delete',
     async function () {
       r.deletedKey = todayKey();
+      r.updatedAt = Date.now();
       try { await DB.put('routines', r); } catch (e) {}
       renderManage();
       renderDesktopSidebarWidgets();
@@ -2906,6 +2972,7 @@ async function moveRoutine(id, dir) {
 function renderProfile() {
   const u = state.user;
   renderReminderSettings();
+  renderDevices();
   $('#profileName').textContent = (u && u.name) ? u.name : '—';
   $('#profileEmail').textContent = (u && u.email) ? u.email : '—';
   const initial = ((u && (u.name || u.email)) || 'F').trim().charAt(0).toUpperCase();
@@ -3196,6 +3263,7 @@ function validateNewPassword(pw, confirm, fail) {
 }
 
 async function saveUser(u) {
+  u.updatedAt = Date.now();
   await DB.put('users', u);
   if (state.user && state.user.id === u.id) state.user = u;
 }
@@ -3791,7 +3859,7 @@ function renderWeekCard() {
   const since = addDays(tk, -30);
   Object.keys(state.completions).forEach(function (key) {
     const c = state.completions[key];
-    if (!c.ts || c.dateKey < since) return;
+    if (!c.ts || !c.count && c.count !== undefined || c.dateKey < since) return;
     const h = new Date(c.ts).getHours();
     buckets[h >= 5 && h < 12 ? 'Morning' : h < 17 && h >= 12 ? 'Afternoon' : h >= 17 && h < 21 ? 'Evening' : 'Night']++;
   });
@@ -3935,7 +4003,7 @@ async function saveOrderFromDom() {
   try {
     for (let i = 0; i < ids.length; i++) {
       const r = state.routines.find(x => x.id === ids[i]);
-      if (r && r.order !== i) { r.order = i; await DB.put('routines', r); }
+      if (r && r.order !== i) { r.order = i; r.updatedAt = Date.now(); await DB.put('routines', r); }
     }
   } catch (e) { toast('Could not reorder.'); }
   state.routines.sort((a, b) => (a.order || 0) - (b.order || 0));
@@ -4188,6 +4256,612 @@ document.addEventListener('visibilitychange', function () {
 })();
 
 /* ============================================================
+   DEVICE SYNC — QR / code pairing, peer-to-peer (WebRTC)
+   Data goes directly device → device (encrypted). A public PeerJS
+   broker is used only to introduce the two devices; nothing is stored.
+   ============================================================ */
+const SYNC_PREFIX = 'flow-sync-v1-';
+const SYNC_ALPHA = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+const SYNC_STORES = ['routines', 'completions', 'skips', 'notes'];
+let syncPeer = null, syncConn = null, syncTimer = null;
+
+const vendorCache = {};
+function loadVendor(src, globalName) {
+  if (window[globalName]) return Promise.resolve(window[globalName]);
+  if (!vendorCache[src]) {
+    vendorCache[src] = new Promise(function (resolve, reject) {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = () => window[globalName] ? resolve(window[globalName]) : reject(new Error(globalName + ' missing'));
+      s.onerror = () => { delete vendorCache[src]; s.remove(); reject(new Error('load failed')); };
+      document.head.appendChild(s);
+    });
+  }
+  return vendorCache[src];
+}
+
+function makeSyncCode() {
+  const b = new Uint8Array(6); crypto.getRandomValues(b);
+  return Array.from(b, x => SYNC_ALPHA[x % SYNC_ALPHA.length]).join('');
+}
+function deviceName() {
+  const ua = navigator.userAgent;
+  const dev = isIOS ? (/iPhone/.test(ua) ? 'iPhone' : 'iPad') : /Android/.test(ua) ? 'Android phone'
+    : /Windows/.test(ua) ? 'Windows PC' : /Mac/.test(ua) ? 'Mac' : /Linux/.test(ua) ? 'Linux PC' : 'device';
+  const br = /Edg\//.test(ua) ? 'Edge' : /Chrome\//.test(ua) ? 'Chrome' : /Firefox\//.test(ua) ? 'Firefox' : /Safari\//.test(ua) ? 'Safari' : '';
+  return dev + (br ? ' · ' + br : '');
+}
+function syncCleanup() {
+  clearTimeout(syncTimer); syncTimer = null;
+  try { if (syncConn) syncConn.close(); } catch (e) {}
+  try { if (syncPeer) syncPeer.destroy(); } catch (e) {}
+  syncConn = null; syncPeer = null;
+}
+function setSyncStatus(kind, text) {
+  const el = $('#syncStatus');
+  if (!el) return;
+  el.className = 'sync-status ' + kind;
+  el.innerHTML = (kind === 'wait' ? '<span class="spinner"></span>' : kind === 'ok' ? '✓ ' : kind === 'err' ? '! ' : '') + '<span>' + esc(text) + '</span>';
+}
+
+/* ---- data packing & merging ---- */
+async function exportUserData(userId) {
+  const out = { user: await DB.get('users', userId) };
+  for (const s of SYNC_STORES) out[s] = await DB.getAll(s, 'userId', userId) || [];
+  return out;
+}
+function rekeyData(data, newUid) {
+  const d = { user: data.user ? Object.assign({}, data.user, { id: newUid }) : null };
+  SYNC_STORES.forEach(function (s) {
+    d[s] = (data[s] || []).map(function (o) {
+      const c = Object.assign({}, o, { userId: newUid });
+      if (s === 'completions' || s === 'skips') c.id = newUid + '|' + c.dateKey + '|' + c.routineId;
+      return c;
+    });
+  });
+  return d;
+}
+function recTime(store, o) {
+  if (store === 'routines') return o.updatedAt || o.createdAt || 0;
+  if (store === 'notes') return o.updatedAt || o.createdAt || 0;
+  return o.ts || 0;
+}
+function userTime(u) { return u ? (u.updatedAt || u.passChangedAt || u.createdAt || 0) : 0; }
+function mergeUser(local, remote, id) {
+  if (!local) return Object.assign({}, remote, { id: id });
+  if (!remote) return Object.assign({}, local, { id: id });
+  return Object.assign({}, userTime(remote) > userTime(local) ? remote : local, { id: id });
+}
+/* write remote records that are new or newer; returns number changed */
+async function mergeInto(userId, data) {
+  let changed = 0;
+  for (const s of SYNC_STORES) {
+    const local = {};
+    (await DB.getAll(s, 'userId', userId) || []).forEach(o => { local[o.id] = o; });
+    for (const o of (data[s] || [])) {
+      if (!o || !o.id) continue;
+      const l = local[o.id];
+      if (!l || recTime(s, o) > recTime(s, l)) {
+        await (DB.putQuiet || DB.put)(s, Object.assign({}, o, { userId: userId }));
+        changed++;
+      }
+    }
+  }
+  return changed;
+}
+function syncStats(data) {
+  const days = new Set((data.completions || []).filter(c => c.count !== 0).map(c => c.dateKey));
+  return {
+    routines: (data.routines || []).filter(r => !r.deletedKey).length,
+    days: days.size,
+    notes: (data.notes || []).filter(n => !n.deleted).length
+  };
+}
+async function refreshAfterSync() {
+  await loadUserData();
+  $('#sidebarUserName').textContent = state.user.name || 'User';
+  $('#sidebarAvatar').textContent = (state.user.name || state.user.email || 'F').trim().charAt(0).toUpperCase();
+  switchView(state.view || 'today');
+  renderDesktopSidebarWidgets();
+  checkBadges(true);
+  syncReminderState();
+}
+
+/* ---- HOST: show QR on the device that has the data ---- */
+async function openSyncHost() {
+  syncCleanup();
+  showModal(
+    '<h2 class="modal-title">Sync with another device</h2>' +
+    '<p class="modal-text">On your phone or iPad, scan this QR with the camera — or open FLOW there and tap <b>Sync from another device</b> and type the code.</p>' +
+    '<div class="sync-qr" id="syncQr"><span class="spinner"></span></div>' +
+    '<div class="sync-code" id="syncCode">······</div>' +
+    '<div id="syncStatus" class="sync-status wait"><span class="spinner"></span><span>Preparing…</span></div>' +
+    '<p class="hint sync-note">🔒 Data goes directly between your devices (encrypted). Nothing is stored online. Keep this screen open until it finishes.</p>' +
+    '<div class="modal-actions"><button class="btn btn-ghost" data-act="cancel">Close</button><button class="btn btn-primary" data-act="newcode">New code</button></div>'
+  );
+  modalOnClose = syncCleanup;
+  $('#modal').onclick = function (e) {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    if (b.dataset.act === 'cancel') hideModal();
+    if (b.dataset.act === 'newcode') startHost();
+  };
+  let Peer, qrlib;
+  try {
+    [Peer, qrlib] = await Promise.all([
+      loadVendor('./vendor/peerjs.min.js', 'Peer').catch(() => loadVendor('https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js', 'Peer')),
+      loadVendor('./vendor/qrcode.min.js', 'qrcode')
+    ]);
+  } catch (e) { setSyncStatus('err', 'Could not load sync tools. Check your internet connection.'); return; }
+
+  let attempts = 0;
+  function startHost(retry) {
+    syncCleanup();
+    attempts = 0;
+    const code = makeSyncCode();
+    const link = location.origin + location.pathname + '#sync=' + code;
+    const qr = qrlib(0, 'M'); qr.addData(link); qr.make();
+    $('#syncQr').innerHTML = qr.createSvgTag({ cellSize: 5, margin: 2 });
+    $('#syncCode').textContent = code.slice(0, 3) + ' ' + code.slice(3);
+    setSyncStatus('wait', 'Connecting to pairing service…');
+
+    const peer = syncPeer = new Peer(SYNC_PREFIX + code, { debug: 0 });
+    peer.on('open', () => setSyncStatus('wait', 'Waiting for your other device…'));
+    peer.on('error', function (err) {
+      if (err.type === 'unavailable-id' && !retry) return startHost(true);
+      if (syncConn) return;
+      setSyncStatus('err', err.type === 'network' || err.type === 'server-error' || err.type === 'socket-error'
+        ? 'Can’t reach the pairing service. Check your internet and tap “New code”.' : 'Sync error (' + err.type + '). Tap “New code”.');
+    });
+    peer.on('connection', function (conn) {
+      if (syncConn) { conn.on('open', () => { conn.send({ t: 'busy' }); setTimeout(() => conn.close(), 300); }); return; }
+      syncConn = conn;
+      let peerName = 'device';
+      conn.on('data', async function (msg) {
+        try {
+          if (!msg || !msg.t) return;
+          if (msg.t === 'hello') {
+            peerName = String(msg.device || 'device').slice(0, 40);
+            const u = state.user;
+            if (String(msg.email || '').toLowerCase() !== (u.email || '').toLowerCase() || msg.passHash !== u.passHash) {
+              attempts++;
+              conn.send({ t: 'denied' });
+              setSyncStatus('err', 'Wrong email or password entered on ' + peerName + '.');
+              setTimeout(() => { try { conn.close(); } catch (e) {} syncConn = null; if (attempts >= 3) startHost(); }, 400);
+              return;
+            }
+            setSyncStatus('wait', 'Connected to ' + peerName + ' — syncing…');
+            conn.joinerDevice = msg.deviceId ? String(msg.deviceId).slice(0, 32) : null;
+            conn.send({ t: 'welcome', userId: u.id });
+          } else if (msg.t === 'push') {
+            const remote = msg.data || {};
+            const merged = mergeUser(state.user, remote.user, state.user.id);
+            await (DB.putQuiet || DB.put)('users', merged);
+            state.user = merged;
+            await mergeInto(state.user.id, remote);
+            const full = await exportUserData(state.user.id);
+            let pair = null;
+            if (conn.joinerDevice && conn.joinerDevice !== myDeviceId()) {
+              const key = makePairKey();
+              upsertPair({ id: conn.joinerDevice, name: peerName, key: key, lastSync: Date.now() });
+              pair = { id: myDeviceId(), name: deviceName(), key: key };
+            }
+            conn.send({ t: 'data', data: full, pair: pair });
+          } else if (msg.t === 'done') {
+            await refreshAfterSync();
+            const st = syncStats(await exportUserData(state.user.id));
+            setSyncStatus('ok', 'Synced with ' + peerName + ' · ' + st.routines + ' routines, ' + st.days + ' days, ' + st.notes + ' notes. Live sync is now on.');
+            toast('Synced with ' + peerName + ' · live sync on');
+            setTimeout(() => { try { conn.close(); } catch (e) {} }, 800);
+            startLiveSync();
+          }
+        } catch (e) {
+          setSyncStatus('err', 'Sync failed. Please try again.');
+        }
+      });
+      conn.on('close', function () { if (syncConn === conn) syncConn = null; });
+    });
+    clearTimeout(syncTimer);
+    syncTimer = setTimeout(function () {
+      if (syncConn) return;
+      setSyncStatus('err', 'Code expired. Tap “New code” to try again.');
+      try { syncPeer.destroy(); } catch (e) {}
+    }, 5 * 60 * 1000);
+  }
+  startHost();
+}
+
+/* ---- JOIN: device that scans the QR / types the code ---- */
+function openSyncJoin(prefill) {
+  syncCleanup();
+  const loggedIn = !!state.user;
+  const emailVal = loggedIn ? state.user.email : ($('#authEmail').value || '').trim();
+  showModal(
+    '<h2 class="modal-title">Sync from another device</h2>' +
+    '<p class="modal-text">On your other device open <b>Profile → Sync with another device</b>, then enter the code shown there. Both devices must be on the same Wi-Fi.</p>' +
+    '<form id="joinForm" novalidate>' +
+      '<div class="field m-field"><label for="joinCode">Sync code</label>' +
+        '<input class="text-input sync-code-input" id="joinCode" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC 123" value="' + esc(prefill ? prefill.slice(0, 3) + ' ' + prefill.slice(3) : '') + '"></div>' +
+      '<div class="field m-field"><label for="joinEmail">Account email</label>' +
+        '<input class="text-input" id="joinEmail" type="email" autocomplete="email" placeholder="you@example.com" value="' + esc(emailVal) + '"' + (loggedIn ? ' readonly' : '') + '></div>' +
+      '<div class="field m-field"><label for="joinPass">Password (as on the other device)</label>' +
+        '<div class="pw-wrap"><input class="text-input" id="joinPass" type="password" autocomplete="current-password">' +
+        '<button type="button" class="pw-eye" data-eye="joinPass" aria-label="Show password"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>' +
+      '<div id="syncStatus" class="sync-status idle"></div>' +
+      '<div class="modal-actions"><button type="button" class="btn btn-ghost" data-act="cancel">Cancel</button>' +
+        '<button type="submit" class="btn btn-primary" id="joinBtn">Connect &amp; sync</button></div>' +
+    '</form>'
+  );
+  modalOnClose = syncCleanup;
+  setTimeout(() => { try { (prefill ? (emailVal ? $('#joinPass') : $('#joinEmail')) : $('#joinCode')).focus(); } catch (e) {} }, 80);
+  $('#joinCode').addEventListener('input', function () {
+    const v = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
+    this.value = v.length > 3 ? v.slice(0, 3) + ' ' + v.slice(3) : v;
+  });
+  $('#modal').onclick = function (e) { if (e.target.closest('[data-act="cancel"]')) hideModal(); };
+
+  $('#joinForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const code = $('#joinCode').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
+    const email = $('#joinEmail').value.trim().toLowerCase();
+    const pass = $('#joinPass').value;
+    if (code.length !== 6) return setSyncStatus('err', 'Enter the 6-character code from your other device.');
+    if (!/^\S+@\S+\.\S+$/.test(email)) return setSyncStatus('err', 'Enter your account email.');
+    if (!pass) return setSyncStatus('err', 'Enter your password.');
+    const btn = $('#joinBtn'); btn.disabled = true;
+    const fail = msg => { setSyncStatus('err', msg); btn.disabled = false; syncCleanup(); };
+
+    setSyncStatus('wait', 'Connecting…');
+    let Peer;
+    try { Peer = await loadVendor('./vendor/peerjs.min.js', 'Peer').catch(() => loadVendor('https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js', 'Peer')); }
+    catch (err) { return fail('Could not load sync tools. Check your internet connection.'); }
+    const passHash = await hashPassword(pass);
+
+    syncCleanup();
+    const peer = syncPeer = new Peer({ debug: 0 });
+    syncTimer = setTimeout(() => fail('Couldn’t reach the other device. Make sure FLOW is showing the code there and both devices are on the same Wi-Fi.'), 25000);
+    peer.on('error', function (err) {
+      if (err.type === 'peer-unavailable') fail('Code not found. Check the code — it changes each time you open Sync.');
+      else fail('Connection problem (' + err.type + '). Check your internet and try again.');
+    });
+    peer.on('open', function () {
+      const conn = syncConn = peer.connect(SYNC_PREFIX + code, { reliable: true });
+      let hostUid = null, localUser = null;
+      conn.on('open', function () {
+        setSyncStatus('wait', 'Connected — verifying…');
+        conn.send({ t: 'hello', email: email, passHash: passHash, device: deviceName(), deviceId: myDeviceId() });
+      });
+      conn.on('data', async function (msg) {
+        try {
+          if (!msg || !msg.t) return;
+          if (msg.t === 'busy') return fail('The other device is already syncing. Try again in a moment.');
+          if (msg.t === 'denied') return fail('Email or password doesn’t match the account on the other device.');
+          if (msg.t === 'welcome') {
+            hostUid = msg.userId;
+            setSyncStatus('wait', 'Sending this device’s data…');
+            const users = await DB.getAll('users') || [];
+            localUser = users.find(u => (u.email || '').toLowerCase() === email) || null;
+            const payload = localUser ? rekeyData(await exportUserData(localUser.id), hostUid)
+                                      : { user: null, routines: [], completions: [], skips: [], notes: [] };
+            conn.send({ t: 'push', data: payload });
+          } else if (msg.t === 'data') {
+            setSyncStatus('wait', 'Saving…');
+            const data = msg.data;
+            /* replace a local copy that used a different account id */
+            if (localUser && localUser.id !== hostUid) {
+              for (const s of SYNC_STORES) {
+                for (const o of (await DB.getAll(s, 'userId', localUser.id) || [])) await DB.remove(s, o.id);
+              }
+              await DB.remove('users', localUser.id);
+            }
+            const user = Object.assign({}, data.user, { id: hostUid });
+            await (DB.putQuiet || DB.put)('users', user);
+            await mergeInto(hostUid, data);
+            if (msg.pair && msg.pair.id && msg.pair.key) {
+              upsertPair({ id: String(msg.pair.id).slice(0, 32), name: String(msg.pair.name || 'device').slice(0, 40), key: msg.pair.key, lastSync: Date.now() }, hostUid);
+            }
+            conn.send({ t: 'done' });
+            clearTimeout(syncTimer);
+            const st = syncStats(data);
+            setSyncStatus('ok', 'Synced · ' + st.routines + ' routines, ' + st.days + ' days, ' + st.notes + ' notes');
+            setTimeout(async function () {
+              hideModal();
+              if (state.user) {
+                state.user = user;
+                try { localStorage.setItem('flow_session', user.id); } catch (e) {}
+                await refreshAfterSync();
+                startLiveSync();
+              } else {
+                await startSession(user);
+              }
+              toast('Synced ✓ ' + st.routines + ' routines, ' + st.days + ' days, ' + st.notes + ' notes · live sync on');
+            }, 700);
+          }
+        } catch (err) { fail('Sync failed. Please try again.'); }
+      });
+    });
+  });
+}
+
+$('#syncBtn').addEventListener('click', openSyncHost);
+$('#syncLoginBtn').addEventListener('click', () => openSyncJoin(''));
+$('#syncJoinBtn').addEventListener('click', () => openSyncJoin(''));
+
+function checkSyncLink() {
+  const m = /[#&]sync=([A-Za-z0-9]{6})/.exec(location.hash || '');
+  if (!m) return;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
+  setTimeout(() => openSyncJoin(m[1].toUpperCase()), 300);
+}
+
+/* ============================================================
+   LIVE SYNC between paired devices
+   - Pairing (QR above) stores each other's device id + a secret key.
+   - Whenever both devices have FLOW open, they connect automatically
+     (peer-to-peer), exchange everything once, then stream every change.
+   - Only the same account (same email + pairing key) can connect,
+     so different accounts' data never mixes.
+   ============================================================ */
+const DEV_PREFIX = 'flow-dev-v1-';
+const DEV_ALPHA = 'abcdefghijkmnpqrstuvwxyz23456789';
+let livePeer = null, liveRetry = null, liveRefreshTimer = null;
+const liveConns = {};          /* partner deviceId -> authenticated conn */
+
+function randomStr(n, alpha) {
+  const b = new Uint8Array(n); crypto.getRandomValues(b);
+  return Array.from(b, x => alpha[x % alpha.length]).join('');
+}
+function myDeviceId() {
+  let id = null;
+  try { id = localStorage.getItem('flow_device_id'); } catch (e) {}
+  if (!id) { id = randomStr(12, DEV_ALPHA); try { localStorage.setItem('flow_device_id', id); } catch (e) {} }
+  return id;
+}
+function makePairKey() { return randomStr(24, DEV_ALPHA); }
+function pairsKey(uid) { return 'flow_pairs_' + (uid || (state.user && state.user.id)); }
+function getPairs(uid) { try { return JSON.parse(localStorage.getItem(pairsKey(uid)) || '[]'); } catch (e) { return []; } }
+function savePairs(arr, uid) { try { localStorage.setItem(pairsKey(uid), JSON.stringify(arr)); } catch (e) {} }
+function upsertPair(p, uid) {
+  const arr = getPairs(uid).filter(x => x.id !== p.id);
+  arr.push(p);
+  savePairs(arr, uid);
+}
+function touchPair(id) {
+  const arr = getPairs();
+  const p = arr.find(x => x.id === id);
+  if (p) { p.lastSync = Date.now(); savePairs(arr); }
+}
+
+/* Broadcast every local write of this account to connected devices */
+function installSyncHook() {
+  if (DB.putQuiet) return;
+  const orig = DB.put.bind(DB);
+  DB.putQuiet = orig;
+  DB.put = async function (store, obj) {
+    const r = await orig(store, obj);
+    try {
+      if (state.user && Object.keys(liveConns).length &&
+          ((store === 'users' && obj.id === state.user.id) || (SYNC_STORES.indexOf(store) !== -1 && obj.userId === state.user.id))) {
+        Object.values(liveConns).forEach(c => { try { if (c.open) c.send({ t: 'rec', store: store, rec: obj }); } catch (e) {} });
+      }
+    } catch (e) {}
+    return r;
+  };
+}
+
+/* Light refresh (keeps the current view & scroll position) */
+function scheduleLiveRefresh() {
+  clearTimeout(liveRefreshTimer);
+  liveRefreshTimer = setTimeout(async function () {
+    if (!state.user) return;
+    const editorOpen = !$('#editorSheet').hidden;
+    const keepNotes = editorOpen ? state.notes : null;
+    await loadUserData();
+    if (keepNotes) {
+      /* don't clobber the note being edited */
+      const cur = state.editor && state.editor.id && keepNotes.find(n => n.id === state.editor.id);
+      if (cur) state.notes = state.notes.map(n => n.id === cur.id ? cur : n);
+    }
+    $('#sidebarUserName').textContent = state.user.name || 'User';
+    $('#sidebarAvatar').textContent = (state.user.name || state.user.email || 'F').trim().charAt(0).toUpperCase();
+    const v = state.view;
+    if (v === 'today') renderToday();
+    else if (v === 'diary' && !editorOpen) renderDiary();
+    else if (v === 'progress') renderProgress();
+    else if (v === 'manage' && !document.querySelector('#manageList.is-dragging')) renderManage();
+    else if (v === 'profile') renderProfile();
+    renderDesktopSidebarWidgets();
+    syncReminderState();
+  }, 120);
+}
+
+async function applyRemoteRec(store, rec) {
+  if (!state.user || !rec) return;
+  if (store === 'users') {
+    if (rec.id !== state.user.id) return;
+    if (userTime(rec) > userTime(state.user)) {
+      state.user = Object.assign({}, rec);
+      await DB.putQuiet('users', state.user);
+      scheduleLiveRefresh();
+    }
+    return;
+  }
+  if (SYNC_STORES.indexOf(store) === -1 || !rec.id) return;
+  const local = await DB.get(store, rec.id);
+  if (!local || recTime(store, rec) > recTime(store, local)) {
+    await DB.putQuiet(store, Object.assign({}, rec, { userId: state.user.id }));
+    scheduleLiveRefresh();
+  }
+}
+
+function registerLive(conn, partnerId) {
+  const me = myDeviceId();
+  const existing = liveConns[partnerId];
+  if (existing && existing !== conn && existing.open) {
+    /* two connections raced: keep the one opened by the smaller device id */
+    const keepFrom = me < partnerId ? me : partnerId;
+    if ((conn.metadata && conn.metadata.from) !== keepFrom) { try { conn.close(); } catch (e) {} return false; }
+    try { existing.close(); } catch (e) {}
+  }
+  liveConns[partnerId] = conn;
+  return true;
+}
+
+function setupLiveConn(conn) {
+  let partner = null, authed = false, sentAuth = false;
+  const me = myDeviceId();
+  const sendAuth = function () {
+    if (sentAuth || !state.user) return;
+    const theirId = conn.peer.replace(DEV_PREFIX, '');
+    const p = getPairs().find(x => x.id === theirId);
+    if (!p) { try { conn.close(); } catch (e) {} return; }
+    sentAuth = true;
+    conn.send({ t: 'auth', deviceId: me, key: p.key, userId: state.user.id, name: deviceName() });
+  };
+  conn.on('open', sendAuth);
+  conn.on('data', async function (msg) {
+    try {
+      if (!msg || !msg.t || !state.user) return;
+      if (msg.t === 'auth') {
+        const p = getPairs().find(x => x.id === msg.deviceId);
+        if (!p || p.key !== msg.key || msg.userId !== state.user.id) { try { conn.close(); } catch (e) {} return; }
+        sendAuth();
+        if (!registerLive(conn, msg.deviceId)) return;
+        partner = msg.deviceId; authed = true;
+        if (msg.name && msg.name !== p.name) upsertPair(Object.assign({}, p, { name: String(msg.name).slice(0, 40) }));
+        conn.send({ t: 'full', data: await exportUserData(state.user.id) });
+        renderSyncPill(); if (state.view === 'profile') renderDevices();
+      } else if (!authed) {
+        return;
+      } else if (msg.t === 'full') {
+        const d = msg.data || {};
+        if (d.user && d.user.id === state.user.id) await applyRemoteRec('users', d.user);
+        const changed = await mergeInto(state.user.id, d);
+        touchPair(partner);
+        if (changed) scheduleLiveRefresh();
+        renderSyncPill(); if (state.view === 'profile') renderDevices();
+      } else if (msg.t === 'rec') {
+        await applyRemoteRec(msg.store, msg.rec);
+        touchPair(partner);
+      } else if (msg.t === 'unpair') {
+        savePairs(getPairs().filter(x => x.id !== partner));
+        try { conn.close(); } catch (e) {}
+        toast('A device was unlinked');
+      }
+    } catch (e) {}
+  });
+  conn.on('close', function () {
+    if (partner && liveConns[partner] === conn) delete liveConns[partner];
+    renderSyncPill(); if (state.view === 'profile') renderDevices();
+  });
+  conn.on('error', function () {});
+}
+
+function connectPairs() {
+  if (!livePeer || !livePeer.open || !state.user) return;
+  const me = myDeviceId();
+  getPairs().forEach(function (p) {
+    if (liveConns[p.id] && liveConns[p.id].open) return;
+    try { setupLiveConn(livePeer.connect(DEV_PREFIX + p.id, { reliable: true, metadata: { from: me } })); } catch (e) {}
+  });
+}
+
+async function startLiveSync() {
+  renderSyncPill();
+  if (!state.user || !getPairs().length) return;
+  if (livePeer && !livePeer.destroyed) { connectPairs(); return; }
+  let Peer;
+  try { Peer = await loadVendor('./vendor/peerjs.min.js', 'Peer').catch(() => loadVendor('https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js', 'Peer')); }
+  catch (e) { return; }
+  if (livePeer && !livePeer.destroyed) return;
+  livePeer = new Peer(DEV_PREFIX + myDeviceId(), { debug: 0 });
+  livePeer.on('open', connectPairs);
+  livePeer.on('connection', setupLiveConn);
+  livePeer.on('disconnected', function () { try { if (!livePeer.destroyed) livePeer.reconnect(); } catch (e) {} });
+  livePeer.on('error', function (err) {
+    if (err.type === 'unavailable-id') {          /* FLOW already open in another tab on this device */
+      try { livePeer.destroy(); } catch (e) {} livePeer = null;
+    }
+  });
+  clearInterval(liveRetry);
+  liveRetry = setInterval(function () {
+    if (!livePeer) startLiveSync();
+    else if (livePeer.disconnected && !livePeer.destroyed) { try { livePeer.reconnect(); } catch (e) {} }
+    else connectPairs();
+  }, 15000);
+}
+
+function stopLiveSync() {
+  clearInterval(liveRetry); liveRetry = null;
+  Object.keys(liveConns).forEach(k => { try { liveConns[k].close(); } catch (e) {} delete liveConns[k]; });
+  try { if (livePeer) livePeer.destroy(); } catch (e) {}
+  livePeer = null;
+  renderSyncPill();
+}
+
+function timeAgo(ts) {
+  if (!ts) return 'never';
+  const s = Math.round((Date.now() - ts) / 1000);
+  if (s < 45) return 'just now';
+  if (s < 3600) return Math.round(s / 60) + ' min ago';
+  if (s < 86400) return Math.round(s / 3600) + ' h ago';
+  return Math.round(s / 86400) + ' d ago';
+}
+
+function renderSyncPill() {
+  const el = $('#syncPill');
+  if (!el) return;
+  const pairs = state.user ? getPairs() : [];
+  if (!pairs.length) { el.hidden = true; return; }
+  const live = pairs.filter(p => liveConns[p.id] && liveConns[p.id].open);
+  el.hidden = false;
+  el.className = 'sync-pill' + (live.length ? ' live' : '');
+  el.innerHTML = '<i></i>' + (live.length
+    ? 'Live sync · ' + esc(live.map(p => p.name.split(' · ')[0]).join(', '))
+    : esc(pairs.map(p => p.name.split(' · ')[0]).join(', ')) + ' offline · syncs when both are open');
+}
+
+function renderDevices() {
+  const box = $('#pairList');
+  if (!box || !state.user) return;
+  const pairs = getPairs();
+  if (!pairs.length) { box.hidden = true; box.innerHTML = ''; return; }
+  box.hidden = false;
+  box.innerHTML = pairs.map(function (p) {
+    const live = liveConns[p.id] && liveConns[p.id].open;
+    return '<div class="pair-row">' +
+      '<span class="pair-dot' + (live ? ' live' : '') + '"></span>' +
+      '<span class="set-txt"><span class="row-title">' + esc(p.name) + '</span>' +
+      '<span class="row-sub">' + (live ? 'Connected · changes sync instantly' : 'Offline · last synced ' + timeAgo(p.lastSync)) + '</span></span>' +
+      '<button class="btn btn-ghost btn-small" data-unpair="' + esc(p.id) + '">Unlink</button>' +
+    '</div>';
+  }).join('');
+}
+
+$('#pairList').addEventListener('click', function (e) {
+  const b = e.target.closest('[data-unpair]');
+  if (!b) return;
+  const id = b.dataset.unpair;
+  const p = getPairs().find(x => x.id === id);
+  confirmModal('Unlink ' + (p ? p.name : 'device') + '?',
+    'Data already on each device stays. They will stop syncing until you pair again with a QR code.', 'Unlink',
+    function () {
+      const c = liveConns[id];
+      if (c && c.open) { try { c.send({ t: 'unpair' }); } catch (e) {} setTimeout(() => { try { c.close(); } catch (e) {} }, 200); }
+      savePairs(getPairs().filter(x => x.id !== id));
+      renderDevices(); renderSyncPill();
+      toast('Device unlinked');
+    });
+});
+
+$('#syncPill').addEventListener('click', function () { switchView('profile'); });
+
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState === 'visible' && state.user) startLiveSync();
+});
+setInterval(function () { if (state.user && state.view === 'profile') renderDevices(); }, 30000);
+
+/* ============================================================
    PWA & BOOT
    ============================================================ */
 (function setupPWA() {
@@ -4233,6 +4907,7 @@ document.addEventListener('visibilitychange', function () {
 
 async function boot() {
   await initStorage();
+  installSyncHook();
   applyTheme(getStoredTheme());
 
   let sessionId = null;
@@ -4244,6 +4919,7 @@ async function boot() {
     if (user) {
       await startSession(user);
       renderDesktopSidebarWidgets();
+      checkSyncLink();
       return;
     }
     try { localStorage.removeItem('flow_session'); } catch (e) {}
@@ -4253,6 +4929,7 @@ async function boot() {
   $('#authScreen').hidden = false;
   $('#mainApp').hidden = true;
   document.documentElement.classList.remove('booting');
+  checkSyncLink();
 }
 
 boot().catch(function (err) {
