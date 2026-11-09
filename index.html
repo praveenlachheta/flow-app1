@@ -347,7 +347,7 @@ ul{list-style:none;}
 
 /* ================= DESKTOP & IPAD PRO SPLIT LAYOUT (>= 768px) ================= */
 @media (min-width: 768px) {
-  body { background: #050608; overflow-y: auto; }
+  body { background: #050608; overflow: hidden; }
   
   #app {
     max-width: 1440px;
@@ -375,6 +375,7 @@ ul{list-style:none;}
     border-right: 1px solid var(--border);
     padding: 24px 16px;
     gap: 8px;
+    height: 100%;
   }
   .desktop-logo-box { display: flex; align-items: center; gap: 12px; margin-bottom: 20px; padding-left: 8px; }
   .desktop-logo-box svg { width: 28px; height: 28px; border-radius: 8px; }
@@ -413,12 +414,24 @@ ul{list-style:none;}
     background: var(--bg);
     overflow: hidden;
   }
-  .view {
+  .views-container {
+    position: relative;
+    width: 100%;
     height: 100%;
     overflow-y: auto;
-    padding: 28px;
   }
-  .view .app-brand { display: none; } /* Hide mobile brand header in desktop split */
+  .view {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    overflow-y: auto;
+    padding: 32px;
+    display: none;
+  }
+  .view.active { display: block; }
+  .view .app-brand { display: none; }
 
   /* Right Insights Panel */
   .desktop-insights {
@@ -428,6 +441,7 @@ ul{list-style:none;}
     border-left: 1px solid var(--border);
     padding: 24px 20px;
     gap: 16px;
+    height: 100%;
     overflow-y: auto;
   }
   .insights-title { font-size: 12px; font-weight: 800; text-transform: uppercase; color: var(--muted); letter-spacing: 0.08em; }
@@ -540,187 +554,189 @@ ul{list-style:none;}
     </aside>
 
     <!-- MAIN WORKSPACE CENTER -->
-    <main class="desktop-center" id="viewContainer">
+    <main class="desktop-center">
+      <div class="views-container" id="viewContainer">
 
-      <!-- ---------- TODAY ---------- -->
-      <section id="view-today" class="view">
-        <div class="app-brand">
-          <div class="app-logo-box">
-            <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+        <!-- ---------- TODAY ---------- -->
+        <section id="view-today" class="view active">
+          <div class="app-brand">
+            <div class="app-logo-box">
+              <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+            </div>
+            <span class="app-brand-name">FLOW</span>
           </div>
-          <span class="app-brand-name">FLOW</span>
-        </div>
 
-        <header style="margin-bottom:14px;">
-          <h1 class="user-name" id="userNameAndGreeting">Good evening, User</h1>
-          <p class="today-date" id="todayDate">—</p>
-        </header>
+          <header style="margin-bottom:14px;">
+            <h1 class="user-name" id="userNameAndGreeting">Good evening, User</h1>
+            <p class="today-date" id="todayDate">—</p>
+          </header>
 
-        <p class="quote">“Action speaks louder than words.”</p>
+          <p class="quote">“Action speaks louder than words.”</p>
 
-        <div class="card progress-ring-card">
-          <div class="circular-progress" id="circularProgress">
-            <svg viewBox="0 0 100 100">
-              <circle class="bg-circle" cx="50" cy="50" r="42"></circle>
-              <circle class="fg-circle" id="fgCircle" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="263.89"></circle>
-            </svg>
-            <div class="circular-value" id="progressPct">0%</div>
+          <div class="card progress-ring-card">
+            <div class="circular-progress" id="circularProgress">
+              <svg viewBox="0 0 100 100">
+                <circle class="bg-circle" cx="50" cy="50" r="42"></circle>
+                <circle class="fg-circle" id="fgCircle" cx="50" cy="50" r="42" stroke-dasharray="263.89" stroke-dashoffset="263.89"></circle>
+              </svg>
+              <div class="circular-value" id="progressPct">0%</div>
+            </div>
+            <div class="progress-subtext" id="progressCount">0 / 0 completed</div>
           </div>
-          <div class="progress-subtext" id="progressCount">0 / 0 completed</div>
-        </div>
 
-        <p class="readonly-note" id="readonlyNote" hidden>Past dates are read-only.</p>
-        <div class="skipped-note" id="skippedNote" hidden>
-          <span id="skippedText">0 removed for this day</span>
-          <button type="button" id="restoreSkipped">Restore</button>
-        </div>
+          <p class="readonly-note" id="readonlyNote" hidden>Past dates are read-only.</p>
+          <div class="skipped-note" id="skippedNote" hidden>
+            <span id="skippedText">0 removed for this day</span>
+            <button type="button" id="restoreSkipped">Restore</button>
+          </div>
 
-        <ul class="routine-list" id="routineList"></ul>
-      </section>
+          <ul class="routine-list" id="routineList"></ul>
+        </section>
 
-      <!-- ---------- DIARY ---------- -->
-      <section id="view-diary" class="view" hidden>
-        <div class="app-brand">
-          <div class="app-logo-box">
-            <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+        <!-- ---------- DIARY ---------- -->
+        <section id="view-diary" class="view">
+          <div class="app-brand">
+            <div class="app-logo-box">
+              <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+            </div>
+            <span class="app-brand-name">FLOW</span>
           </div>
-          <span class="app-brand-name">FLOW</span>
-        </div>
-        <div class="view-head">
-          <h1 class="view-title">Diary</h1>
-          <button class="btn btn-primary btn-small" id="newNoteBtn">＋ New</button>
-        </div>
-        <ul class="diary-list" id="diaryList"></ul>
-      </section>
+          <div class="view-head">
+            <h1 class="view-title">Diary</h1>
+            <button class="btn btn-primary btn-small" id="newNoteBtn">＋ New</button>
+          </div>
+          <ul class="diary-list" id="diaryList"></ul>
+        </section>
 
-      <!-- ---------- PROGRESS ---------- -->
-      <section id="view-progress" class="view" hidden>
-        <div class="app-brand">
-          <div class="app-logo-box">
-            <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+        <!-- ---------- PROGRESS ---------- -->
+        <section id="view-progress" class="view">
+          <div class="app-brand">
+            <div class="app-logo-box">
+              <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+            </div>
+            <span class="app-brand-name">FLOW</span>
           </div>
-          <span class="app-brand-name">FLOW</span>
-        </div>
-        <div class="view-head"><h1 class="view-title">Progress</h1></div>
+          <div class="view-head"><h1 class="view-title">Progress</h1></div>
 
-        <div class="stat-grid">
-          <div class="stat-card">
-            <div class="stat-label">Today's Score</div>
-            <div class="stat-value" id="statToday">0%</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Current Streak</div>
-            <div class="stat-value" id="statStreak">0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Best Streak</div>
-            <div class="stat-value" id="statBest">0</div>
-          </div>
-          <div class="stat-card">
-            <div class="stat-label">Days Tracked</div>
-            <div class="stat-value" id="statTracked">0</div>
-          </div>
-        </div>
-
-        <p class="section-label">Completion Trend</p>
-        <div class="card" style="margin-bottom:24px;">
-          <div class="segmented" id="chartToggle" style="margin-bottom:14px;">
-            <button data-range="7" class="active">Last 7 Days</button>
-            <button data-range="30">Last 30 Days</button>
-          </div>
-          <div id="chartWrap"></div>
-        </div>
-
-        <p class="section-label">Calendar History</p>
-        <div class="card">
-          <div class="cal-head">
-            <button class="icon-btn small" id="calPrev" aria-label="Previous month">‹</button>
-            <span class="cal-title" id="calTitle">—</span>
-            <button class="icon-btn small" id="calNext" aria-label="Next month">›</button>
-          </div>
-          <div class="cal-dows">
-            <div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div>
-            <div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div>
-            <div class="cal-dow">S</div>
-          </div>
-          <div class="cal-grid" id="calGrid"></div>
-          <div class="cal-legend">
-            <span class="cal-swatch" style="background:transparent"></span><span>No data</span>
-            <span class="cal-swatch" style="background:rgba(var(--ink-rgb),.35);margin-left:10px"></span><span>Partial</span>
-            <span class="cal-swatch" style="background:var(--text);margin-left:10px"></span><span>100%</span>
-          </div>
-        </div>
-
-        <p class="section-label">Routine Consistency</p>
-        <ul class="consistency-list" id="consistencyList"></ul>
-      </section>
-
-      <!-- ---------- MANAGE ---------- -->
-      <section id="view-manage" class="view" hidden>
-        <div class="app-brand">
-          <div class="app-logo-box">
-            <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
-          </div>
-          <span class="app-brand-name">FLOW</span>
-        </div>
-        <div class="view-head">
-          <div>
-            <h1 class="view-title">Manage</h1>
-            <p style="font-size:13px;color:var(--muted);margin-top:2px;">Your routines.</p>
-          </div>
-          <button class="btn btn-primary btn-small" id="addRoutineBtn">＋ Add</button>
-        </div>
-        <ul class="manage-list" id="manageList"></ul>
-      </section>
-
-      <!-- ---------- PROFILE ---------- -->
-      <section id="view-profile" class="view" hidden>
-        <div class="app-brand">
-          <div class="app-logo-box">
-            <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
-          </div>
-          <span class="app-brand-name">FLOW</span>
-        </div>
-        <div class="view-head"><h1 class="view-title">Profile</h1></div>
-
-        <div class="profile-card" style="margin-bottom:20px;">
-          <div class="avatar" id="avatarInitial">F</div>
-          <div style="min-width:0">
-            <div class="profile-name" id="profileName">—</div>
-            <div class="profile-email" id="profileEmail">—</div>
-          </div>
-        </div>
-
-        <p class="section-label">Appearance</p>
-        <div class="card" style="margin-bottom:20px;">
-          <div class="row-card" style="background:transparent;border:none;padding:0;">
-            <div>
-              <div class="row-title">Theme</div>
-              <div class="row-sub" id="themeSubLabel">Dark</div>
+          <div class="stat-grid">
+            <div class="stat-card">
+              <div class="stat-label">Today's Score</div>
+              <div class="stat-value" id="statToday">0%</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Current Streak</div>
+              <div class="stat-value" id="statStreak">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Best Streak</div>
+              <div class="stat-value" id="statBest">0</div>
+            </div>
+            <div class="stat-card">
+              <div class="stat-label">Days Tracked</div>
+              <div class="stat-value" id="statTracked">0</div>
             </div>
           </div>
-          <div class="segmented" id="themeToggle" style="margin-top:14px;">
-            <button data-theme="light">Light</button>
-            <button data-theme="dark">Dark</button>
+
+          <p class="section-label">Completion Trend</p>
+          <div class="card" style="margin-bottom:24px;">
+            <div class="segmented" id="chartToggle" style="margin-bottom:14px;">
+              <button data-range="7" class="active">Last 7 Days</button>
+              <button data-range="30">Last 30 Days</button>
+            </div>
+            <div id="chartWrap"></div>
           </div>
-        </div>
 
-        <p class="section-label">Account</p>
-        <button class="row-card" id="logoutBtn" style="width:100%;text-align:left;background:var(--surface);">
-          <div>
-            <div class="row-title">Log out</div>
-            <div class="row-sub">Your data stays on this device</div>
+          <p class="section-label">Calendar History</p>
+          <div class="card">
+            <div class="cal-head">
+              <button class="icon-btn small" id="calPrev" aria-label="Previous month">‹</button>
+              <span class="cal-title" id="calTitle">—</span>
+              <button class="icon-btn small" id="calNext" aria-label="Next month">›</button>
+            </div>
+            <div class="cal-dows">
+              <div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div>
+              <div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div>
+              <div class="cal-dow">S</div>
+            </div>
+            <div class="cal-grid" id="calGrid"></div>
+            <div class="cal-legend">
+              <span class="cal-swatch" style="background:transparent"></span><span>No data</span>
+              <span class="cal-swatch" style="background:rgba(var(--ink-rgb),.35);margin-left:10px"></span><span>Partial</span>
+              <span class="cal-swatch" style="background:var(--text);margin-left:10px"></span><span>100%</span>
+            </div>
           </div>
-          <span style="font-size:18px;color:var(--muted)">›</span>
-        </button>
 
-        <div style="margin-top:34px;display:flex;flex-direction:column;align-items:center;gap:8px;">
-          <p style="font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6;">
-            FLOW · v1.0<br>100% Private
-          </p>
-        </div>
-      </section>
+          <p class="section-label">Routine Consistency</p>
+          <ul class="consistency-list" id="consistencyList"></ul>
+        </section>
 
+        <!-- ---------- MANAGE ---------- -->
+        <section id="view-manage" class="view">
+          <div class="app-brand">
+            <div class="app-logo-box">
+              <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+            </div>
+            <span class="app-brand-name">FLOW</span>
+          </div>
+          <div class="view-head">
+            <div>
+              <h1 class="view-title">Manage</h1>
+              <p style="font-size:13px;color:var(--muted);margin-top:2px;">Your routines.</p>
+            </div>
+            <button class="btn btn-primary btn-small" id="addRoutineBtn">＋ Add</button>
+          </div>
+          <ul class="manage-list" id="manageList"></ul>
+        </section>
+
+        <!-- ---------- PROFILE ---------- -->
+        <section id="view-profile" class="view">
+          <div class="app-brand">
+            <div class="app-logo-box">
+              <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+            </div>
+            <span class="app-brand-name">FLOW</span>
+          </div>
+          <div class="view-head"><h1 class="view-title">Profile</h1></div>
+
+          <div class="profile-card" style="margin-bottom:20px;">
+            <div class="avatar" id="avatarInitial">F</div>
+            <div style="min-width:0">
+              <div class="profile-name" id="profileName">—</div>
+              <div class="profile-email" id="profileEmail">—</div>
+            </div>
+          </div>
+
+          <p class="section-label">Appearance</p>
+          <div class="card" style="margin-bottom:20px;">
+            <div class="row-card" style="background:transparent;border:none;padding:0;">
+              <div>
+                <div class="row-title">Theme</div>
+                <div class="row-sub" id="themeSubLabel">Dark</div>
+              </div>
+            </div>
+            <div class="segmented" id="themeToggle" style="margin-top:14px;">
+              <button data-theme="light">Light</button>
+              <button data-theme="dark">Dark</button>
+            </div>
+          </div>
+
+          <p class="section-label">Account</p>
+          <button class="row-card" id="logoutBtn" style="width:100%;text-align:left;background:var(--surface);">
+            <div>
+              <div class="row-title">Log out</div>
+              <div class="row-sub">Your data stays on this device</div>
+            </div>
+            <span style="font-size:18px;color:var(--muted)">›</span>
+          </button>
+
+          <div style="margin-top:34px;display:flex;flex-direction:column;align-items:center;gap:8px;">
+            <p style="font-size:11.5px;color:var(--muted);text-align:center;line-height:1.6;">
+              FLOW · v1.0<br>100% Private
+            </p>
+          </div>
+        </section>
+
+      </div>
     </main>
 
     <!-- RIGHT INSIGHTS PANEL (Desktop Only) -->
@@ -1302,7 +1318,10 @@ function doLogout() {
    ============================================================ */
 function switchView(name) {
   state.view = name;
-  $$('.view').forEach(v => { v.hidden = (v.id !== 'view-' + name); });
+  $$('.view').forEach(v => {
+    v.classList.toggle('active', v.id === 'view-' + name);
+    v.hidden = (v.id !== 'view-' + name);
+  });
   $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === name));
   $$('.nav-item-desk').forEach(b => b.classList.toggle('active', b.dataset.view === name));
   window.scrollTo(0, 0);
