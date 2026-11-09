@@ -13,9 +13,19 @@
 <link rel="icon" href="./logo.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="./logo.svg">
 <title>FLOW</title>
+<script>
+/* Runs before first paint: apply theme and skip the login screen if a session exists */
+(function () {
+  try {
+    var t = localStorage.getItem('flow_theme');
+    if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
+    if (localStorage.getItem('flow_session')) document.documentElement.classList.add('booting');
+  } catch (e) {}
+})();
+</script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&family=Geist+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap">
 <style>
 :root{
   --bg:#ffffff;
@@ -736,7 +746,7 @@ body{
 
 /* ---- Form dialog ---- */
 .m-field{margin-top:14px;}
-.m-field .text-input{height:46px;}
+.m-field .text-input{height:46px;margin-top:0;}
 .pw-meter{display:flex;align-items:center;gap:4px;margin-top:8px;}
 .pw-meter i{flex:1;height:4px;border-radius:4px;background:var(--surface-2);transition:background .2s;}
 .pw-meter span{flex:none;min-width:58px;text-align:right;font-size:11.5px;font-weight:600;color:var(--muted);}
@@ -776,6 +786,181 @@ body{
 kbd{font-family:inherit;font-size:12px;font-weight:600;color:var(--text);background:var(--surface-2);border:1px solid var(--border-strong);border-bottom-width:2px;border-radius:6px;padding:1px 7px;}
 .shortcuts-label,.shortcuts-card{display:none;}
 @media (min-width:768px) and (hover:hover){ .shortcuts-label{display:block;} .shortcuts-card{display:block;} }
+
+/* =====================================================================
+   TYPOGRAPHY · MOTION · SMOOTH SCROLL
+   ===================================================================== */
+body{
+  font-family:"Geist","Inter",-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-feature-settings:"ss01","cv11";
+  letter-spacing:-.011em;
+  text-rendering:optimizeLegibility;
+}
+.user-name,.view-title,.modal-title,.circular-value,.stat-value,.streak-value,.wk-pct,.detail-score{letter-spacing:-.035em;font-weight:650;}
+.stat-value,.circular-value,.streak-value,.wk-pct,.consistency-pct,.cons-pct,.cal-cell,.detail-score,#deskFreezeVal,.key-box,kbd{font-variant-numeric:tabular-nums;}
+.key-box,.mono{font-family:"Geist Mono",ui-monospace,SFMono-Regular,Consolas,monospace;}
+.section-label,.insights-title,.wk-eyebrow{font-weight:600;letter-spacing:.06em;}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%;}
+.view,.desktop-sidebar,.desktop-insights,.modal{-webkit-overflow-scrolling:touch;overscroll-behavior:contain;scroll-behavior:smooth;}
+.view{scrollbar-gutter:stable;}
+@media (prefers-reduced-motion: reduce){ html,.view{scroll-behavior:auto;} *{animation-duration:.01ms !important;transition-duration:.01ms !important;} }
+
+/* Boot: skip login flash when a session exists */
+.booting #authScreen{display:none !important;}
+.booting body::after{
+  content:"";position:fixed;inset:0;z-index:999;background:var(--bg) center/56px no-repeat;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='118' fill='%232dd4bf'/%3E%3Cpath d='M146 268l68 68 152-152' fill='none' stroke='%2304201c' stroke-width='44' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  animation:bootPulse 1s ease-in-out infinite alternate;
+}
+@keyframes bootPulse{from{opacity:.55}to{opacity:1}}
+.app-enter .desktop-sidebar,.app-enter .desktop-center,.app-enter .desktop-insights,.app-enter .view{animation:appIn .38s cubic-bezier(.2,.8,.2,1) both;}
+.app-enter .desktop-insights{animation-delay:.06s;}
+@keyframes appIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.view-enter{animation:viewIn .28s cubic-bezier(.2,.8,.2,1) both;}
+@keyframes viewIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.routine-item,.manage-item,.diary-item,.set-row,.icon-btn,.btn,.tpl-chip,.day-chip,.badge-tile{transition:background-color .18s ease,border-color .18s ease,box-shadow .18s ease,transform .18s cubic-bezier(.2,.8,.2,1),opacity .18s ease;}
+.btn:active,.icon-btn:active,.tpl-chip:active,.day-chip:active{transform:scale(.96);}
+
+/* ---- Today: richer rows ---- */
+.r-main{display:flex;flex-direction:column;min-width:0;gap:1px;}
+.r-sub{font-size:12px;color:var(--muted);font-weight:500;}
+.r-sub.ok{color:var(--st-full);}
+.routine-item.done .r-sub{text-decoration:none;}
+.routine-item.counter .routine-label{cursor:default;}
+.count-ctl{display:flex;gap:6px;margin-right:4px;}
+.count-ctl .icon-btn{width:34px;height:34px;border:1px solid var(--border);background:var(--surface-2);font-size:17px;font-weight:600;color:var(--text);}
+.count-ctl .icon-btn.inc{background:var(--accent);border-color:var(--accent);color:var(--on-accent);}
+.count-ctl .icon-btn:disabled{opacity:.35;}
+.ring-mini{--p:0;width:24px;height:24px;flex:none;border-radius:50%;display:grid;place-items:center;
+  background:conic-gradient(var(--accent) calc(var(--p)*1%),var(--surface-2) 0);position:relative;}
+.ring-mini::before{content:"";position:absolute;inset:3px;border-radius:50%;background:var(--surface);}
+.ring-mini span{position:relative;font-size:11px;font-weight:800;color:var(--accent);}
+.routine-item.done .ring-mini::before{background:var(--accent);}
+.routine-item.done .ring-mini span{color:var(--on-accent);}
+
+/* Onboarding templates */
+.onboard{align-items:stretch;text-align:left;border-style:solid;padding:22px;}
+.onboard-title{font-size:17px;color:var(--text);font-weight:650;letter-spacing:-.02em;}
+.tpl-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:8px;}
+.tpl-chip{display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:12px;border:1px solid var(--border);background:var(--bg);text-align:left;}
+.tpl-chip:hover{border-color:var(--border-strong);}
+.tpl-chip.picked{border-color:var(--accent);background:var(--accent-soft);box-shadow:inset 0 0 0 1px var(--accent);}
+.tpl-emo{font-size:20px;}
+.tpl-chip b{display:block;font-size:13.5px;font-weight:600;color:var(--text);}
+.tpl-chip small{display:block;font-size:11.5px;color:var(--muted);}
+.onboard-actions{display:flex;gap:8px;flex-wrap:wrap;}
+.onboard-actions .btn{flex:1;min-width:150px;width:auto;}
+
+/* ---- Manage ---- */
+.manage-item{gap:6px;padding:8px 10px 8px 4px;touch-action:pan-y;}
+.manage-main{flex:1;min-width:0;display:flex;flex-direction:column;align-items:flex-start;text-align:left;padding:4px 6px;}
+.manage-main .manage-name{width:100%;}
+.manage-sub{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%;}
+.drag-handle{width:30px;height:40px;flex:none;display:grid;place-items:center;color:var(--muted);cursor:grab;touch-action:none;border-radius:8px;}
+.drag-handle:hover{background:var(--surface-2);color:var(--text);}
+.drag-handle svg{width:16px;height:16px;fill:currentColor;}
+.manage-item.dragging{position:relative;z-index:5;box-shadow:0 18px 40px -12px rgba(0,0,0,.45);border-color:var(--accent);cursor:grabbing;transition:none;}
+.is-dragging .manage-item:not(.dragging){transition:transform .15s;}
+.diary-list,.manage-list{scroll-margin-top:12px;}
+@media (min-width:768px){ .manage-list{display:flex;flex-direction:column;} }
+
+/* ---- Routine editor ---- */
+.tpl-row{display:flex;gap:6px;overflow-x:auto;padding:12px 0 2px;scrollbar-width:none;}
+.tpl-row::-webkit-scrollbar{display:none;}
+.tpl-pill{flex:none;font-size:12.5px;font-weight:500;padding:6px 11px;border-radius:99px;border:1px solid var(--border);background:var(--bg);white-space:nowrap;}
+.tpl-pill:hover{border-color:var(--accent);color:var(--accent);}
+.day-chips{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;}
+.day-chip{height:38px;border-radius:10px;border:1px solid var(--border);background:var(--bg);font-size:12.5px;font-weight:600;color:var(--muted);}
+.day-chip.on{background:var(--accent);border-color:var(--accent);color:var(--on-accent);}
+.day-presets{display:flex;gap:12px;margin-top:8px;}
+.day-presets button{font-size:12px;font-weight:600;color:var(--accent);}
+.goal-row{display:flex;gap:8px;align-items:center;}
+.goal-row .text-input{margin-top:0;flex:1;min-width:0;}
+.stepper{display:flex;align-items:center;border:1px solid var(--border);border-radius:12px;background:var(--bg);height:46px;flex:none;}
+.stepper button{width:38px;height:100%;font-size:18px;color:var(--muted);}
+.stepper button:hover{color:var(--text);}
+.stepper input{width:46px;text-align:center;border:none;background:transparent;font-weight:650;font-size:16px;outline:none;-moz-appearance:textfield;}
+.stepper input::-webkit-inner-spin-button,.stepper input::-webkit-outer-spin-button{-webkit-appearance:none;margin:0;}
+.hint{font-size:12px;color:var(--muted);margin-top:6px;line-height:1.45;}
+input[type="time"]{color-scheme:light dark;}
+
+/* ---- Weekly summary ---- */
+.week-card{background:radial-gradient(500px 200px at 0% 0%,rgba(var(--accent-rgb),.10),transparent 70%),var(--surface);
+  border:1px solid var(--border);border-radius:20px;padding:20px;margin-bottom:20px;box-shadow:var(--shadow-sm);}
+.wk-top{display:flex;justify-content:space-between;gap:18px;align-items:flex-end;flex-wrap:wrap;}
+.wk-eyebrow{font-size:11.5px;text-transform:uppercase;color:var(--muted);}
+.wk-pct{font-size:40px;line-height:1.05;margin-top:4px;}
+.delta{display:inline-block;margin-top:6px;font-size:12px;font-weight:600;padding:3px 9px;border-radius:99px;}
+.delta.up{background:rgba(34,197,94,.13);color:var(--st-full);}
+.delta.down{background:var(--st-miss-bg);color:var(--st-miss);}
+.wk-days{display:flex;gap:8px;align-items:flex-end;}
+.wk-day{display:flex;flex-direction:column;align-items:center;gap:6px;font-size:11px;color:var(--muted);font-weight:600;}
+.wk-day.is-today span{color:var(--accent);}
+.wk-bar{width:18px;height:58px;border-radius:6px;background:var(--surface-2);display:flex;align-items:flex-end;overflow:hidden;}
+.wk-bar i{display:block;width:100%;border-radius:6px;transition:height .5s cubic-bezier(.2,.8,.2,1);}
+.wk-bar.full i{background:var(--st-full);} .wk-bar.partial i{background:var(--st-part);} .wk-bar.miss{box-shadow:inset 0 0 0 1.5px var(--st-miss-bd);background:var(--st-miss-bg);}
+.wk-tiles{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:18px;}
+@media (min-width:1024px){ .wk-tiles{grid-template-columns:repeat(4,minmax(0,1fr));} }
+.wk-tile{display:flex;gap:10px;align-items:flex-start;background:var(--bg);border:1px solid var(--border);border-radius:14px;padding:12px;min-width:0;}
+.wk-tile > div{min-width:0;}
+.wk-ico{font-size:18px;line-height:1.2;}
+.wk-label{font-size:11.5px;color:var(--muted);font-weight:500;}
+.wk-val{font-size:14px;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.wk-sub{font-size:11.5px;color:var(--muted);}
+
+/* ---- Mood ---- */
+.mood-row{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:4px 18px 8px;flex-wrap:wrap;}
+.mood-label{font-size:12.5px;color:var(--muted);font-weight:500;}
+.mood-picks{display:flex;gap:6px;}
+.mood-picks button{width:40px;height:40px;border-radius:12px;font-size:21px;border:1px solid var(--border);background:var(--surface);filter:grayscale(.85);opacity:.7;transition:all .18s cubic-bezier(.2,.8,.2,1);}
+.mood-picks button:hover{filter:none;opacity:1;}
+.mood-picks button.on{filter:none;opacity:1;border-color:var(--accent);background:var(--accent-soft);transform:scale(1.08);}
+@media (min-width:768px){ .mood-row{padding-left:max(18px, calc((100% - 760px) / 2));padding-right:max(18px, calc((100% - 760px) / 2));} }
+.diary-mood{font-size:16px;flex:none;}
+.mood-empty{display:flex;align-items:center;gap:12px;color:var(--muted);font-size:13.5px;}
+.mood-empty-emo{font-size:26px;filter:grayscale(1);opacity:.6;}
+.mood-head{display:flex;align-items:center;gap:12px;margin-bottom:14px;}
+.mood-big{font-size:34px;}
+.mood-avg{font-size:16px;font-weight:650;}
+.mood-bars{display:flex;align-items:flex-end;gap:3px;height:64px;}
+.mood-bars i{flex:1;border-radius:4px 4px 2px 2px;min-height:4px;}
+.mood-bars i.empty{height:4px;background:var(--surface-2);}
+
+/* ---- Achievements ---- */
+.section-label-row{display:flex;align-items:baseline;justify-content:space-between;}
+.badge-count{font-size:12px;color:var(--muted);font-weight:600;}
+.badge-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(132px,1fr));gap:10px;}
+.badge-tile{display:flex;flex-direction:column;align-items:center;text-align:center;gap:4px;padding:16px 10px;border-radius:16px;border:1px dashed var(--border-strong);background:transparent;}
+.badge-emo{font-size:28px;filter:grayscale(1);opacity:.35;}
+.badge-name{font-size:13px;font-weight:650;color:var(--muted);}
+.badge-desc{font-size:11px;color:var(--muted);line-height:1.35;}
+.badge-tile.got{border-style:solid;border-color:rgba(var(--accent-rgb),.35);background:radial-gradient(120px 80px at 50% 0%,rgba(var(--accent-rgb),.14),transparent 70%),var(--surface);box-shadow:var(--shadow-sm);}
+.badge-tile.got .badge-emo{filter:none;opacity:1;}
+.badge-tile.got .badge-name{color:var(--text);}
+
+/* ---- Streak freeze ---- */
+:root{--st-frz:#2563eb;--st-frz-bg:rgba(37,99,235,.10);--st-frz-bd:rgba(37,99,235,.30);}
+[data-theme="dark"]{--st-frz:#60a5fa;--st-frz-bg:rgba(96,165,250,.13);--st-frz-bd:rgba(96,165,250,.32);}
+.stat-sub{font-size:11.5px;color:var(--st-frz);font-weight:500;margin-top:4px;}
+.cal-cell.st-freeze{background:var(--st-frz-bg);color:var(--st-frz);box-shadow:inset 0 0 0 1px var(--st-frz-bd);font-weight:600;}
+.sw-freeze{background:var(--st-frz-bg);box-shadow:inset 0 0 0 1px var(--st-frz-bd);}
+.freeze-line{margin-top:8px !important;padding-top:8px !important;}
+
+/* ---- Reminders settings ---- */
+.set-row.as-div{cursor:default;}
+.set-row.as-div:hover{background:transparent;}
+label.set-row{cursor:pointer;}
+.switch{width:46px;height:28px;border-radius:99px;background:var(--border-strong);position:relative;flex:none;transition:background .2s;}
+.switch i{position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.3);transition:transform .22s cubic-bezier(.2,.8,.2,1);}
+.switch.on{background:var(--accent);}
+.switch.on i{transform:translateX(18px);}
+.time-input{height:36px;padding:0 10px;border-radius:10px;border:1px solid var(--border);background:var(--bg);font-size:14px;font-weight:600;color:var(--text);flex:none;}
+.time-input:disabled{opacity:.45;}
+.set-row:disabled{opacity:.5;}
+.set-hint{margin:8px 4px 0;}
+
+/* Confetti */
+.confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:400;}
 
 /* ---- Desktop / iPad shell polish ---- */
 @media (min-width:768px){
@@ -980,6 +1165,8 @@ kbd{font-family:inherit;font-size:12px;font-weight:600;color:var(--text);backgro
           </div>
           <div class="view-head"><h1 class="view-title">Progress</h1></div>
 
+          <div class="week-card" id="weekCard"></div>
+
           <div class="stat-grid">
             <div class="stat-card">
               <div class="stat-label">Today's Score</div>
@@ -988,6 +1175,7 @@ kbd{font-family:inherit;font-size:12px;font-weight:600;color:var(--text);backgro
             <div class="stat-card">
               <div class="stat-label">Current Streak</div>
               <div class="stat-value" id="statStreak">0</div>
+              <div class="stat-sub" id="statFreeze" title="Missed days covered automatically each month">❄ 2 freezes left</div>
             </div>
             <div class="stat-card">
               <div class="stat-label">Best Streak</div>
@@ -1022,6 +1210,7 @@ kbd{font-family:inherit;font-size:12px;font-weight:600;color:var(--text);backgro
             </div>
             <div class="cal-grid" id="calGrid"></div>
             <div class="cal-legend">
+              <span class="cal-key"><i class="cal-swatch sw-freeze"></i>Freeze</span>
               <span class="cal-key"><i class="cal-swatch sw-none"></i>No data</span>
               <span class="cal-key"><i class="cal-swatch sw-miss"></i>Missed</span>
               <span class="cal-key"><i class="cal-swatch sw-partial"></i>Partial</span>
@@ -1031,6 +1220,12 @@ kbd{font-family:inherit;font-size:12px;font-weight:600;color:var(--text);backgro
 
           <p class="section-label">Routine Consistency</p>
           <ul class="consistency-list" id="consistencyList"></ul>
+
+          <p class="section-label">Mood · last 30 days</p>
+          <div class="card" id="moodCard"></div>
+
+          <div class="section-label-row"><p class="section-label">Achievements</p><span class="badge-count" id="badgeCount"></span></div>
+          <div class="badge-grid" id="badgeGrid"></div>
         </section>
 
         <!-- ---------- MANAGE ---------- -->
@@ -1082,6 +1277,26 @@ kbd{font-family:inherit;font-size:12px;font-weight:600;color:var(--text);backgro
               <button data-theme="dark">Dark</button>
             </div>
           </div>
+
+          <p class="section-label">Reminders</p>
+          <div class="settings-group">
+            <div class="set-row as-div">
+              <span class="set-ico"><svg viewBox="0 0 24 24"><path d="M6 16V11a6 6 0 0 1 12 0v5l1.5 2h-15z"/><path d="M10 20a2 2 0 0 0 4 0"/></svg></span>
+              <span class="set-txt"><span class="row-title">Notifications</span><span class="row-sub" id="notifSub">Remind me about today’s unfinished routines</span></span>
+              <button class="switch" id="notifSwitch" role="switch" aria-checked="false" aria-label="Notifications"><i></i></button>
+            </div>
+            <label class="set-row as-div" for="checkinTime">
+              <span class="set-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8.5"/><path d="M12 7.5V12l3 2"/></svg></span>
+              <span class="set-txt"><span class="row-title">Daily check-in</span><span class="row-sub">Lists what’s still left for today</span></span>
+              <input type="time" id="checkinTime" class="time-input" value="20:00">
+            </label>
+            <button class="set-row" id="testNotifBtn">
+              <span class="set-ico"><svg viewBox="0 0 24 24"><path d="M4 12l16-8-6 16-2.5-6.5z"/></svg></span>
+              <span class="set-txt"><span class="row-title">Send a test notification</span><span class="row-sub" id="testNotifSub">Check that reminders reach this device</span></span>
+              <span class="set-chev">›</span>
+            </button>
+          </div>
+          <p class="hint set-hint" id="notifHint">Per-routine reminder times are set in Manage → edit a routine.</p>
 
           <p class="section-label">Account &amp; Security</p>
           <div class="settings-group">
@@ -1158,6 +1373,10 @@ kbd{font-family:inherit;font-size:12px;font-weight:600;color:var(--text);backgro
             <span>Best streak</span>
             <span id="deskBestVal">0 days</span>
           </div>
+          <div class="streak-sub freeze-line" title="Missed days covered automatically so your streak survives">
+            <span>❄ Streak freezes left</span>
+            <span id="deskFreezeVal">2 / 2</span>
+          </div>
         </div>
       </div>
 
@@ -1220,6 +1439,16 @@ kbd{font-family:inherit;font-size:12px;font-weight:600;color:var(--text);backgro
       <button class="btn btn-primary btn-small" id="editorSave">Save</button>
     </div>
     <input id="editorTitle" class="editor-title" placeholder="Title" maxlength="120" autocomplete="off">
+    <div class="mood-row" id="moodRow">
+      <span class="mood-label">How do you feel?</span>
+      <div class="mood-picks">
+        <button type="button" data-mood="1" title="Awful">😞</button>
+        <button type="button" data-mood="2" title="Low">🙁</button>
+        <button type="button" data-mood="3" title="Okay">😐</button>
+        <button type="button" data-mood="4" title="Good">🙂</button>
+        <button type="button" data-mood="5" title="Great">😄</button>
+      </div>
+    </div>
     <textarea id="editorBody" class="editor-body" placeholder="Write your thoughts…"></textarea>
     <div class="editor-foot">
       <span id="editorDate">—</span>
@@ -1458,9 +1687,23 @@ const state = {
   editor: null
 };
 
+/* ---- schedule & goals ---- */
+function scheduledOn(r, dk) {
+  if (!r.days || !r.days.length || r.days.length === 7) return true;
+  return r.days.indexOf(parseKey(dk).getDay()) !== -1;
+}
+function rTarget(r) { return Math.max(1, Math.floor(+r.target || 1)); }
+function compCount(dk, r) {
+  const c = state.completions[dk + '|' + r.id];
+  if (!c) return 0;
+  return (c.count == null) ? rTarget(r) : c.count;   /* legacy records = done */
+}
+function isDone(dk, r) { return compCount(dk, r) >= rTarget(r); }
+
 function routinesForDate(dk) {
   return state.routines
     .filter(r => r.createdKey <= dk)
+    .filter(r => scheduledOn(r, dk))
     .filter(r => !r.deletedKey || dk < r.deletedKey)
     .filter(r => !state.skips[dk + '|' + r.id])
     .slice()
@@ -1471,7 +1714,7 @@ function countsFor(dk) {
   const items = routinesForDate(dk);
   let done = 0;
   for (let i = 0; i < items.length; i++) {
-    if (state.completions[dk + '|' + items[i].id]) done++;
+    if (isDone(dk, items[i])) done++;
   }
   const total = items.length;
   const pct = total ? Math.round((done / total) * 100) : 0;
@@ -1480,38 +1723,66 @@ function countsFor(dk) {
 
 function scoreFor(dk) { return countsFor(dk).pct; }
 
-function computeStreak() {
+/* ---- Streaks with neutral days and streak freezes ----
+   - Days with nothing scheduled are neutral (don't break, don't count).
+   - Up to FREEZES_PER_MONTH missed days per calendar month are covered
+     automatically, as long as the streak continues after them. */
+const FREEZES_PER_MONTH = 2;
+function earliestKey() {
   const tk = todayKey();
-  let d = tk;
-  if (scoreFor(d) !== 100) d = addDays(d, -1);
-  let streak = 0;
-  let guard = 0;
-  while (guard++ < 2500) {
-    if (scoreFor(d) === 100) {
-      streak++;
-      d = addDays(d, -1);
-    } else break;
-  }
-  return streak;
+  let e = tk;
+  state.routines.forEach(r => { if (r.createdKey && r.createdKey < e) e = r.createdKey; });
+  const cap = addDays(tk, -1095);
+  return e < cap ? cap : e;
 }
+function streakInfo() {
+  const tk = todayKey(), first = earliestKey();
+  let d = tk;
+  const today = countsFor(tk);
+  if (!today.total || today.pct < 100) d = addDays(d, -1);
+  let streak = 0, guard = 0;
+  const used = {}, frozen = [];
+  let pending = [];
+  while (d >= first && guard++ < 2000) {
+    const c = countsFor(d);
+    if (!c.total) { d = addDays(d, -1); continue; }
+    if (c.pct >= 100) {
+      streak++;
+      pending.forEach(k => { used[k.slice(0, 7)] = (used[k.slice(0, 7)] || 0) + 1; frozen.push(k); });
+      pending = [];
+    } else {
+      const m = d.slice(0, 7);
+      const usedM = (used[m] || 0) + pending.filter(k => k.slice(0, 7) === m).length;
+      if (usedM < FREEZES_PER_MONTH) pending.push(d);
+      else break;
+    }
+    d = addDays(d, -1);
+  }
+  const mNow = tk.slice(0, 7);
+  return { streak: streak, frozen: frozen, freezesLeft: Math.max(0, FREEZES_PER_MONTH - (used[mNow] || 0)) };
+}
+function computeStreak() { return streakInfo().streak; }
 
 function computeBestStreak() {
   const tk = todayKey();
-  let earliest = tk;
-  state.routines.forEach(r => { if (r.createdKey && r.createdKey < earliest) earliest = r.createdKey; });
-  Object.keys(state.completions).forEach(k => {
-    const d = k.split('|')[0];
-    if (d < earliest) earliest = d;
-  });
-  const cap = addDays(tk, -1095);
-  if (earliest < cap) earliest = cap;
-
-  let best = 0, cur = 0, d = earliest, guard = 0;
+  let best = 0, cur = 0, d = earliestKey(), guard = 0;
+  const used = {};
+  let pending = [];
   while (d <= tk && guard++ < 4000) {
-    if (scoreFor(d) === 100) {
-      cur++;
-      if (cur > best) best = cur;
-    } else cur = 0;
+    const c = countsFor(d);
+    if (c.total) {
+      if (c.pct >= 100) {
+        cur++;
+        pending.forEach(k => { used[k.slice(0, 7)] = (used[k.slice(0, 7)] || 0) + 1; });
+        pending = [];
+        if (cur > best) best = cur;
+      } else if (d !== tk) {
+        const m = d.slice(0, 7);
+        const usedM = (used[m] || 0) + pending.filter(k => k.slice(0, 7) === m).length;
+        if (cur > 0 && usedM < FREEZES_PER_MONTH) pending.push(d);
+        else { cur = 0; pending = []; }
+      }
+    }
     d = addDays(d, 1);
   }
   return best;
@@ -1716,8 +1987,6 @@ async function startSession(user) {
   await loadUserData();
   state.selectedDate = todayKey();
   state.calMonth = { y: new Date().getFullYear(), m: new Date().getMonth() };
-  $('#authScreen').hidden = true;
-  $('#mainApp').hidden = false;
   $('#authPassword').value = '';
   applyTheme(getStoredTheme());
 
@@ -1726,8 +1995,18 @@ async function startSession(user) {
   $('#sidebarUserEmail').textContent = user.email || '';
   $('#sidebarAvatar').textContent = (user.name || user.email || 'F').trim().charAt(0).toUpperCase();
 
+  // Render everything first, then reveal in one frame (no flash of empty UI)
+  $('#mainApp').hidden = false;
   switchView('today');
   renderDesktopSidebarWidgets();
+  $('#authScreen').hidden = true;
+  document.documentElement.classList.remove('booting');
+  $('#mainApp').classList.add('app-enter');
+  setTimeout(() => $('#mainApp').classList.remove('app-enter'), 450);
+
+  checkBadges();
+  syncReminderState();
+  setTimeout(reminderTick, 1500);
 }
 
 function doLogout() {
@@ -1737,6 +2016,7 @@ function doLogout() {
     'Log out',
     function () {
       try { localStorage.removeItem('flow_session'); } catch (e) {}
+      clearReminderState();
       state.user = null;
       state.routines = [];
       state.completions = {};
@@ -1762,7 +2042,14 @@ function switchView(name) {
   });
   $$('.nav-item').forEach(b => b.classList.toggle('active', b.dataset.view === name));
   $$('.nav-item-desk').forEach(b => b.classList.toggle('active', b.dataset.view === name));
-  window.scrollTo(0, 0);
+  window.scrollTo({ top: 0, behavior: 'instant' });
+  const v = $('#view-' + name);
+  if (v) {
+    v.scrollTop = 0;
+    v.classList.remove('view-enter');
+    void v.offsetWidth;
+    v.classList.add('view-enter');
+  }
 
   if (name === 'today') renderToday();
   else if (name === 'diary') renderDiary();
@@ -1808,21 +2095,53 @@ function renderToday() {
 
   if (!items.length) {
     const anyActive = state.routines.some(r => !r.deletedKey);
-    let msg = anyActive ? 'Nothing scheduled for this day.' : 'No routines yet. Add your first routine to start building your flow.';
-    list.innerHTML =
-      '<li class="empty-state"><span>' + esc(msg) + '</span>' +
-      (anyActive ? '' : '<button class="btn btn-primary" data-goto-manage>Add a routine</button>') +
-      '</li>';
+    if (anyActive) {
+      list.innerHTML = '<li class="empty-state"><span>Nothing scheduled for this day. Enjoy the rest. 🌿</span></li>';
+    } else {
+      list.innerHTML =
+        '<li class="empty-state onboard">' +
+          '<strong class="onboard-title">Start your flow</strong>' +
+          '<span>Pick a few to begin — you can edit them anytime.</span>' +
+          '<div class="tpl-grid">' + ROUTINE_TEMPLATES.map((t, i) =>
+            '<button class="tpl-chip" data-tpl="' + i + '"><span class="tpl-emo">' + t.emoji + '</span>' +
+            '<span><b>' + esc(t.name) + '</b><small>' + esc(routineSummary(t)) + '</small></span></button>').join('') +
+          '</div>' +
+          '<div class="onboard-actions"><button class="btn btn-primary" data-tpl-add disabled>Add selected</button>' +
+          '<button class="btn btn-ghost" data-goto-manage>Create my own</button></div>' +
+        '</li>';
+    }
     return;
   }
 
   list.innerHTML = items.map(function (r) {
-    const done = !!state.completions[dk + '|' + r.id];
+    const target = rTarget(r);
+    const count = Math.min(compCount(dk, r), target);
+    const done = count >= target;
+    const rec = state.completions[dk + '|' + r.id];
+    let sub = '';
+    if (done && rec && rec.ts) sub = '<span class="r-sub ok">✓ Done at ' + time12(rec.ts) + '</span>';
+    else if (r.remindAt) sub = '<span class="r-sub">⏰ ' + esc(fmtTime(r.remindAt)) + '</span>';
+    if (target > 1) {
+      const pct = Math.round(count / target * 100);
+      return '<li class="routine-item counter' + (done ? ' done' : '') + '" data-row="' + esc(r.id) + '">' +
+        '<div class="routine-label">' +
+          '<span class="ring-mini" style="--p:' + pct + '"><span>' + (done ? '✓' : '') + '</span></span>' +
+          '<span class="r-main"><span class="routine-name">' + esc(r.name) + '</span>' +
+            '<span class="r-sub">' + count + ' / ' + target + (r.unit ? ' ' + esc(r.unit) : '') + '</span>' + sub + '</span>' +
+        '</div>' +
+        (readOnly ? '' :
+          '<div class="count-ctl">' +
+            '<button class="icon-btn small" data-dec="' + esc(r.id) + '" aria-label="Decrease"' + (count <= 0 ? ' disabled' : '') + '>−</button>' +
+            '<button class="icon-btn small inc" data-inc="' + esc(r.id) + '" aria-label="Increase"' + (done ? ' disabled' : '') + '>+</button>' +
+          '</div>' +
+          '<button class="icon-btn small" data-skip="' + esc(r.id) + '" aria-label="Remove for this day">✕</button>') +
+      '</li>';
+    }
     return '<li class="routine-item' + (done ? ' done' : '') + '" data-row="' + esc(r.id) + '">' +
       '<label class="routine-label">' +
         '<input type="checkbox" class="rcheck" data-check="' + esc(r.id) + '"' +
           (done ? ' checked' : '') + (readOnly ? ' disabled' : '') + '>' +
-        '<span class="routine-name">' + esc(r.name) + '</span>' +
+        '<span class="r-main"><span class="routine-name">' + esc(r.name) + '</span>' + sub + '</span>' +
       '</label>' +
       (readOnly ? '' :
         '<button class="icon-btn small" data-skip="' + esc(r.id) + '" aria-label="Remove for this day">✕</button>') +
@@ -1830,41 +2149,66 @@ function renderToday() {
   }).join('');
 }
 
-async function toggleCompletion(routineId, checked, rowEl) {
+function updateTodayRing() {
+  const c = countsFor(state.selectedDate);
+  $('#progressCount').textContent = c.done + ' / ' + c.total + ' completed';
+  $('#progressPct').textContent = c.pct + '%';
+  const fg = $('#fgCircle');
+  if (fg) fg.style.strokeDashoffset = 263.89 - (c.pct / 100) * 263.89;
+}
+
+/* Called after any completion change on today */
+function afterProgressChange(prevPct) {
+  const tk = todayKey();
+  const now = countsFor(tk).pct;
+  renderToday();
+  renderDesktopSidebarWidgets();
+  if (state.selectedDate === tk && prevPct < 100 && now >= 100) {
+    celebrate();
+    toast('All done for today! 🎉');
+  }
+  checkBadges();
+  syncReminderState();
+}
+
+async function setCompletionCount(routineId, count) {
   const dk = state.selectedDate;
   if (dk < todayKey()) return;
+  const r = state.routines.find(x => x.id === routineId);
+  if (!r) return;
+  const target = rTarget(r);
+  count = Math.max(0, Math.min(target, count));
   const id = state.user.id + '|' + dk + '|' + routineId;
   const key = dk + '|' + routineId;
-
+  const prevPct = countsFor(todayKey()).pct;
   try {
-    if (checked) {
-      const rec = { id: id, userId: state.user.id, dateKey: dk, routineId: routineId, ts: Date.now() };
-      await DB.put('completions', rec);
-      state.completions[key] = rec;
-    } else {
+    if (count <= 0) {
       await DB.remove('completions', id);
       delete state.completions[key];
+    } else {
+      const old = state.completions[key];
+      const rec = { id: id, userId: state.user.id, dateKey: dk, routineId: routineId, count: count,
+        ts: (count >= target) ? ((old && old.count >= target && old.ts) || Date.now()) : Date.now() };
+      await DB.put('completions', rec);
+      state.completions[key] = rec;
     }
   } catch (e) {
     toast('Could not save. Try again.');
     return;
   }
+  afterProgressChange(prevPct);
+}
 
-  if (rowEl) rowEl.classList.toggle('done', !!checked);
-
-  const c = countsFor(dk);
-  $('#progressCount').textContent = c.done + ' / ' + c.total + ' completed';
-  $('#progressPct').textContent = c.pct + '%';
-  const circ = 263.89;
-  const offset = circ - (c.pct / 100) * circ;
-  const fg = $('#fgCircle');
-  if (fg) fg.style.strokeDashoffset = offset;
-  renderDesktopSidebarWidgets();
+async function toggleCompletion(routineId, checked) {
+  const r = state.routines.find(x => x.id === routineId);
+  if (!r) return;
+  return setCompletionCount(routineId, checked ? rTarget(r) : 0);
 }
 
 async function skipRoutineForDay(routineId) {
   const dk = state.selectedDate;
   if (dk < todayKey()) return;
+  const prevPct = countsFor(todayKey()).pct;
 
   try {
     const rec = {
@@ -1886,8 +2230,7 @@ async function skipRoutineForDay(routineId) {
     toast('Could not update. Try again.');
     return;
   }
-  renderToday();
-  renderDesktopSidebarWidgets();
+  afterProgressChange(prevPct);
 }
 
 async function restoreSkippedForDay() {
@@ -1932,6 +2275,7 @@ function renderDiary() {
     return '<li>' +
       '<button class="diary-item" data-note="' + esc(n.id) + '">' +
         '<div class="diary-title-row">' +
+          (n.mood ? '<span class="diary-mood" title="' + MOODS[n.mood].label + '">' + MOODS[n.mood].emoji + '</span>' : '') +
           '<span class="diary-title">' + esc(title) + '</span>' +
           (n.isDraft ? '<span class="badge">Draft</span>' : '') +
           todayFlag +
@@ -1958,6 +2302,8 @@ function openEditor(noteId) {
   $('#editorDate').textContent = dateTime12(state.editor.createdAt);
   $('#editorStatus').textContent = note ? (note.isDraft ? 'Draft · auto-saved' : 'Saved') : 'New entry';
   $('#editorDelete').hidden = !note;
+  state.editor.mood = note ? (note.mood || 0) : 0;
+  paintMood();
 
   const sheet = $('#editorSheet');
   sheet.hidden = false;
@@ -2016,6 +2362,7 @@ async function flushDraft() {
 
   note.title = title;
   note.body = body;
+  if (ed.mood) note.mood = ed.mood;
   note.updatedAt = Date.now();
   if (note.isDraft === undefined) note.isDraft = true;
 
@@ -2074,6 +2421,7 @@ async function saveNote() {
 
   note.title = title;
   note.body = body;
+  if (ed.mood) note.mood = ed.mood;
   note.updatedAt = Date.now();
   note.isDraft = false;
 
@@ -2107,7 +2455,9 @@ function deleteCurrentNote() {
    ============================================================ */
 function renderProgress() {
   $('#statToday').textContent = scoreFor(todayKey()) + '%';
-  $('#statStreak').textContent = computeStreak();
+  const si = streakInfo();
+  $('#statStreak').textContent = si.streak;
+  $('#statFreeze').textContent = '❄ ' + si.freezesLeft + ' freeze' + (si.freezesLeft === 1 ? '' : 's') + ' left this month';
   $('#statBest').textContent = computeBestStreak();
   $('#statTracked').textContent = daysTracked();
 
@@ -2118,6 +2468,9 @@ function renderProgress() {
   renderChart();
   renderCalendar();
   renderRoutineConsistency();
+  renderWeekCard();
+  renderMoodCard();
+  renderBadges();
 }
 
 function renderChart() {
@@ -2175,6 +2528,7 @@ function buildCalendarHtml() {
   const startDow = new Date(y, m, 1).getDay();
   const dim = new Date(y, m + 1, 0).getDate();
   const tk = todayKey();
+  const frozen = new Set(streakInfo().frozen);
 
   let html = '';
   for (let i = 0; i < startDow; i++) html += '<div class="cal-cell blank"></div>';
@@ -2193,6 +2547,8 @@ function buildCalendarHtml() {
       cls += ' nodata';               /* no routines, or today still pending */
     } else if (c.pct >= 100) {
       cls += ' st-full';              /* green: all done */
+    } else if (frozen.has(dk)) {
+      cls += ' st-freeze';            /* blue: covered by a streak freeze */
     } else if (c.pct > 0) {
       cls += ' st-partial';           /* orange: some done */
     } else {
@@ -2219,6 +2575,7 @@ function renderDesktopSidebarWidgets() {
   const dayWord = n => n + (n === 1 ? ' day' : ' days');
   $('#deskStreakVal').textContent = dayWord(computeStreak());
   $('#deskBestVal').textContent = dayWord(computeBestStreak());
+  $('#deskFreezeVal').textContent = streakInfo().freezesLeft + ' / ' + FREEZES_PER_MONTH;
 
   const y = state.calMonth.y;
   const m = state.calMonth.m;
@@ -2239,9 +2596,9 @@ function renderDesktopSidebarWidgets() {
     let d = r.createdKey || tk;
     let guard = 0;
     while (d <= tk && guard++ < 365) {
-      if (!state.skips[d + '|' + r.id]) {
+      if (!state.skips[d + '|' + r.id] && scheduledOn(r, d)) {
         totalDays++;
-        if (state.completions[d + '|' + r.id]) completedDays++;
+        if (isDone(d, r)) completedDays++;
       }
       d = addDays(d, 1);
     }
@@ -2269,9 +2626,9 @@ function renderRoutineConsistency() {
     let d = r.createdKey || tk;
     let guard = 0;
     while (d <= tk && guard++ < 365) {
-      if (!state.skips[d + '|' + r.id]) {
+      if (!state.skips[d + '|' + r.id] && scheduledOn(r, d)) {
         totalDays++;
-        if (state.completions[d + '|' + r.id]) completedDays++;
+        if (isDone(d, r)) completedDays++;
       }
       d = addDays(d, 1);
     }
@@ -2289,7 +2646,7 @@ function openDateDetail(dk) {
   const c = countsFor(dk);
 
   const rows = items.map(function (r) {
-    const done = !!state.completions[dk + '|' + r.id];
+    const done = isDone(dk, r);
     return '<div class="detail-row' + (done ? ' done' : '') + '">' +
       '<span class="detail-mark">' + (done ? '✓' : '') + '</span>' +
       '<span class="detail-name">' + esc(r.name) + '</span>' +
@@ -2329,13 +2686,15 @@ function renderManage() {
     return;
   }
 
-  list.innerHTML = active.map(function (r, i) {
-    return '<li class="manage-item">' +
-      '<div style="display:flex;flex-direction:column;gap:2px;">' +
-        '<button class="icon-btn small" data-up="' + esc(r.id) + '"' + (i === 0 ? ' disabled' : '') + ' aria-label="Move up">↑</button>' +
-        '<button class="icon-btn small" data-down="' + esc(r.id) + '"' + (i === active.length - 1 ? ' disabled' : '') + ' aria-label="Move down">↓</button>' +
-      '</div>' +
-      '<span class="manage-name">' + esc(r.name) + '</span>' +
+  list.innerHTML = active.map(function (r) {
+    return '<li class="manage-item" data-id="' + esc(r.id) + '">' +
+      '<button class="drag-handle" data-handle aria-label="Drag to reorder (or use arrow keys)" title="Drag to reorder">' +
+        '<svg viewBox="0 0 24 24"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>' +
+      '</button>' +
+      '<button class="manage-main" data-edit="' + esc(r.id) + '">' +
+        '<span class="manage-name">' + esc(r.name) + '</span>' +
+        '<span class="manage-sub">' + esc(routineSummary(r)) + (r.remindAt ? ' · ⏰ ' + esc(fmtTime(r.remindAt)) : '') + '</span>' +
+      '</button>' +
       '<div class="manage-actions">' +
         '<button class="icon-btn small" data-edit="' + esc(r.id) + '" aria-label="Edit routine">✎</button>' +
         '<button class="icon-btn small" data-del="' + esc(r.id) + '" aria-label="Delete routine">🗑</button>' +
@@ -2344,57 +2703,159 @@ function renderManage() {
   }).join('');
 }
 
-async function addRoutine() {
-  promptModal({
-    title: 'New routine',
-    message: 'What do you want to do every day?',
-    placeholder: 'e.g. Meditate 10 minutes',
-    confirmText: 'Add',
-    onConfirm: async function (name) {
-      let maxOrder = -1;
-      state.routines.filter(r => !r.deletedKey).forEach(function (r) {
-        if ((r.order || 0) > maxOrder) maxOrder = r.order || 0;
-      });
-      const rec = {
-        id: uid(),
-        userId: state.user.id,
-        name: name,
-        order: maxOrder + 1,
-        createdKey: todayKey(),
-        deletedKey: null,
-        createdAt: Date.now()
-      };
-      try {
+/* ---------- Routine helpers ---------- */
+const DOW_SHORT = ['Su', 'Mo', 'Tu', 'We', 'Th', 'Fr', 'Sa'];
+const ROUTINE_TEMPLATES = [
+  { emoji: '🧘', name: 'Meditation', target: 10, unit: 'min', remindAt: '07:00' },
+  { emoji: '💧', name: 'Drink water', target: 8, unit: 'glasses', remindAt: '10:00' },
+  { emoji: '🏃', name: 'Exercise', target: 1, days: [1, 3, 5], remindAt: '18:00' },
+  { emoji: '📖', name: 'Read', target: 20, unit: 'pages', remindAt: '21:00' },
+  { emoji: '✍️', name: 'Journal', target: 1, remindAt: '22:00' },
+  { emoji: '🚶', name: 'Walk', target: 30, unit: 'min' },
+  { emoji: '😴', name: 'Sleep by 11 PM', target: 1 },
+  { emoji: '📵', name: 'No social media', target: 1 }
+];
+
+function fmtTime(hhmm) {
+  if (!hhmm) return '';
+  const p = hhmm.split(':').map(Number);
+  const d = new Date(); d.setHours(p[0], p[1], 0, 0);
+  return time12(d.getTime());
+}
+function daysLabel(days) {
+  if (!days || !days.length || days.length === 7) return 'Every day';
+  const s = days.slice().sort().join(',');
+  if (s === '1,2,3,4,5') return 'Weekdays';
+  if (s === '0,6') return 'Weekends';
+  return days.slice().sort((a, b) => ((a + 6) % 7) - ((b + 6) % 7)).map(d => DOW_SHORT[d]).join(' ');
+}
+function routineSummary(r) {
+  const t = rTarget(r);
+  return daysLabel(r.days) + (t > 1 ? ' · ' + t + (r.unit ? ' ' + r.unit : ' times') : '');
+}
+function nextOrder() {
+  let maxOrder = -1;
+  state.routines.filter(r => !r.deletedKey).forEach(r => { if ((r.order || 0) > maxOrder) maxOrder = r.order || 0; });
+  return maxOrder + 1;
+}
+function makeRoutine(o) {
+  return {
+    id: uid(), userId: state.user.id, name: o.name, order: nextOrder(),
+    days: (o.days && o.days.length && o.days.length < 7) ? o.days.slice() : null,
+    target: Math.max(1, +o.target || 1), unit: o.unit || '', remindAt: o.remindAt || '',
+    createdKey: todayKey(), deletedKey: null, createdAt: Date.now()
+  };
+}
+function afterRoutineChange() {
+  renderManage();
+  if (state.view === 'today') renderToday();
+  renderDesktopSidebarWidgets();
+  syncReminderState();
+}
+
+async function addTemplates(idxs) {
+  try {
+    for (const i of idxs) {
+      const rec = makeRoutine(ROUTINE_TEMPLATES[i]);
+      await DB.put('routines', rec);
+      state.routines.push(rec);
+    }
+  } catch (e) { toast('Could not add routines.'); return; }
+  renderToday();
+  afterRoutineChange();
+  toast(idxs.length + ' routine' + (idxs.length === 1 ? '' : 's') + ' added');
+  if (idxs.some(i => ROUTINE_TEMPLATES[i].remindAt)) maybeOfferReminders();
+}
+
+/* ---------- Routine editor dialog (add + edit) ---------- */
+function routineEditor(r) {
+  const isNew = !r;
+  const v = r ? { name: r.name, days: r.days || [0, 1, 2, 3, 4, 5, 6], target: rTarget(r), unit: r.unit || '', remindAt: r.remindAt || '' }
+              : { name: '', days: [0, 1, 2, 3, 4, 5, 6], target: 1, unit: '', remindAt: '' };
+  const dayOrder = [1, 2, 3, 4, 5, 6, 0];
+  showModal(
+    '<h2 class="modal-title">' + (isNew ? 'New routine' : 'Edit routine') + '</h2>' +
+    '<form id="rForm" novalidate>' +
+      (isNew ? '<div class="tpl-row">' + ROUTINE_TEMPLATES.slice(0, 6).map((t, i) =>
+        '<button type="button" class="tpl-pill" data-rt="' + i + '">' + t.emoji + ' ' + esc(t.name) + '</button>').join('') + '</div>' : '') +
+      '<div class="field m-field"><label for="rName">Name</label>' +
+        '<input class="text-input" id="rName" maxlength="60" autocomplete="off" placeholder="e.g. Meditate" value="' + esc(v.name) + '"></div>' +
+      '<div class="field m-field"><label>Repeat on</label>' +
+        '<div class="day-chips" id="rDays">' + dayOrder.map(d =>
+          '<button type="button" class="day-chip' + (v.days.indexOf(d) !== -1 ? ' on' : '') + '" data-day="' + d + '">' + DOW_SHORT[d] + '</button>').join('') + '</div>' +
+        '<div class="day-presets"><button type="button" data-preset="all">Every day</button><button type="button" data-preset="wk">Weekdays</button><button type="button" data-preset="we">Weekends</button></div>' +
+      '</div>' +
+      '<div class="field m-field"><label>Daily goal</label>' +
+        '<div class="goal-row">' +
+          '<div class="stepper"><button type="button" data-step="-1" aria-label="Less">−</button>' +
+          '<input id="rTarget" type="number" min="1" max="999" inputmode="numeric" value="' + v.target + '">' +
+          '<button type="button" data-step="1" aria-label="More">+</button></div>' +
+          '<input class="text-input" id="rUnit" maxlength="16" placeholder="unit (min, pages, glasses)" value="' + esc(v.unit) + '">' +
+        '</div>' +
+        '<p class="hint">Goal 1 = a simple checkbox. Higher = tap + to count up.</p>' +
+      '</div>' +
+      '<div class="field m-field"><label for="rTime">Reminder</label>' +
+        '<div class="goal-row"><input class="text-input" id="rTime" type="time" value="' + esc(v.remindAt) + '">' +
+        '<button type="button" class="btn btn-ghost btn-small" id="rTimeClear">No reminder</button></div>' +
+        '<p class="hint">You’ll get a notification at this time if it isn’t done yet.</p>' +
+      '</div>' +
+      '<p class="modal-error" id="modalError" hidden></p>' +
+      '<div class="modal-actions">' +
+        '<button type="button" class="btn btn-ghost" data-act="cancel">Cancel</button>' +
+        '<button type="submit" class="btn btn-primary">' + (isNew ? 'Add routine' : 'Save') + '</button>' +
+      '</div>' +
+    '</form>'
+  );
+  setTimeout(() => { try { $('#rName').focus(); } catch (e) {} }, 80);
+  const setDays = ds => $$('#rDays .day-chip').forEach(c => c.classList.toggle('on', ds.indexOf(+c.dataset.day) !== -1));
+
+  $('#modal').onclick = function (e) {
+    const t = e.target;
+    if (t.closest('[data-act="cancel"]')) { hideModal(); return; }
+    const chip = t.closest('.day-chip');
+    if (chip) { chip.classList.toggle('on'); return; }
+    const pre = t.closest('[data-preset]');
+    if (pre) { setDays({ all: [0, 1, 2, 3, 4, 5, 6], wk: [1, 2, 3, 4, 5], we: [0, 6] }[pre.dataset.preset]); return; }
+    const st = t.closest('[data-step]');
+    if (st) { const i = $('#rTarget'); i.value = Math.max(1, Math.min(999, (+i.value || 1) + (+st.dataset.step))); return; }
+    if (t.closest('#rTimeClear')) { $('#rTime').value = ''; return; }
+    const rt = t.closest('[data-rt]');
+    if (rt) {
+      const tp = ROUTINE_TEMPLATES[+rt.dataset.rt];
+      $('#rName').value = tp.name; $('#rTarget').value = tp.target || 1; $('#rUnit').value = tp.unit || '';
+      $('#rTime').value = tp.remindAt || ''; setDays(tp.days || [0, 1, 2, 3, 4, 5, 6]);
+    }
+  };
+  $('#rForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    const err = $('#modalError');
+    const name = $('#rName').value.trim();
+    const days = $$('#rDays .day-chip.on').map(c => +c.dataset.day);
+    if (!name) { err.textContent = 'Please enter a name.'; err.hidden = false; $('#rName').focus(); return; }
+    if (!days.length) { err.textContent = 'Pick at least one day.'; err.hidden = false; return; }
+    const o = { name: name, days: days, target: Math.max(1, Math.min(999, Math.floor(+$('#rTarget').value || 1))),
+                unit: $('#rUnit').value.trim(), remindAt: $('#rTime').value || '' };
+    try {
+      if (isNew) {
+        const rec = makeRoutine(o);
         await DB.put('routines', rec);
         state.routines.push(rec);
-      } catch (e) {
-        toast('Could not add routine.');
-        return;
+      } else {
+        r.name = o.name; r.days = days.length === 7 ? null : days; r.target = o.target; r.unit = o.unit; r.remindAt = o.remindAt;
+        await DB.put('routines', r);
       }
-      renderManage();
-      renderDesktopSidebarWidgets();
-      toast('Routine added');
-    }
+    } catch (e2) { err.textContent = 'Could not save. Try again.'; err.hidden = false; return; }
+    hideModal();
+    afterRoutineChange();
+    toast(isNew ? 'Routine added' : 'Routine saved');
+    if (o.remindAt) maybeOfferReminders();
   });
 }
 
+async function addRoutine() { routineEditor(null); }
 function editRoutine(id) {
   const r = state.routines.find(x => x.id === id);
-  if (!r) return;
-
-  promptModal({
-    title: 'Rename routine',
-    value: r.name,
-    placeholder: 'Routine name',
-    confirmText: 'Save',
-    onConfirm: async function (name) {
-      r.name = name;
-      try { await DB.put('routines', r); } catch (e) {}
-      renderManage();
-      renderDesktopSidebarWidgets();
-      toast('Routine renamed');
-    }
-  });
+  if (r) routineEditor(r);
 }
 
 function deleteRoutine(id) {
@@ -2444,6 +2905,7 @@ async function moveRoutine(id, dir) {
    ============================================================ */
 function renderProfile() {
   const u = state.user;
+  renderReminderSettings();
   $('#profileName').textContent = (u && u.name) ? u.name : '—';
   $('#profileEmail').textContent = (u && u.email) ? u.email : '—';
   const initial = ((u && (u.name || u.email)) || 'F').trim().charAt(0).toUpperCase();
@@ -2475,14 +2937,33 @@ $$('.nav-item, .nav-item-desk').forEach(function (b) {
 $('#routineList').addEventListener('change', function (e) {
   const cb = e.target.closest('[data-check]');
   if (!cb) return;
-  toggleCompletion(cb.dataset.check, cb.checked, cb.closest('.routine-item'));
+  toggleCompletion(cb.dataset.check, cb.checked);
 });
 
 $('#routineList').addEventListener('click', function (e) {
   const skipBtn = e.target.closest('[data-skip]');
   if (skipBtn) { skipRoutineForDay(skipBtn.dataset.skip); return; }
 
-  if (e.target.closest('[data-goto-manage]')) switchView('manage');
+  const inc = e.target.closest('[data-inc]');
+  if (inc) { const r = state.routines.find(x => x.id === inc.dataset.inc); setCompletionCount(r.id, compCount(state.selectedDate, r) + 1); return; }
+  const dec = e.target.closest('[data-dec]');
+  if (dec) { const r = state.routines.find(x => x.id === dec.dataset.dec); setCompletionCount(r.id, compCount(state.selectedDate, r) - 1); return; }
+
+  const tpl = e.target.closest('[data-tpl]');
+  if (tpl) {
+    tpl.classList.toggle('picked');
+    const n = $$('#routineList .tpl-chip.picked').length;
+    const btn = $('#routineList [data-tpl-add]');
+    btn.disabled = !n;
+    btn.textContent = n ? 'Add ' + n + ' routine' + (n === 1 ? '' : 's') : 'Add selected';
+    return;
+  }
+  if (e.target.closest('[data-tpl-add]')) {
+    addTemplates($$('#routineList .tpl-chip.picked').map(c => +c.dataset.tpl));
+    return;
+  }
+
+  if (e.target.closest('[data-goto-manage]')) { switchView('manage'); addRoutine(); }
 });
 
 $('#restoreSkipped').addEventListener('click', restoreSkippedForDay);
@@ -2869,13 +3350,17 @@ let jsPdfPromise = null;
 function loadJsPDF() {
   if (window.jspdf && window.jspdf.jsPDF) return Promise.resolve(window.jspdf.jsPDF);
   if (!jsPdfPromise) {
-    jsPdfPromise = new Promise(function (resolve, reject) {
+    /* Bundled copy first (works offline), CDN as fallback */
+    const load = src => new Promise(function (resolve, reject) {
       const s = document.createElement('script');
-      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js';
+      s.src = src;
       s.onload = function () { (window.jspdf && window.jspdf.jsPDF) ? resolve(window.jspdf.jsPDF) : reject(new Error('jsPDF missing')); };
-      s.onerror = function () { jsPdfPromise = null; reject(new Error('load failed')); };
+      s.onerror = function () { s.remove(); reject(new Error('load failed')); };
       document.head.appendChild(s);
     });
+    jsPdfPromise = load('./vendor/jspdf.umd.min.js')
+      .catch(() => load('https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'))
+      .catch(function (e) { jsPdfPromise = null; throw e; });
   }
   return jsPdfPromise;
 }
@@ -2891,9 +3376,9 @@ function pdfText(s) {
 function routineConsistencyPct(r, tk) {
   let total = 0, done = 0, d = r.createdKey || tk, guard = 0;
   while (d <= tk && guard++ < 365) {
-    if (!state.skips[d + '|' + r.id]) {
+    if (!state.skips[d + '|' + r.id] && scheduledOn(r, d)) {
       total++;
-      if (state.completions[d + '|' + r.id]) done++;
+      if (isDone(d, r)) done++;
     }
     d = addDays(d, 1);
   }
@@ -2904,7 +3389,7 @@ async function exportPdfReport() {
   let JsPDF;
   toast('Preparing your PDF report...');
   try { JsPDF = await loadJsPDF(); }
-  catch (e) { toast('Internet connection needed to create the PDF.'); return; }
+  catch (e) { toast('Could not load the PDF engine. Check your connection and try again.'); return; }
 
   const u = state.user;
   const tk = todayKey();
@@ -3104,7 +3589,7 @@ async function exportPdfReport() {
     const dk = addDays(tk, -i), s = statusOf(dk);
     if (!s.c.total) continue;
     logged++;
-    const missed = routinesForDate(dk).filter(r => !state.completions[dk + '|' + r.id]).map(r => r.name).join(', ');
+    const missed = routinesForDate(dk).filter(r => !isDone(dk, r)).map(r => r.name).join(', ');
     const missLines = doc.splitTextToSize(pdfText(missed || '-'), cols[4].w - 3).slice(0, 2);
     const rh = 6.6 + (missLines.length - 1) * 3.6;
     if (y + rh > H - 18) { doc.addPage(); contHeader(); tableHead(); }
@@ -3143,7 +3628,8 @@ async function exportPdfReport() {
       let yy = y;
       if (first) {
         font('bold', 10); color(C.text); text((n.title || '').trim() || 'Untitled', M + 5, yy);
-        font('normal', 7.5); color(C.muted); text(dateTime12(n.createdAt), W - M - 4, yy, { align: 'right' });
+        font('normal', 7.5); color(C.muted);
+        text((n.mood ? 'Mood: ' + MOODS[n.mood].label + '   ' : '') + dateTime12(n.createdAt), W - M - 4, yy, { align: 'right' });
         yy += 6;
       }
       font('normal', 8.8); color([55, 65, 81]);
@@ -3184,6 +3670,522 @@ $('#setPassBtn').addEventListener('click', openChangePassword);
 $('#setKeyBtn').addEventListener('click', openRecoveryKeySettings);
 $('#setNameBtn').addEventListener('click', openEditName);
 $('#exportBtn').addEventListener('click', exportPdfReport);
+
+/* ============================================================
+   MOOD
+   ============================================================ */
+const MOODS = [null,
+  { emoji: '😞', label: 'Awful', color: '#ef4444' },
+  { emoji: '🙁', label: 'Low',   color: '#f97316' },
+  { emoji: '😐', label: 'Okay',  color: '#eab308' },
+  { emoji: '🙂', label: 'Good',  color: '#22c55e' },
+  { emoji: '😄', label: 'Great', color: '#14b8a6' }
+];
+function paintMood() {
+  const m = state.editor ? state.editor.mood : 0;
+  $$('#moodRow [data-mood]').forEach(b => b.classList.toggle('on', +b.dataset.mood === m));
+}
+$('#moodRow').addEventListener('click', function (e) {
+  const b = e.target.closest('[data-mood]');
+  if (!b || !state.editor) return;
+  const v = +b.dataset.mood;
+  state.editor.mood = (state.editor.mood === v) ? 0 : v;
+  paintMood();
+  const note = state.editor.id && state.notes.find(n => n.id === state.editor.id);
+  if (note) { note.mood = state.editor.mood; scheduleDraftSave(); }
+});
+
+function moodByDay(fromKey, toKey) {
+  const map = {};
+  state.notes.forEach(function (n) {
+    if (!n.mood) return;
+    const k = dateKey(new Date(n.createdAt));
+    if (k < fromKey || k > toKey) return;
+    (map[k] = map[k] || []).push(n.mood);
+  });
+  const out = {};
+  Object.keys(map).forEach(k => { out[k] = map[k].reduce((a, b) => a + b, 0) / map[k].length; });
+  return out;
+}
+
+function renderMoodCard() {
+  const tk = todayKey(), from = addDays(tk, -29);
+  const m = moodByDay(from, tk);
+  const keys = Object.keys(m);
+  const card = $('#moodCard');
+  if (!keys.length) {
+    card.innerHTML = '<div class="mood-empty"><span class="mood-empty-emo">🙂</span>' +
+      '<span>Tap a mood when you write in your diary — your trend shows up here.</span></div>';
+    return;
+  }
+  const avg = keys.reduce((a, k) => a + m[k], 0) / keys.length;
+  const mi = Math.round(avg);
+  let bars = '';
+  for (let i = 0; i < 30; i++) {
+    const k = addDays(from, i), v = m[k];
+    bars += v
+      ? '<i title="' + k + ': ' + MOODS[Math.round(v)].label + '" style="height:' + (v / 5 * 100) + '%;background:' + MOODS[Math.round(v)].color + '"></i>'
+      : '<i class="empty"></i>';
+  }
+  card.innerHTML =
+    '<div class="mood-head"><span class="mood-big">' + MOODS[mi].emoji + '</span>' +
+    '<div><div class="mood-avg">Mostly ' + MOODS[mi].label.toLowerCase() + '</div>' +
+    '<div class="row-sub">' + keys.length + ' day' + (keys.length === 1 ? '' : 's') + ' logged · avg ' + avg.toFixed(1) + ' / 5</div></div></div>' +
+    '<div class="mood-bars">' + bars + '</div>';
+}
+
+/* ============================================================
+   WEEKLY SUMMARY
+   ============================================================ */
+function rangePct(from, to) {
+  let d = from, done = 0, total = 0, g = 0;
+  while (d <= to && g++ < 400) { const c = countsFor(d); done += c.done; total += c.total; d = addDays(d, 1); }
+  return total ? Math.round(done / total * 100) : null;
+}
+function mondayOf(k) { const d = parseKey(k); return addDays(k, -((d.getDay() + 6) % 7)); }
+
+function renderWeekCard() {
+  const tk = todayKey();
+  const mon = mondayOf(tk), lastMon = addDays(mon, -7), lastSun = addDays(mon, -1);
+  const thisPct = rangePct(mon, tk), lastPct = rangePct(lastMon, lastSun);
+  const card = $('#weekCard');
+  if (thisPct === null && lastPct === null) { card.hidden = true; return; }
+  card.hidden = false;
+
+  let delta = '';
+  if (thisPct !== null && lastPct !== null) {
+    const dlt = thisPct - lastPct;
+    delta = '<span class="delta ' + (dlt >= 0 ? 'up' : 'down') + '">' + (dlt >= 0 ? '▲ ' : '▼ ') + Math.abs(dlt) + '% vs last week</span>';
+  }
+
+  let days = '';
+  for (let i = 0; i < 7; i++) {
+    const k = addDays(mon, i), c = countsFor(k), fut = k > tk;
+    let cls = 'none';
+    if (!fut && c.total) cls = c.pct >= 100 ? 'full' : c.pct > 0 ? 'partial' : (k === tk ? 'none' : 'miss');
+    days += '<div class="wk-day' + (k === tk ? ' is-today' : '') + '"><div class="wk-bar ' + cls + '"><i style="height:' + (fut || !c.total ? 0 : Math.max(6, c.pct)) + '%"></i></div>' +
+      '<span>' + DOW_SHORT[parseKey(k).getDay()] + '</span></div>';
+  }
+
+  const active = state.routines.filter(r => !r.deletedKey);
+  const per = active.map(function (r) {
+    let s = 0, dn = 0;
+    for (let k = mon; k <= tk; k = addDays(k, 1)) {
+      if (r.createdKey > k || !scheduledOn(r, k) || state.skips[k + '|' + r.id]) continue;
+      s++; if (isDone(k, r)) dn++;
+    }
+    return { r: r, pct: s ? Math.round(dn / s * 100) : null };
+  }).filter(o => o.pct !== null);
+  per.sort((a, b) => b.pct - a.pct);
+  const best = per[0], worst = per.length > 1 ? per[per.length - 1] : null;
+
+  const wd = [0, 0, 0, 0, 0, 0, 0].map(() => ({ s: 0, n: 0 }));
+  for (let i = 1; i <= 56; i++) {
+    const k = addDays(tk, -i), c = countsFor(k);
+    if (c.total) { const w = parseKey(k).getDay(); wd[w].s += c.pct; wd[w].n++; }
+  }
+  let bestDay = -1, bestAvg = -1;
+  wd.forEach((o, i) => { if (o.n && o.s / o.n > bestAvg) { bestAvg = o.s / o.n; bestDay = i; } });
+
+  const buckets = { Morning: 0, Afternoon: 0, Evening: 0, Night: 0 };
+  const since = addDays(tk, -30);
+  Object.keys(state.completions).forEach(function (key) {
+    const c = state.completions[key];
+    if (!c.ts || c.dateKey < since) return;
+    const h = new Date(c.ts).getHours();
+    buckets[h >= 5 && h < 12 ? 'Morning' : h < 17 && h >= 12 ? 'Afternoon' : h >= 17 && h < 21 ? 'Evening' : 'Night']++;
+  });
+  const peak = Object.keys(buckets).sort((a, b) => buckets[b] - buckets[a])[0];
+  const peakIcon = { Morning: '🌅', Afternoon: '☀️', Evening: '🌇', Night: '🌙' }[peak];
+
+  const tile = (ico, label, val, sub) =>
+    '<div class="wk-tile"><span class="wk-ico">' + ico + '</span><div><div class="wk-label">' + label + '</div>' +
+    '<div class="wk-val">' + esc(val) + '</div>' + (sub ? '<div class="wk-sub">' + esc(sub) + '</div>' : '') + '</div></div>';
+
+  card.innerHTML =
+    '<div class="wk-top"><div><div class="wk-eyebrow">This week</div>' +
+      '<div class="wk-pct">' + (thisPct === null ? '—' : thisPct + '%') + '</div>' + delta + '</div>' +
+      '<div class="wk-days">' + days + '</div></div>' +
+    '<div class="wk-tiles">' +
+      tile('🏆', 'Strongest', best ? best.r.name : '—', best ? best.pct + '% this week' : '') +
+      tile('🎯', 'Needs focus', worst && worst.pct < 100 ? worst.r.name : 'All on track', worst && worst.pct < 100 ? worst.pct + '% this week' : '') +
+      tile('📅', 'Best day', bestDay >= 0 ? DAYS_FULL[bestDay] : '—', bestDay >= 0 ? Math.round(bestAvg) + '% avg' : 'Needs more data') +
+      tile(peakIcon || '⏰', 'Peak time', buckets[peak] ? peak : '—', buckets[peak] ? 'When you finish most tasks' : 'Needs more data') +
+    '</div>';
+}
+
+/* ============================================================
+   ACHIEVEMENTS
+   ============================================================ */
+const BADGES = [
+  { id: 'first',   emo: '🌱', name: 'First step',     desc: 'Complete your first routine',      test: s => s.totalDone >= 1 },
+  { id: 'perfect', emo: '⭐', name: 'Perfect day',     desc: 'Finish everything in a day',       test: s => s.perfectDays >= 1 },
+  { id: 's3',      emo: '🔥', name: 'On fire',         desc: '3-day streak',                     test: s => s.best >= 3 },
+  { id: 's7',      emo: '⚡', name: 'Week warrior',    desc: '7-day streak',                     test: s => s.best >= 7 },
+  { id: 'week',    emo: '🗓️', name: 'Perfect week',    desc: 'A full Mon–Sun week at 100%',      test: s => s.perfectWeeks >= 1 },
+  { id: 's30',     emo: '🏅', name: 'Monthly master',  desc: '30-day streak',                    test: s => s.best >= 30 },
+  { id: 's100',    emo: '👑', name: 'Centurion',       desc: '100-day streak',                   test: s => s.best >= 100 },
+  { id: 't50',     emo: '✅', name: 'Getting going',   desc: '50 routines completed',            test: s => s.totalDone >= 50 },
+  { id: 't250',    emo: '💪', name: 'Habit builder',   desc: '250 routines completed',           test: s => s.totalDone >= 250 },
+  { id: 't1000',   emo: '🚀', name: 'Unstoppable',     desc: '1,000 routines completed',         test: s => s.totalDone >= 1000 },
+  { id: 'early',   emo: '🌅', name: 'Early bird',      desc: 'Finish a routine before 7 AM',     test: s => s.early },
+  { id: 'night',   emo: '🦉', name: 'Night owl',       desc: 'Finish a routine after 10 PM',     test: s => s.night },
+  { id: 'comeback',emo: '🔄', name: 'Comeback',        desc: 'Perfect day right after a miss',   test: s => s.comeback },
+  { id: 'journal', emo: '📓', name: 'Storyteller',     desc: 'Write 5 diary entries',            test: s => s.notes >= 5 },
+  { id: 'mood',    emo: '💭', name: 'Self-aware',      desc: 'Log your mood 10 times',           test: s => s.moods >= 10 },
+  { id: 'five',    emo: '🧩', name: 'Architect',       desc: 'Have 5 active routines',           test: s => s.active >= 5 }
+];
+
+function badgeStats() {
+  const tk = todayKey();
+  const s = { totalDone: 0, perfectDays: 0, perfectWeeks: 0, best: computeBestStreak(), early: false, night: false, comeback: false,
+    notes: state.notes.filter(n => (n.title || '').trim() || (n.body || '').trim()).length,
+    moods: state.notes.filter(n => n.mood).length, active: state.routines.filter(r => !r.deletedKey).length };
+  Object.keys(state.completions).forEach(function (k) {
+    const c = state.completions[k];
+    const r = state.routines.find(x => x.id === c.routineId);
+    if (!r || !isDone(c.dateKey, r)) return;
+    s.totalDone++;
+    if (c.ts) { const h = new Date(c.ts).getHours(); if (h < 7) s.early = true; if (h >= 22) s.night = true; }
+  });
+  let prevMiss = false, wkOk = true, wkAny = false, g = 0;
+  for (let d = earliestKey(); d <= tk && g++ < 1200; d = addDays(d, 1)) {
+    const c = countsFor(d), dow = parseKey(d).getDay();
+    if (dow === 1) { wkOk = true; wkAny = false; }
+    if (c.total) {
+      wkAny = true;
+      if (c.pct >= 100) { s.perfectDays++; if (prevMiss) s.comeback = true; prevMiss = false; }
+      else { if (d !== tk) prevMiss = true; wkOk = false; }
+    }
+    if (dow === 0 && d < tk && wkOk && wkAny) s.perfectWeeks++;
+  }
+  return s;
+}
+
+function badgeStoreKey() { return 'flow_badges_' + state.user.id; }
+function earnedBadges() { const s = badgeStats(); return BADGES.filter(b => b.test(s)).map(b => b.id); }
+
+function renderBadges() {
+  const got = new Set(earnedBadges());
+  $('#badgeCount').textContent = got.size + ' / ' + BADGES.length;
+  $('#badgeGrid').innerHTML = BADGES.map(b =>
+    '<div class="badge-tile' + (got.has(b.id) ? ' got' : '') + '" title="' + esc(b.desc) + '">' +
+      '<span class="badge-emo">' + b.emo + '</span>' +
+      '<span class="badge-name">' + esc(b.name) + '</span>' +
+      '<span class="badge-desc">' + esc(b.desc) + '</span>' +
+    '</div>').join('');
+}
+
+function checkBadges(silent) {
+  if (!state.user) return;
+  const now = earnedBadges();
+  let prev = null;
+  try { prev = JSON.parse(localStorage.getItem(badgeStoreKey()) || 'null'); } catch (e) {}
+  try { localStorage.setItem(badgeStoreKey(), JSON.stringify(now)); } catch (e) {}
+  if (!prev || silent) return;
+  const fresh = now.filter(id => prev.indexOf(id) === -1);
+  if (!fresh.length) return;
+  const b = BADGES.find(x => x.id === fresh[0]);
+  setTimeout(function () {
+    toast(b.emo + ' Achievement unlocked: ' + b.name + (fresh.length > 1 ? ' (+' + (fresh.length - 1) + ' more)' : ''));
+  }, 900);
+}
+
+/* ============================================================
+   CONFETTI
+   ============================================================ */
+function celebrate() {
+  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+  const cv = document.createElement('canvas');
+  cv.className = 'confetti';
+  document.body.appendChild(cv);
+  const ctx = cv.getContext('2d');
+  const dpr = Math.min(2, window.devicePixelRatio || 1);
+  const W = cv.width = innerWidth * dpr, H = cv.height = innerHeight * dpr;
+  const cols = ['#2dd4bf', '#22c55e', '#fbbf24', '#f97316', '#60a5fa', '#f472b6', '#ffffff'];
+  const P = [];
+  for (let i = 0; i < 160; i++) {
+    const fromLeft = i % 2 === 0;
+    P.push({
+      x: fromLeft ? 0 : W, y: H * 0.65,
+      vx: (fromLeft ? 1 : -1) * (6 + Math.random() * 10) * dpr, vy: -(10 + Math.random() * 12) * dpr,
+      w: (5 + Math.random() * 6) * dpr, h: (8 + Math.random() * 8) * dpr,
+      r: Math.random() * Math.PI, vr: (Math.random() - 0.5) * 0.4, c: cols[i % cols.length]
+    });
+  }
+  const t0 = performance.now();
+  (function frame(t) {
+    const el = t - t0;
+    ctx.clearRect(0, 0, W, H);
+    P.forEach(p => {
+      p.vy += 0.45 * dpr; p.vx *= 0.985; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.globalAlpha = Math.max(0, 1 - el / 2600);
+      ctx.fillStyle = p.c; ctx.fillRect(-p.w / 2, -p.h / 2, p.w, p.h); ctx.restore();
+    });
+    if (el < 2600) requestAnimationFrame(frame); else cv.remove();
+  })(t0);
+}
+
+/* ============================================================
+   MANAGE: DRAG TO REORDER (mouse + touch) & KEYBOARD
+   ============================================================ */
+async function saveOrderFromDom() {
+  const ids = $$('#manageList .manage-item').map(li => li.dataset.id);
+  try {
+    for (let i = 0; i < ids.length; i++) {
+      const r = state.routines.find(x => x.id === ids[i]);
+      if (r && r.order !== i) { r.order = i; await DB.put('routines', r); }
+    }
+  } catch (e) { toast('Could not reorder.'); }
+  state.routines.sort((a, b) => (a.order || 0) - (b.order || 0));
+  renderDesktopSidebarWidgets();
+}
+
+(function setupDrag() {
+  const list = $('#manageList');
+  let drag = null;
+  list.addEventListener('pointerdown', function (e) {
+    const h = e.target.closest('[data-handle]');
+    if (!h) return;
+    const li = h.closest('.manage-item');
+    e.preventDefault();
+    h.setPointerCapture(e.pointerId);
+    const rect = li.getBoundingClientRect();
+    drag = { li: li, h: h, startY: e.clientY, offset: 0, height: rect.height + 9 };
+    li.classList.add('dragging');
+    list.classList.add('is-dragging');
+  });
+  list.addEventListener('pointermove', function (e) {
+    if (!drag) return;
+    let dy = e.clientY - drag.startY;
+    const li = drag.li;
+    const prev = li.previousElementSibling, next = li.nextElementSibling;
+    if (dy > drag.height / 2 && next) { list.insertBefore(next, li); drag.startY += drag.height; dy -= drag.height; }
+    else if (dy < -drag.height / 2 && prev) { list.insertBefore(li, prev); drag.startY -= drag.height; dy += drag.height; }
+    li.style.transform = 'translateY(' + dy + 'px)';
+  });
+  function end() {
+    if (!drag) return;
+    drag.li.style.transform = '';
+    drag.li.classList.remove('dragging');
+    list.classList.remove('is-dragging');
+    drag = null;
+    saveOrderFromDom();
+  }
+  list.addEventListener('pointerup', end);
+  list.addEventListener('pointercancel', end);
+  list.addEventListener('keydown', function (e) {
+    const h = e.target.closest('[data-handle]');
+    if (!h || (e.key !== 'ArrowUp' && e.key !== 'ArrowDown')) return;
+    e.preventDefault();
+    const li = h.closest('.manage-item');
+    if (e.key === 'ArrowUp' && li.previousElementSibling) list.insertBefore(li, li.previousElementSibling);
+    else if (e.key === 'ArrowDown' && li.nextElementSibling) list.insertBefore(li.nextElementSibling, li);
+    h.focus();
+    saveOrderFromDom();
+  });
+})();
+
+/* ============================================================
+   REMINDERS & NOTIFICATIONS
+   - In-app engine checks every 30s while FLOW is open (foreground or background tab)
+   - Service worker shows the notifications (required on Android)
+   - Periodic Background Sync (installed app on Android/Chrome) lets the
+     service worker check even when FLOW is closed — browser decides timing
+   ============================================================ */
+const REM_CACHE = 'flow-reminders';
+const hasNotif = () => 'Notification' in window;
+function remKey() { return 'flow_rem_' + state.user.id; }
+function remCfg() {
+  let c = null;
+  try { c = JSON.parse(localStorage.getItem(remKey()) || 'null'); } catch (e) {}
+  return Object.assign({ enabled: false, checkin: '20:00', asked: false }, c || {});
+}
+function setRemCfg(patch) {
+  const c = Object.assign(remCfg(), patch);
+  try { localStorage.setItem(remKey(), JSON.stringify(c)); } catch (e) {}
+  syncReminderState();
+  return c;
+}
+function hhmm(d) { return pad(d.getHours()) + ':' + pad(d.getMinutes()); }
+function minutesOf(t) { const p = t.split(':').map(Number); return p[0] * 60 + p[1]; }
+
+function firedKey(dk) { return 'flow_fired_' + state.user.id + '_' + dk; }
+function getFired(dk) { try { return JSON.parse(localStorage.getItem(firedKey(dk)) || '[]'); } catch (e) { return []; } }
+function addFired(dk, id) {
+  const f = getFired(dk); if (f.indexOf(id) === -1) f.push(id);
+  try {
+    localStorage.setItem(firedKey(dk), JSON.stringify(f));
+    localStorage.removeItem(firedKey(addDays(dk, -2)));
+  } catch (e) {}
+}
+
+function pendingToday() {
+  const tk = todayKey();
+  return routinesForDate(tk).filter(r => !isDone(tk, r));
+}
+
+let swReg = null;
+async function showNotif(title, body, tag) {
+  const opts = { body: body, tag: tag, icon: './logo.svg', badge: './logo.svg', data: { url: './' } };
+  try {
+    if (swReg && swReg.showNotification) { await swReg.showNotification(title, opts); return true; }
+  } catch (e) {}
+  try { new Notification(title, opts); return true; } catch (e) { return false; }
+}
+
+function reminderTick() {
+  if (!state.user || !hasNotif() || Notification.permission !== 'granted') return;
+  const cfg = remCfg();
+  if (!cfg.enabled) return;
+  const tk = todayKey(), now = new Date(), nowM = now.getHours() * 60 + now.getMinutes();
+  const pending = pendingToday();
+  if (!pending.length) return;
+  const fired = getFired(tk);
+
+  pending.forEach(function (r) {
+    if (!r.remindAt || fired.indexOf(r.id) !== -1) return;
+    const m = minutesOf(r.remindAt);
+    if (nowM < m || nowM - m > 180) return;
+    const t = rTarget(r), c = compCount(tk, r);
+    const left = pending.length - 1;
+    showNotif('⏰ ' + r.name,
+      (t > 1 ? c + ' / ' + t + (r.unit ? ' ' + r.unit : '') + ' done so far. ' : 'Still pending today. ') +
+      (left ? left + ' more routine' + (left === 1 ? '' : 's') + ' left today.' : 'This is the last one for today!'),
+      'flow-r-' + r.id);
+    addFired(tk, r.id);
+  });
+
+  if (cfg.checkin && fired.indexOf('checkin') === -1 && nowM >= minutesOf(cfg.checkin)) {
+    const names = pending.map(r => r.name);
+    showNotif(pending.length + ' routine' + (pending.length === 1 ? '' : 's') + ' left today',
+      names.slice(0, 4).join(', ') + (names.length > 4 ? ' +' + (names.length - 4) + ' more' : '') + ' — you’ve got this 💪',
+      'flow-checkin');
+    addFired(tk, 'checkin');
+  }
+}
+
+/* Snapshot for the service worker (it can't read app state directly) */
+async function syncReminderState() {
+  if (!state.user || typeof caches === 'undefined') return;
+  try {
+    const cfg = remCfg(), tk = todayKey();
+    const snap = {
+      v: 1, enabled: !!cfg.enabled && hasNotif() && Notification.permission === 'granted',
+      checkin: cfg.checkin, date: tk,
+      routines: state.routines.filter(r => !r.deletedKey).map(r => ({
+        id: r.id, name: r.name, days: r.days || null, remindAt: r.remindAt || '', target: rTarget(r), unit: r.unit || '', createdKey: r.createdKey })),
+      skipped: Object.keys(state.skips).filter(k => k.indexOf(tk + '|') === 0).map(k => k.split('|')[1]),
+      done: routinesForDate(tk).filter(r => isDone(tk, r)).map(r => r.id),
+      fired: getFired(tk)
+    };
+    const c = await caches.open(REM_CACHE);
+    await c.put('./__reminders.json', new Response(JSON.stringify(snap), { headers: { 'Content-Type': 'application/json' } }));
+  } catch (e) {}
+}
+async function clearReminderState() {
+  try { if (typeof caches !== 'undefined') await (await caches.open(REM_CACHE)).delete('./__reminders.json'); } catch (e) {}
+}
+
+async function registerPeriodic() {
+  try {
+    if (!swReg || !('periodicSync' in swReg)) return false;
+    const st = await navigator.permissions.query({ name: 'periodic-background-sync' });
+    if (st.state !== 'granted') return false;
+    await swReg.periodicSync.register('flow-reminders', { minInterval: 15 * 60 * 1000 });
+    return true;
+  } catch (e) { return false; }
+}
+
+const isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+
+function renderReminderSettings() {
+  if (!state.user) return;
+  const cfg = remCfg();
+  const perm = hasNotif() ? Notification.permission : 'unsupported';
+  const on = cfg.enabled && perm === 'granted';
+  const sw = $('#notifSwitch');
+  sw.setAttribute('aria-checked', on ? 'true' : 'false');
+  sw.classList.toggle('on', on);
+  $('#checkinTime').value = cfg.checkin || '';
+  $('#checkinTime').disabled = !on;
+  $('#testNotifBtn').disabled = !on;
+  let sub = 'Remind me about today’s unfinished routines';
+  let hint = 'Per-routine reminder times are set in Manage → edit a routine. Reminders only include routines scheduled for today that aren’t done yet.';
+  if (perm === 'denied') sub = 'Blocked in browser settings — allow notifications for this site';
+  if (perm === 'unsupported') {
+    sub = 'Not supported in this browser';
+    if (isIOS && !isStandalone) hint = 'On iPhone/iPad: tap Share → “Add to Home Screen”, then open FLOW from your home screen to turn on reminders.';
+  } else if (on && !isStandalone) {
+    hint = 'Tip: install FLOW (browser menu → “Install app” / “Add to Home screen”) so reminders keep working better when the app is closed.';
+  }
+  $('#notifSub').textContent = sub;
+  $('#notifHint').textContent = hint;
+}
+
+async function enableReminders() {
+  if (!hasNotif()) { renderReminderSettings(); toast(isIOS ? 'Add FLOW to your Home Screen first' : 'Notifications aren’t supported here'); return false; }
+  let perm = Notification.permission;
+  if (perm === 'default') perm = await Notification.requestPermission();
+  if (perm !== 'granted') { setRemCfg({ asked: true }); renderReminderSettings(); toast('Notifications are blocked for this site'); return false; }
+  setRemCfg({ enabled: true, asked: true });
+  await registerPeriodic();
+  renderReminderSettings();
+  showNotif('Reminders are on ✓', 'FLOW will remind you about today’s unfinished routines.', 'flow-test');
+  reminderTick();
+  return true;
+}
+
+function maybeOfferReminders() {
+  if (!state.user || !hasNotif()) return;
+  const cfg = remCfg();
+  if (cfg.enabled || cfg.asked || Notification.permission === 'denied') return;
+  setRemCfg({ asked: true });
+  setTimeout(function () {
+    confirmModal('Turn on reminders?',
+      'Get a notification when a routine’s reminder time arrives — only if it isn’t done yet — plus a daily check-in of what’s left.',
+      'Turn on', enableReminders);
+  }, 450);
+}
+
+$('#notifSwitch').addEventListener('click', async function () {
+  const cfg = remCfg();
+  if (cfg.enabled && hasNotif() && Notification.permission === 'granted') {
+    setRemCfg({ enabled: false });
+    renderReminderSettings();
+    toast('Reminders off');
+  } else {
+    await enableReminders();
+  }
+});
+$('#checkinTime').addEventListener('change', function () {
+  setRemCfg({ checkin: this.value || '' });
+  toast(this.value ? 'Daily check-in at ' + fmtTime(this.value) : 'Daily check-in off');
+});
+$('#testNotifBtn').addEventListener('click', async function () {
+  const p = pendingToday();
+  const ok = await showNotif(p.length ? p.length + ' routine' + (p.length === 1 ? '' : 's') + ' left today' : 'All done for today 🎉',
+    p.length ? p.slice(0, 4).map(r => r.name).join(', ') : 'Nothing pending — great work!', 'flow-test');
+  toast(ok ? 'Test notification sent' : 'Could not show a notification');
+});
+
+setInterval(reminderTick, 30000);
+document.addEventListener('visibilitychange', function () {
+  if (document.visibilityState === 'visible' && state.user) {
+    if (state.view === 'today' && state.selectedDate !== todayKey()) { state.selectedDate = todayKey(); renderToday(); }
+    reminderTick();
+  }
+});
+
+(function registerSW() {
+  if (!('serviceWorker' in navigator) || !/^https?:$/.test(location.protocol)) return;
+  navigator.serviceWorker.register('./sw.js').then(function (reg) {
+    swReg = reg;
+    return navigator.serviceWorker.ready;
+  }).then(function (reg) { swReg = reg; }).catch(function () {});
+})();
 
 /* ============================================================
    PWA & BOOT
@@ -3250,10 +4252,12 @@ async function boot() {
   setAuthMode('login');
   $('#authScreen').hidden = false;
   $('#mainApp').hidden = true;
+  document.documentElement.classList.remove('booting');
 }
 
 boot().catch(function (err) {
   console.error('FLOW boot error', err);
+  document.documentElement.classList.remove('booting');
   const screen = document.getElementById('authScreen');
   if (screen) screen.hidden = false;
 });
