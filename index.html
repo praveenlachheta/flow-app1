@@ -475,7 +475,6 @@ ul{list-style:none;}
     padding-top: 0;
     z-index: 120;
   }
-  /* Constrain text content width for readability on wide screens */
   .editor-title {
     padding-left: max(18px, calc((100% - 760px) / 2));
     padding-right: max(18px, calc((100% - 760px) / 2));
@@ -502,7 +501,6 @@ ul{list-style:none;}
     max-height: 80vh;
   }
 
-  /* Toast sits at bottom center of viewport on desktop */
   #toast {
     bottom: 28px;
   }
@@ -1848,17 +1846,14 @@ function renderCalendar() {
 }
 
 function renderDesktopSidebarWidgets() {
-  // 1. Streaks
   $('#deskStreakVal').textContent = computeStreak() + ' days';
   $('#deskBestVal').textContent = computeBestStreak() + ' days';
 
-  // 2. Calendar History in Right Panel
   const y = state.calMonth.y;
   const m = state.calMonth.m;
   $('#deskCalTitle').textContent = MONTHS_SHORT[m] + ' ' + y;
   $('#deskCalGrid').innerHTML = buildCalendarHtml();
 
-  // 3. Routine Consistency in Right Panel
   const activeRoutines = state.routines.filter(r => !r.deletedKey);
   const box = $('#deskConsistencyBox');
   if (!activeRoutines.length) {
@@ -1866,6 +1861,7 @@ function renderDesktopSidebarWidgets() {
     return;
   }
 
+  const tk = todayKey();
   box.innerHTML = activeRoutines.map(function (r) {
     let totalDays = 0;
     let completedDays = 0;
@@ -2153,7 +2149,6 @@ $('#chartToggle').addEventListener('click', function (e) {
   renderChart();
 });
 
-/* --- Calendar navigation: keep main + desktop in sync --- */
 $('#calPrev').addEventListener('click', function () {
   let m = state.calMonth.m - 1;
   let y = state.calMonth.y;
@@ -2177,7 +2172,6 @@ $('#calGrid').addEventListener('click', function (e) {
   openDateDetail(cell.dataset.date);
 });
 
-// Desktop Right Sidebar Calendar Controls
 $('#deskCalPrev').addEventListener('click', function () {
   let m = state.calMonth.m - 1;
   let y = state.calMonth.y;
