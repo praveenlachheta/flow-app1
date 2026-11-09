@@ -720,6 +720,63 @@ body{
 .streak-sub{display:flex;justify-content:space-between;margin-top:14px;padding-top:12px;border-top:1px solid var(--border);font-size:13px;color:var(--muted);}
 .streak-sub span:last-child{color:var(--text);font-weight:600;font-variant-numeric:tabular-nums;}
 
+/* ---- Auth extras ---- */
+.field-row{display:flex;align-items:center;justify-content:space-between;gap:10px;}
+.small-link{font-size:12.5px;font-weight:600;color:var(--accent);text-decoration:none;}
+.small-link:hover{text-decoration:underline;}
+.pw-wrap{position:relative;}
+.pw-wrap input{width:100%;padding-right:46px;}
+.pw-wrap .text-input{margin-top:0;}
+.pw-eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);width:34px;height:34px;border-radius:9px;display:grid;place-items:center;color:var(--muted);}
+.pw-eye:hover{background:var(--surface-2);color:var(--text);}
+.pw-eye svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.pw-eye.on{color:var(--accent);}
+.pw-eye.on svg path{stroke-dasharray:none;}
+.pw-eye.on::after{content:"";position:absolute;width:20px;height:1.8px;background:currentColor;transform:rotate(-45deg);border-radius:2px;}
+
+/* ---- Form dialog ---- */
+.m-field{margin-top:14px;}
+.m-field .text-input{height:46px;}
+.pw-meter{display:flex;align-items:center;gap:4px;margin-top:8px;}
+.pw-meter i{flex:1;height:4px;border-radius:4px;background:var(--surface-2);transition:background .2s;}
+.pw-meter span{flex:none;min-width:58px;text-align:right;font-size:11.5px;font-weight:600;color:var(--muted);}
+.pw-meter[data-s="0"] i:nth-child(-n+1),.pw-meter[data-s="1"] i:nth-child(-n+1){background:var(--st-miss);}
+.pw-meter[data-s="2"] i:nth-child(-n+2){background:var(--st-part);}
+.pw-meter[data-s="3"] i:nth-child(-n+3){background:var(--accent);}
+.pw-meter[data-s="4"] i{background:var(--st-full);}
+.modal-error{color:var(--st-miss);font-weight:500;margin-top:12px;}
+
+/* ---- Recovery key dialog ---- */
+.key-hero{width:52px;height:52px;margin:0 auto 14px;border-radius:15px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);}
+.key-hero svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.key-box{margin:18px 0 10px;padding:16px;border-radius:14px;text-align:center;
+  font-family:ui-monospace,SFMono-Regular,Consolas,"Liberation Mono",monospace;font-size:19px;font-weight:700;letter-spacing:.12em;
+  background:var(--bg);border:1.5px dashed var(--border-strong);user-select:all;word-break:break-all;}
+.key-actions{display:flex;gap:8px;justify-content:center;}
+.key-note{text-align:center;font-size:12.5px;}
+.key-ack{display:flex;align-items:center;gap:10px;margin-top:18px;font-size:13.5px;font-weight:500;cursor:pointer;}
+.key-ack input{width:18px;height:18px;accent-color:var(--accent);}
+
+/* ---- Settings list ---- */
+.settings-group{background:var(--surface);border:1px solid var(--border);border-radius:16px;overflow:hidden;box-shadow:var(--shadow-sm);margin-bottom:6px;}
+.set-row{width:100%;display:flex;align-items:center;gap:14px;padding:14px 16px;text-align:left;transition:background .15s;}
+.set-row + .set-row,.set-row + input + .set-row{border-top:1px solid var(--border);}
+.set-row:hover{background:var(--surface-2);}
+.set-ico{width:36px;height:36px;border-radius:10px;flex:none;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);}
+.set-ico svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.set-txt{flex:1;min-width:0;display:flex;flex-direction:column;}
+.set-txt .row-sub{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.set-chev{color:var(--muted);font-size:18px;flex:none;}
+.set-status{flex:none;font-size:11.5px;font-weight:600;padding:3px 9px;border-radius:99px;}
+.set-status.ok{background:rgba(34,197,94,.13);color:var(--st-full);}
+.set-status.warn{background:var(--st-part-bg);color:var(--st-part);}
+.shortcuts-card{padding:6px 16px;}
+.kbd-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;font-size:13.5px;color:var(--muted);}
+.kbd-row + .kbd-row{border-top:1px solid var(--border);}
+kbd{font-family:inherit;font-size:12px;font-weight:600;color:var(--text);background:var(--surface-2);border:1px solid var(--border-strong);border-bottom-width:2px;border-radius:6px;padding:1px 7px;}
+.shortcuts-label,.shortcuts-card{display:none;}
+@media (min-width:768px) and (hover:hover){ .shortcuts-label{display:block;} .shortcuts-card{display:block;} }
+
 /* ---- Desktop / iPad shell polish ---- */
 @media (min-width:768px){
   body{background:var(--chrome);}
@@ -790,8 +847,16 @@ body{
           <input id="authEmail" type="email" autocomplete="email" placeholder="you@example.com" required>
         </div>
         <div class="field">
-          <label for="authPassword">Password</label>
-          <input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••" required>
+          <div class="field-row">
+            <label for="authPassword">Password</label>
+            <button type="button" class="link-btn small-link" id="forgotBtn">Forgot password?</button>
+          </div>
+          <div class="pw-wrap">
+            <input id="authPassword" type="password" autocomplete="current-password" placeholder="••••••••" required>
+            <button type="button" class="pw-eye" data-eye="authPassword" aria-label="Show password">
+              <svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>
+            </button>
+          </div>
         </div>
         <p class="auth-error" id="authError" hidden></p>
         <button type="submit" class="btn btn-primary" id="authSubmit">Log in</button>
@@ -1018,7 +1083,50 @@ body{
             </div>
           </div>
 
-          <p class="section-label">Account</p>
+          <p class="section-label">Account &amp; Security</p>
+          <div class="settings-group">
+            <button class="set-row" id="setNameBtn">
+              <span class="set-ico"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="3.6"/><path d="M4.8 20a7.2 7.2 0 0 1 14.4 0"/></svg></span>
+              <span class="set-txt"><span class="row-title">Display name</span><span class="row-sub" id="setNameSub">—</span></span>
+              <span class="set-chev">›</span>
+            </button>
+            <button class="set-row" id="setPassBtn">
+              <span class="set-ico"><svg viewBox="0 0 24 24"><rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 8 0v3"/></svg></span>
+              <span class="set-txt"><span class="row-title">Change password</span><span class="row-sub">Set a new password for this account</span></span>
+              <span class="set-chev">›</span>
+            </button>
+            <button class="set-row" id="setKeyBtn">
+              <span class="set-ico"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></svg></span>
+              <span class="set-txt"><span class="row-title">Recovery key</span><span class="row-sub" id="setKeySub">Used to reset a forgotten password</span></span>
+              <span class="set-status" id="setKeyStatus"></span>
+              <span class="set-chev">›</span>
+            </button>
+          </div>
+
+          <p class="section-label">Data &amp; Backup</p>
+          <div class="settings-group">
+            <button class="set-row" id="exportBtn">
+              <span class="set-ico"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 20h14"/></svg></span>
+              <span class="set-txt"><span class="row-title">Export backup</span><span class="row-sub">Download routines, history &amp; diary as a file</span></span>
+              <span class="set-chev">›</span>
+            </button>
+            <button class="set-row" id="importBtn">
+              <span class="set-ico"><svg viewBox="0 0 24 24"><path d="M12 15V3M7 8l5-5 5 5M5 20h14"/></svg></span>
+              <span class="set-txt"><span class="row-title">Import backup</span><span class="row-sub">Restore from a FLOW backup file</span></span>
+              <span class="set-chev">›</span>
+            </button>
+            <input type="file" id="importFile" accept=".json,application/json" hidden>
+          </div>
+
+          <p class="section-label shortcuts-label">Keyboard shortcuts</p>
+          <div class="card shortcuts-card">
+            <div class="kbd-row"><span>Switch views</span><span><kbd>1</kbd>–<kbd>5</kbd></span></div>
+            <div class="kbd-row"><span>New diary entry</span><kbd>N</kbd></div>
+            <div class="kbd-row"><span>Add routine</span><kbd>A</kbd></div>
+            <div class="kbd-row"><span>Close dialog</span><kbd>Esc</kbd></div>
+          </div>
+
+          <p class="section-label">Session</p>
           <button class="row-card" id="logoutBtn" style="width:100%;text-align:left;background:var(--surface);">
             <div>
               <div class="row-title">Log out</div>
@@ -1580,18 +1688,22 @@ async function handleAuth(e) {
 
   if (authMode === 'register') {
     if (!name) return fail('Please enter your name.');
+    if (pass.length < 6) return fail('Password must be at least 6 characters.');
     if (users.some(u => (u.email || '').toLowerCase() === email)) {
       return fail('An account with this email already exists on this device.');
     }
+    const key = makeRecoveryKey();
     const user = {
       id: uid(),
       name: name,
       email: email,
       passHash: await hashPassword(pass),
+      recoveryHash: await hashPassword(normKey(key)),
       createdAt: Date.now()
     };
     await DB.put('users', user);
     await startSession(user);
+    showRecoveryKey(key, true);
   } else {
     let user = users.find(u => (u.email || '').toLowerCase() === email);
     if (!user) {
@@ -2341,6 +2453,10 @@ function renderProfile() {
   $('#profileEmail').textContent = (u && u.email) ? u.email : '—';
   const initial = ((u && (u.name || u.email)) || 'F').trim().charAt(0).toUpperCase();
   $('#avatarInitial').textContent = initial || 'F';
+  $('#setNameSub').textContent = (u && u.name) || '—';
+  const hasKey = !!(u && u.recoveryHash);
+  $('#setKeyStatus').textContent = hasKey ? 'Active' : 'Not set';
+  $('#setKeyStatus').className = 'set-status ' + (hasKey ? 'ok' : 'warn');
 
   const theme = document.documentElement.getAttribute('data-theme') || 'dark';
   $$('#themeToggle button').forEach(function (b) {
@@ -2494,8 +2610,335 @@ $('#modalBackdrop').addEventListener('click', function (e) {
 document.addEventListener('keydown', function (e) {
   if (e.key === 'Escape') {
     if (!$('#modalBackdrop').hidden) hideModal();
+    return;
   }
+  // Global shortcuts (only when logged in and not typing / no dialog open)
+  if (!state.user || e.ctrlKey || e.metaKey || e.altKey) return;
+  const t = e.target;
+  if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+  if (!$('#modalBackdrop').hidden || !$('#editorSheet').hidden) return;
+  const views = ['today', 'diary', 'progress', 'manage', 'profile'];
+  if (e.key >= '1' && e.key <= '5') { e.preventDefault(); switchView(views[+e.key - 1]); }
+  else if (e.key === 'n' || e.key === 'N') { e.preventDefault(); switchView('diary'); openEditor(null); }
+  else if (e.key === 'a' || e.key === 'A') { e.preventDefault(); switchView('manage'); addRoutine(); }
 });
+
+/* ============================================================
+   ACCOUNT, SECURITY & BACKUP
+   ============================================================ */
+const KEY_ALPHABET = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // no 0/O/1/I
+function makeRecoveryKey() {
+  const bytes = new Uint8Array(16);
+  crypto.getRandomValues(bytes);
+  let s = '';
+  for (let i = 0; i < 16; i++) s += KEY_ALPHABET[bytes[i] % KEY_ALPHABET.length];
+  return s.match(/.{4}/g).join('-');
+}
+function normKey(k) { return String(k || '').toUpperCase().replace(/[^A-Z0-9]/g, ''); }
+
+function pwStrength(pw) {
+  let s = 0;
+  if (pw.length >= 8) s++;
+  if (pw.length >= 12) s++;
+  if (/[a-z]/.test(pw) && /[A-Z]/.test(pw)) s++;
+  if (/\d/.test(pw)) s++;
+  if (/[^A-Za-z0-9]/.test(pw)) s++;
+  return Math.min(4, s);
+}
+const STRENGTH_LABEL = ['Too weak', 'Weak', 'Fair', 'Good', 'Strong'];
+
+/* Generic multi-field form dialog.
+   fields: [{id,label,type,autocomplete,placeholder,value,strength}]
+   onSubmit(values, fail) -> return true to close */
+function formModal(opts) {
+  const fieldsHtml = opts.fields.map(function (f) {
+    const isPw = f.type === 'password';
+    return '<div class="field m-field">' +
+      '<label for="mf_' + f.id + '">' + esc(f.label) + '</label>' +
+      '<div class="pw-wrap">' +
+        '<input class="text-input" id="mf_' + f.id + '" type="' + (f.type || 'text') + '"' +
+          ' autocomplete="' + (f.autocomplete || 'off') + '" placeholder="' + esc(f.placeholder || '') + '"' +
+          ' value="' + esc(f.value || '') + '" maxlength="' + (f.maxlength || 80) + '"' +
+          (f.mono ? ' style="font-family:ui-monospace,SFMono-Regular,Consolas,monospace;letter-spacing:.06em;text-transform:uppercase"' : '') + '>' +
+        (isPw ? '<button type="button" class="pw-eye" data-eye="mf_' + f.id + '" aria-label="Show password"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button>' : '') +
+      '</div>' +
+      (f.strength ? '<div class="pw-meter" id="mf_' + f.id + '_meter"><i></i><i></i><i></i><i></i><span></span></div>' : '') +
+    '</div>';
+  }).join('');
+  showModal(
+    '<h2 class="modal-title">' + esc(opts.title) + '</h2>' +
+    (opts.message ? '<p class="modal-text">' + esc(opts.message) + '</p>' : '') +
+    '<form id="mForm" novalidate>' + fieldsHtml +
+      '<p class="modal-error" id="modalError" hidden></p>' +
+      '<div class="modal-actions">' +
+        '<button type="button" class="btn btn-ghost" data-act="cancel">Cancel</button>' +
+        '<button type="submit" class="btn btn-primary" id="mSubmit">' + esc(opts.confirmText || 'Save') + '</button>' +
+      '</div>' +
+    '</form>'
+  );
+  const form = $('#mForm');
+  const errEl = $('#modalError');
+  function fail(msg, fieldId) {
+    errEl.textContent = msg; errEl.hidden = false;
+    if (fieldId) { try { $('#mf_' + fieldId).focus(); } catch (e) {} }
+    return false;
+  }
+  opts.fields.forEach(function (f) {
+    if (!f.strength) return;
+    const inp = $('#mf_' + f.id), meter = $('#mf_' + f.id + '_meter');
+    inp.addEventListener('input', function () {
+      const v = inp.value, s = v ? pwStrength(v) : -1;
+      meter.dataset.s = s;
+      $('span', meter).textContent = v ? STRENGTH_LABEL[s] : '';
+    });
+  });
+  setTimeout(function () { try { $('#mf_' + opts.fields[0].id).focus(); } catch (e) {} }, 80);
+  form.addEventListener('submit', async function (e) {
+    e.preventDefault();
+    errEl.hidden = true;
+    const vals = {};
+    opts.fields.forEach(f => { vals[f.id] = $('#mf_' + f.id).value; });
+    const btn = $('#mSubmit');
+    btn.disabled = true;
+    try {
+      const ok = await opts.onSubmit(vals, fail);
+      if (ok) hideModal();
+    } catch (err) {
+      fail('Something went wrong. Please try again.');
+    } finally { btn.disabled = false; }
+  });
+  $('#modal').onclick = function (e) {
+    const b = e.target.closest('[data-act]');
+    if (b && b.dataset.act === 'cancel') hideModal();
+  };
+}
+
+function validateNewPassword(pw, confirm, fail) {
+  if (!pw || pw.length < 6) return fail('New password must be at least 6 characters.', 'newPass');
+  if (pw !== confirm) return fail('Passwords do not match.', 'confirmPass');
+  return true;
+}
+
+async function saveUser(u) {
+  await DB.put('users', u);
+  if (state.user && state.user.id === u.id) state.user = u;
+}
+
+/* ---- Recovery key display ---- */
+function showRecoveryKey(key, isNewAccount) {
+  showModal(
+    '<div class="key-hero"><svg viewBox="0 0 24 24"><circle cx="8" cy="15" r="4"/><path d="M11 12l9-9M16 7l3 3M14 9l2 2"/></svg></div>' +
+    '<h2 class="modal-title" style="text-align:center">' + (isNewAccount ? 'Save your recovery key' : 'Your new recovery key') + '</h2>' +
+    '<p class="modal-text" style="text-align:center">FLOW keeps your data only on this device, so there is no email reset. ' +
+      'If you forget your password, this key is the only way back in. Store it somewhere safe.</p>' +
+    '<div class="key-box" id="keyBox">' + esc(key) + '</div>' +
+    '<div class="key-actions">' +
+      '<button class="btn btn-ghost btn-small" data-act="copy">Copy</button>' +
+      '<button class="btn btn-ghost btn-small" data-act="download">Download .txt</button>' +
+    '</div>' +
+    (isNewAccount ? '' : '<p class="modal-text key-note">Any previous recovery key no longer works.</p>') +
+    '<label class="key-ack"><input type="checkbox" id="keyAck"> I have saved my recovery key</label>' +
+    '<div class="modal-actions"><button class="btn btn-primary" data-act="done" id="keyDone" disabled>Done</button></div>'
+  );
+  $('#keyAck').addEventListener('change', function () { $('#keyDone').disabled = !this.checked; });
+  $('#modal').onclick = async function (e) {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    if (b.dataset.act === 'copy') {
+      try { await navigator.clipboard.writeText(key); toast('Recovery key copied'); }
+      catch (err) { toast('Select the key and copy it manually'); }
+    } else if (b.dataset.act === 'download') {
+      const u = state.user || {};
+      downloadFile('flow-recovery-key.txt',
+        'FLOW recovery key\n\nAccount: ' + (u.email || '') + '\nKey: ' + key +
+        '\n\nUse this on the login screen → "Forgot password?" to set a new password.\n', 'text/plain');
+    } else if (b.dataset.act === 'done') {
+      hideModal();
+      if (state.view === 'profile') renderProfile();
+    }
+  };
+}
+
+/* ---- Forgot password (logged out) ---- */
+function openForgotPassword() {
+  const prefill = $('#authEmail').value.trim();
+  formModal({
+    title: 'Reset password',
+    message: 'Enter your email and the recovery key you saved when you created your account.',
+    confirmText: 'Reset password',
+    fields: [
+      { id: 'email', label: 'Email', type: 'email', autocomplete: 'email', value: prefill, placeholder: 'you@example.com' },
+      { id: 'key', label: 'Recovery key', placeholder: 'XXXX-XXXX-XXXX-XXXX', mono: true, maxlength: 24 },
+      { id: 'newPass', label: 'New password', type: 'password', autocomplete: 'new-password', strength: true },
+      { id: 'confirmPass', label: 'Confirm new password', type: 'password', autocomplete: 'new-password' }
+    ],
+    onSubmit: async function (v, fail) {
+      const email = v.email.trim().toLowerCase();
+      if (!/^\S+@\S+\.\S+$/.test(email)) return fail('Please enter a valid email address.', 'email');
+      const users = await DB.getAll('users') || [];
+      const u = users.find(x => (x.email || '').toLowerCase() === email);
+      if (!u) return fail('No account found with this email on this device.', 'email');
+      if (!u.recoveryHash) return fail('This account has no recovery key. Recovery keys are created at sign-up or in Profile → Recovery key.', 'key');
+      if (normKey(v.key).length !== 16) return fail('Recovery key should look like XXXX-XXXX-XXXX-XXXX.', 'key');
+      if (await hashPassword(normKey(v.key)) !== u.recoveryHash) return fail('That recovery key is not correct.', 'key');
+      if (!validateNewPassword(v.newPass, v.confirmPass, fail)) return false;
+      u.passHash = await hashPassword(v.newPass);
+      u.passChangedAt = Date.now();
+      await saveUser(u);
+      $('#authEmail').value = u.email;
+      $('#authPassword').value = '';
+      setAuthMode('login');
+      toast('Password reset. Log in with your new password.');
+      setTimeout(function () { try { $('#authPassword').focus(); } catch (e) {} }, 250);
+      return true;
+    }
+  });
+}
+
+/* ---- Settings actions (logged in) ---- */
+function openChangePassword() {
+  formModal({
+    title: 'Change password',
+    confirmText: 'Update password',
+    fields: [
+      { id: 'curPass', label: 'Current password', type: 'password', autocomplete: 'current-password' },
+      { id: 'newPass', label: 'New password', type: 'password', autocomplete: 'new-password', strength: true },
+      { id: 'confirmPass', label: 'Confirm new password', type: 'password', autocomplete: 'new-password' }
+    ],
+    onSubmit: async function (v, fail) {
+      const u = state.user;
+      if (await hashPassword(v.curPass) !== u.passHash) return fail('Current password is incorrect.', 'curPass');
+      if (!validateNewPassword(v.newPass, v.confirmPass, fail)) return false;
+      if (v.newPass === v.curPass) return fail('New password must be different from the current one.', 'newPass');
+      u.passHash = await hashPassword(v.newPass);
+      u.passChangedAt = Date.now();
+      await saveUser(u);
+      toast('Password updated');
+      return true;
+    }
+  });
+}
+
+function openRecoveryKeySettings() {
+  const has = !!state.user.recoveryHash;
+  formModal({
+    title: has ? 'Create a new recovery key' : 'Set up a recovery key',
+    message: has
+      ? 'For security we can’t show your existing key. Confirm your password to generate a new one — the old key will stop working.'
+      : 'A recovery key lets you reset your password if you forget it. Confirm your password to create one.',
+    confirmText: has ? 'Generate new key' : 'Create key',
+    fields: [{ id: 'curPass', label: 'Password', type: 'password', autocomplete: 'current-password' }],
+    onSubmit: async function (v, fail) {
+      const u = state.user;
+      if (await hashPassword(v.curPass) !== u.passHash) return fail('Password is incorrect.', 'curPass');
+      const key = makeRecoveryKey();
+      u.recoveryHash = await hashPassword(normKey(key));
+      await saveUser(u);
+      setTimeout(function () { showRecoveryKey(key, false); }, 220);
+      return true;
+    }
+  });
+}
+
+function openEditName() {
+  formModal({
+    title: 'Display name',
+    confirmText: 'Save',
+    fields: [{ id: 'name', label: 'Name', autocomplete: 'name', value: state.user.name || '', maxlength: 40 }],
+    onSubmit: async function (v, fail) {
+      const name = v.name.trim();
+      if (!name) return fail('Please enter your name.', 'name');
+      const u = state.user;
+      u.name = name;
+      await saveUser(u);
+      $('#sidebarUserName').textContent = name;
+      $('#sidebarAvatar').textContent = name.charAt(0).toUpperCase();
+      renderProfile();
+      renderToday();
+      toast('Name updated');
+      return true;
+    }
+  });
+}
+
+/* ---- Backup ---- */
+function downloadFile(name, text, type) {
+  const blob = new Blob([text], { type: type || 'application/octet-stream' });
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = name;
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 500);
+}
+
+const DATA_STORES = ['routines', 'completions', 'skips', 'notes'];
+
+async function exportBackup() {
+  const u = state.user;
+  const data = { app: 'FLOW', version: 1, exportedAt: new Date().toISOString(),
+    profile: { name: u.name, email: u.email } };
+  for (const s of DATA_STORES) data[s] = await DB.getAll(s, 'userId', u.id) || [];
+  downloadFile('flow-backup-' + todayKey() + '.json', JSON.stringify(data, null, 2), 'application/json');
+  toast('Backup downloaded');
+}
+
+function importBackup(file) {
+  const reader = new FileReader();
+  reader.onload = function () {
+    let data;
+    try { data = JSON.parse(reader.result); } catch (e) { toast('That file is not a valid backup.'); return; }
+    if (!data || data.app !== 'FLOW' || !DATA_STORES.every(s => Array.isArray(data[s]))) {
+      toast('That file is not a FLOW backup.'); return;
+    }
+    const n = data.routines.length, d = data.notes.length;
+    confirmModal(
+      'Restore this backup?',
+      'This replaces your current routines, history and diary with the backup from ' +
+        (data.exportedAt ? new Date(data.exportedAt).toLocaleDateString() : 'file') +
+        ' (' + n + ' routine' + (n === 1 ? '' : 's') + ', ' + d + ' diary entr' + (d === 1 ? 'y' : 'ies') + ').',
+      'Restore',
+      async function () {
+        const uidv = state.user.id;
+        try {
+          for (const s of DATA_STORES) {
+            const existing = await DB.getAll(s, 'userId', uidv) || [];
+            for (const o of existing) await DB.remove(s, o.id);
+            for (const o of data[s]) {
+              if (!o || !o.id) continue;
+              o.userId = uidv;
+              await DB.put(s, o);
+            }
+          }
+          await loadUserData();
+          switchView('today');
+          renderDesktopSidebarWidgets();
+          toast('Backup restored');
+        } catch (e) { toast('Could not restore backup.'); }
+      }
+    );
+  };
+  reader.readAsText(file);
+}
+
+/* ---- Wiring ---- */
+document.addEventListener('click', function (e) {
+  const eye = e.target.closest('.pw-eye');
+  if (!eye) return;
+  const inp = document.getElementById(eye.dataset.eye);
+  if (!inp) return;
+  const show = inp.type === 'password';
+  inp.type = show ? 'text' : 'password';
+  eye.classList.toggle('on', show);
+  eye.setAttribute('aria-label', show ? 'Hide password' : 'Show password');
+});
+$('#forgotBtn').addEventListener('click', openForgotPassword);
+$('#setPassBtn').addEventListener('click', openChangePassword);
+$('#setKeyBtn').addEventListener('click', openRecoveryKeySettings);
+$('#setNameBtn').addEventListener('click', openEditName);
+$('#exportBtn').addEventListener('click', exportBackup);
+$('#importBtn').addEventListener('click', function () { $('#importFile').value = ''; $('#importFile').click(); });
+$('#importFile').addEventListener('change', function () { if (this.files[0]) importBackup(this.files[0]); });
 
 /* ============================================================
    PWA & BOOT
