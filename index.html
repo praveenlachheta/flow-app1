@@ -93,7 +93,7 @@ ul{list-style:none;}
 .icon-btn.small{width:32px;height:32px;border-radius:10px;font-size:13px;border-color:transparent;background:transparent;}
 .link-btn{color:var(--text);font-weight:650;text-decoration:underline;text-underline-offset:3px;}
 
-.auth-screen{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:32px 22px calc(32px + env(safe-area-inset-bottom));}
+.auth-screen{min-height:100dvh;display:flex;align-items:center;justify-content:center;padding:32px 22px calc(32px + env(safe-area-inset-bottom)); width:100%;}
 .auth-inner{width:100%;max-width:380px;}
 .brand{display:flex;flex-direction:column;align-items:center;text-align:center;margin-bottom:30px;}
 .brand-logo{width:66px;height:66px;border-radius:19px;display:block;margin-bottom:14px;}
@@ -349,7 +349,8 @@ ul{list-style:none;}
 @media (min-width: 768px) {
   body { background: #050608; overflow: hidden; }
   
-  #app {
+  /* Only apply grid layout when mainApp is visible (logged in) */
+  #app:has(#mainApp:not([hidden])) {
     max-width: 1440px;
     height: 92vh;
     max-height: 900px;
@@ -362,6 +363,14 @@ ul{list-style:none;}
     grid-template-rows: 100%;
     overflow: hidden;
     background: var(--bg);
+  }
+
+  /* When logged out, keep auth screen centered nicely */
+  #app:has(#authScreen:not([hidden])) {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
   }
 
   /* Hide mobile bottom nav on desktop */
@@ -406,7 +415,7 @@ ul{list-style:none;}
   .desktop-nav .nav-item-desk:hover { background: rgba(255,255,255,0.03); color: var(--text); }
   .desktop-nav .nav-item-desk.active { background: var(--text); color: var(--bg); }
 
-  /* Main Workspace Center (Fixed App-like feel) */
+  /* Main Workspace Center */
   .desktop-center {
     display: flex;
     flex-direction: column;
@@ -427,7 +436,7 @@ ul{list-style:none;}
   }
   .view .app-brand { display: none; }
 
-  /* Right Insights Panel (Ordered Top to Bottom) */
+  /* Right Insights Panel */
   .desktop-insights {
     display: flex !important;
     flex-direction: column;
@@ -733,9 +742,8 @@ ul{list-style:none;}
       </div>
     </main>
 
-    <!-- RIGHT INSIGHTS PANEL (Desktop Only - Sorted Correctly) -->
+    <!-- RIGHT INSIGHTS PANEL (Desktop Only) -->
     <aside class="desktop-insights">
-      <!-- 1. Streaks & Focus -->
       <div>
         <div class="insights-title" style="margin-bottom:10px;">Streak & Focus</div>
         <div class="insight-card-box" style="margin-bottom:10px;">
@@ -750,7 +758,6 @@ ul{list-style:none;}
         </div>
       </div>
 
-      <!-- 2. Calendar History -->
       <div>
         <div class="insights-title" style="margin-bottom:10px;">Calendar History</div>
         <div class="insight-card-box">
@@ -768,7 +775,6 @@ ul{list-style:none;}
         </div>
       </div>
 
-      <!-- 3. Routine Consistency -->
       <div>
         <div class="insights-title" style="margin-bottom:10px;">Routine Consistency</div>
         <div class="insight-card-box" id="deskConsistencyBox">
@@ -1314,6 +1320,7 @@ async function startSession(user) {
   $('#sidebarAvatar').textContent = (user.name || user.email || 'F').trim().charAt(0).toUpperCase();
 
   switchView('today');
+  renderDesktopSidebarWidgets();
 }
 
 function doLogout() {
