@@ -345,7 +345,7 @@ ul{list-style:none;}
 }
 #toast.show{opacity:1;transform:translate(-50%,0);}
 
-/* ================= DESKTOP & IPAD PRO SPLIT LAYOUT (>= 768px) ================= */
+/* ================= DESKTOP SPLIT LAYOUT (>= 768px) ================= */
 @media (min-width: 768px) {
   body { background: #050608; overflow: hidden; }
   
@@ -406,7 +406,7 @@ ul{list-style:none;}
   .desktop-nav .nav-item-desk:hover { background: rgba(255,255,255,0.03); color: var(--text); }
   .desktop-nav .nav-item-desk.active { background: var(--text); color: var(--bg); }
 
-  /* Main Workspace Center */
+  /* Main Workspace Center (Fixed App-like feel) */
   .desktop-center {
     display: flex;
     flex-direction: column;
@@ -427,7 +427,7 @@ ul{list-style:none;}
   }
   .view .app-brand { display: none; }
 
-  /* Right Insights Panel */
+  /* Right Insights Panel (Ordered Top to Bottom) */
   .desktop-insights {
     display: flex !important;
     flex-direction: column;
@@ -733,16 +733,47 @@ ul{list-style:none;}
       </div>
     </main>
 
-    <!-- RIGHT INSIGHTS PANEL (Desktop Only) -->
+    <!-- RIGHT INSIGHTS PANEL (Desktop Only - Sorted Correctly) -->
     <aside class="desktop-insights">
-      <div class="insights-title">Streak & Focus</div>
-      <div class="insight-card-box">
-        <strong style="font-size:14px;">Active Flow</strong>
-        <p style="font-size:13px;color:var(--muted);margin-top:4px;">Consistency builds momentum. Keep tracking daily.</p>
+      <!-- 1. Streaks & Focus -->
+      <div>
+        <div class="insights-title" style="margin-bottom:10px;">Streak & Focus</div>
+        <div class="insight-card-box" style="margin-bottom:10px;">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+            <span style="font-size:13px;color:var(--muted);font-weight:600;">Current Streak</span>
+            <span id="deskStreakVal" style="font-size:18px;font-weight:800;">0 days</span>
+          </div>
+          <div style="display:flex;align-items:center;justify-content:space-between;">
+            <span style="font-size:13px;color:var(--muted);font-weight:600;">Best Streak</span>
+            <span id="deskBestVal" style="font-size:18px;font-weight:800;">0 days</span>
+          </div>
+        </div>
       </div>
-      <div class="insight-card-box">
-        <strong style="font-size:14px;">Quick Tip</strong>
-        <p style="font-size:13px;color:var(--muted);margin-top:4px;">Use the Diary section to log reflections and clear your mind.</p>
+
+      <!-- 2. Calendar History -->
+      <div>
+        <div class="insights-title" style="margin-bottom:10px;">Calendar History</div>
+        <div class="insight-card-box">
+          <div class="cal-head" style="margin-bottom:8px;">
+            <button class="icon-btn small" id="deskCalPrev" aria-label="Previous month">‹</button>
+            <span class="cal-title" id="deskCalTitle" style="font-size:13px;">—</span>
+            <button class="icon-btn small" id="deskCalNext" aria-label="Next month">›</button>
+          </div>
+          <div class="cal-dows" style="margin-bottom:4px;">
+            <div class="cal-dow">S</div><div class="cal-dow">M</div><div class="cal-dow">T</div>
+            <div class="cal-dow">W</div><div class="cal-dow">T</div><div class="cal-dow">F</div>
+            <div class="cal-dow">S</div>
+          </div>
+          <div class="cal-grid" id="deskCalGrid" style="gap:3px;"></div>
+        </div>
+      </div>
+
+      <!-- 3. Routine Consistency -->
+      <div>
+        <div class="insights-title" style="margin-bottom:10px;">Routine Consistency</div>
+        <div class="insight-card-box" id="deskConsistencyBox">
+          <div style="font-size:13px;color:var(--muted);">No consistency data yet.</div>
+        </div>
       </div>
     </aside>
 
@@ -1414,6 +1445,7 @@ async function toggleCompletion(routineId, checked, rowEl) {
   const offset = circ - (c.pct / 100) * circ;
   const fg = $('#fgCircle');
   if (fg) fg.style.strokeDashoffset = offset;
+  renderDesktopSidebarWidgets();
 }
 
 async function skipRoutineForDay(routineId) {
@@ -1441,6 +1473,7 @@ async function skipRoutineForDay(routineId) {
     return;
   }
   renderToday();
+  renderDesktopSidebarWidgets();
 }
 
 async function restoreSkippedForDay() {
@@ -1457,6 +1490,7 @@ async function restoreSkippedForDay() {
     return;
   }
   renderToday();
+  renderDesktopSidebarWidgets();
 }
 
 /* ============================================================
@@ -1655,7 +1689,7 @@ function deleteCurrentNote() {
 }
 
 /* ============================================================
-   PROGRESS VIEW
+   PROGRESS VIEW & DESKTOP SIDEBAR WIDGETS
    ============================================================ */
 function renderProgress() {
   $('#statToday').textContent = scoreFor(todayKey()) + '%';
@@ -1757,6 +1791,75 @@ function renderCalendar() {
   }
 
   $('#calGrid').innerHTML = html;
+}
+
+function renderDesktopSidebarWidgets() {
+  // 1. Streaks
+  $('#deskStreakVal').textContent = computeStreak() + ' days';
+  $('#deskBestVal').textContent = computeBestStreak() + ' days';
+
+  // 2. Calendar History in Right Panel
+  const y = state.calMonth.y;
+  const m = state.calMonth.m;
+  $('#deskCalTitle').textContent = MONTHS_SHORT[m] + ' ' + y;
+
+  const startDow = new Date(y, m, 1).getDay();
+  const dim = new Date(y, m + 1, 0).getDate();
+  const tk = todayKey();
+
+  let calHtml = '';
+  for (let i = 0; i < startDow; i++) calHtml += '<div class="cal-cell blank"></div>';
+
+  for (let d = 1; d <= dim; d++) {
+    const dk = dateKey(new Date(y, m, d));
+    const c = countsFor(dk);
+    const isFuture = dk > tk;
+
+    let cls = 'cal-cell';
+    let style = '';
+
+    if (isFuture) {
+      cls += ' future';
+    } else if (c.pct === 0) {
+      cls += ' nodata';
+    } else {
+      const a = 0.18 + (c.pct / 100) * 0.82;
+      const fg = c.pct > 55 ? 'var(--bg)' : 'var(--text)';
+      style = 'background:rgba(var(--ink-rgb),' + a.toFixed(2) + ');color:' + fg + ';';
+    }
+
+    if (dk === tk) cls += ' today';
+
+    calHtml += '<button class="' + cls + '" style="' + style + '" data-date="' + dk + '">' + d + '</button>';
+  }
+  $('#deskCalGrid').innerHTML = calHtml;
+
+  // 3. Routine Consistency in Right Panel
+  const activeRoutines = state.routines.filter(r => !r.deletedKey);
+  const box = $('#deskConsistencyBox');
+  if (!activeRoutines.length) {
+    box.innerHTML = '<div style="font-size:13px;color:var(--muted);">No routines available.</div>';
+    return;
+  }
+
+  box.innerHTML = activeRoutines.map(function (r) {
+    let totalDays = 0;
+    let completedDays = 0;
+    let d = r.createdKey || tk;
+    let guard = 0;
+    while (d <= tk && guard++ < 365) {
+      if (!state.skips[d + '|' + r.id]) {
+        totalDays++;
+        if (state.completions[d + '|' + r.id]) completedDays++;
+      }
+      d = addDays(d, 1);
+    }
+    const pct = totalDays > 0 ? Math.round((completedDays / totalDays) * 100) : 0;
+    return '<div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">' +
+      '<span style="font-size:13px;font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:180px;">' + esc(r.name) + '</span>' +
+      '<span style="font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;">' + pct + '%</span>' +
+    '</div>';
+  }).join('');
 }
 
 function renderRoutineConsistency() {
@@ -1876,6 +1979,7 @@ async function addRoutine() {
         return;
       }
       renderManage();
+      renderDesktopSidebarWidgets();
       toast('Routine added');
     }
   });
@@ -1894,6 +1998,7 @@ function editRoutine(id) {
       r.name = name;
       try { await DB.put('routines', r); } catch (e) {}
       renderManage();
+      renderDesktopSidebarWidgets();
       toast('Routine renamed');
     }
   });
@@ -1911,6 +2016,7 @@ function deleteRoutine(id) {
       r.deletedKey = todayKey();
       try { await DB.put('routines', r); } catch (e) {}
       renderManage();
+      renderDesktopSidebarWidgets();
       toast('Routine deleted');
     }
   );
@@ -2044,6 +2150,27 @@ $('#calGrid').addEventListener('click', function (e) {
   openDateDetail(cell.dataset.date);
 });
 
+// Desktop Right Sidebar Calendar Controls
+$('#deskCalPrev').addEventListener('click', function () {
+  let m = state.calMonth.m - 1;
+  let y = state.calMonth.y;
+  if (m < 0) { m = 11; y -= 1; }
+  state.calMonth = { y: y, m: m };
+  renderDesktopSidebarWidgets();
+});
+$('#deskCalNext').addEventListener('click', function () {
+  let m = state.calMonth.m + 1;
+  let y = state.calMonth.y;
+  if (m > 11) { m = 0; y += 1; }
+  state.calMonth = { y: y, m: m };
+  renderDesktopSidebarWidgets();
+});
+$('#deskCalGrid').addEventListener('click', function (e) {
+  const cell = e.target.closest('[data-date]');
+  if (!cell) return;
+  openDateDetail(cell.dataset.date);
+});
+
 $('#addRoutineBtn').addEventListener('click', addRoutine);
 
 $('#manageList').addEventListener('click', function (e) {
@@ -2137,6 +2264,7 @@ async function boot() {
     try { user = await DB.get('users', sessionId); } catch (e) {}
     if (user) {
       await startSession(user);
+      renderDesktopSidebarWidgets();
       return;
     }
     try { localStorage.removeItem('flow_session'); } catch (e) {}
