@@ -3,9 +3,9 @@
    - Notifications: clicking one focuses / opens FLOW.
    - Periodic Background Sync (installed app, Chromium): checks today's unfinished
      routines while FLOW is closed, using the snapshot the page stores in Cache Storage. */
-const VERSION = 'flow-v3';
+const VERSION = 'flow-v4';
 const SHELL = ['./', './index.html', './manifest.json', './logo.svg', './vendor/jspdf.umd.min.js',
-  './vendor/peerjs.min.js', './vendor/qrcode.min.js'];
+  './vendor/peerjs.min.js', './vendor/qrcode.min.js', './vendor/jsQR.min.js'];
 const REM_CACHE = 'flow-reminders';
 
 self.addEventListener('install', e => {

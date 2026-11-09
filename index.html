@@ -987,6 +987,25 @@ label.set-row{cursor:pointer;}
 .pair-dot{width:10px;height:10px;border-radius:50%;background:var(--border-strong);flex:none;margin:0 13px;}
 .pair-dot.live{background:var(--st-full);box-shadow:0 0 0 4px rgba(34,197,94,.18);}
 
+/* QR scanner */
+.scan-cta{display:flex;align-items:center;gap:14px;width:100%;margin-top:16px;padding:14px 16px;border-radius:14px;background:var(--accent-soft);border:1px solid rgba(var(--accent-rgb),.35);text-align:left;color:var(--text);}
+.scan-cta:hover{border-color:var(--accent);}
+.scan-cta svg{width:30px;height:30px;flex:none;fill:none;stroke:var(--accent);stroke-width:1.8;stroke-linecap:round;}
+.scan-cta b{display:block;font-size:15px;font-weight:650;}
+.scan-cta small{display:block;font-size:12px;color:var(--muted);}
+.or-sep{display:flex;align-items:center;gap:10px;margin:18px 0 2px;font-size:11.5px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;}
+.or-sep::before,.or-sep::after{content:"";flex:1;height:1px;background:var(--border);}
+.scan-box{position:relative;margin:16px auto 6px;width:100%;max-width:340px;aspect-ratio:1;border-radius:20px;overflow:hidden;background:#000;}
+.scan-box video{width:100%;height:100%;object-fit:cover;display:block;}
+.scan-frame{position:absolute;inset:14%;}
+.scan-frame i{position:absolute;width:28px;height:28px;border:3px solid var(--accent);}
+.scan-frame i:nth-child(1){top:0;left:0;border-right:none;border-bottom:none;border-radius:10px 0 0 0;}
+.scan-frame i:nth-child(2){top:0;right:0;border-left:none;border-bottom:none;border-radius:0 10px 0 0;}
+.scan-frame i:nth-child(3){bottom:0;left:0;border-right:none;border-top:none;border-radius:0 0 0 10px;}
+.scan-frame i:nth-child(4){bottom:0;right:0;border-left:none;border-top:none;border-radius:0 0 10px 0;}
+.scan-line{position:absolute;left:6%;right:6%;height:2px;background:linear-gradient(90deg,transparent,var(--accent),transparent);animation:scanMove 2s ease-in-out infinite;}
+@keyframes scanMove{0%,100%{top:8%}50%{top:90%}}
+
 /* Confetti */
 .confetti{position:fixed;inset:0;width:100vw;height:100vh;pointer-events:none;z-index:400;}
 
@@ -1081,7 +1100,7 @@ label.set-row{cursor:pointer;}
       </p>
       <button type="button" class="sync-login" id="syncLoginBtn">
         <svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4M20 17v4"/></svg>
-        Sync from another device
+        Scan QR from another device
       </button>
       <p class="auth-foot">Everything stays on your devices.<br>No cloud storage.</p>
     </div>
@@ -1341,7 +1360,7 @@ label.set-row{cursor:pointer;}
             </button>
             <button class="set-row" id="syncJoinBtn">
               <span class="set-ico"><svg viewBox="0 0 24 24"><rect x="6" y="2.5" width="12" height="19" rx="2.5"/><path d="M10.5 18.5h3"/></svg></span>
-              <span class="set-txt"><span class="row-title">Enter a sync code</span><span class="row-sub">Get data from your other device</span></span>
+              <span class="set-txt"><span class="row-title">Scan QR code</span><span class="row-sub">Get data from your other device — no email or password needed</span></span>
               <span class="set-chev">›</span>
             </button>
           </div>
@@ -4372,7 +4391,7 @@ async function openSyncHost() {
   syncCleanup();
   showModal(
     '<h2 class="modal-title">Sync with another device</h2>' +
-    '<p class="modal-text">On your phone or iPad, scan this QR with the camera — or open FLOW there and tap <b>Sync from another device</b> and type the code.</p>' +
+    '<p class="modal-text">Scan this QR on your phone or iPad — with the camera app, or in FLOW with <b>Scan QR code</b>. No email or password needed. Or type the code below.</p>' +
     '<div class="sync-qr" id="syncQr"><span class="spinner"></span></div>' +
     '<div class="sync-code" id="syncCode">······</div>' +
     '<div id="syncStatus" class="sync-status wait"><span class="spinner"></span><span>Preparing…</span></div>' +
@@ -4397,9 +4416,12 @@ async function openSyncHost() {
   let attempts = 0;
   function startHost(retry) {
     syncCleanup();
+    if (!$('#syncQr')) return;              /* dialog was closed */
     attempts = 0;
     const code = makeSyncCode();
-    const link = location.origin + location.pathname + '#sync=' + code;
+    /* one-time secret inside the QR: scanning it = permission (no email/password needed) */
+    const token = randomStr(16, DEV_ALPHA);
+    const link = location.origin + location.pathname + '#sync=' + code + '-' + token;
     const qr = qrlib(0, 'M'); qr.addData(link); qr.make();
     $('#syncQr').innerHTML = qr.createSvgTag({ cellSize: 5, margin: 2 });
     $('#syncCode').textContent = code.slice(0, 3) + ' ' + code.slice(3);
@@ -4423,16 +4445,19 @@ async function openSyncHost() {
           if (msg.t === 'hello') {
             peerName = String(msg.device || 'device').slice(0, 40);
             const u = state.user;
-            if (String(msg.email || '').toLowerCase() !== (u.email || '').toLowerCase() || msg.passHash !== u.passHash) {
+            const tokenOk = typeof msg.token === 'string' && msg.token.length === token.length && msg.token === token;
+            const credsOk = String(msg.email || '').toLowerCase() === (u.email || '').toLowerCase() && msg.passHash === u.passHash;
+            if (!tokenOk && !credsOk) {
               attempts++;
-              conn.send({ t: 'denied' });
-              setSyncStatus('err', 'Wrong email or password entered on ' + peerName + '.');
+              conn.send({ t: 'denied', why: msg.token ? 'token' : 'creds' });
+              setSyncStatus('err', msg.token ? 'That QR code has expired — a new one is shown.' : 'Wrong email or password entered on ' + peerName + '.');
+              if (msg.token) attempts = 3;
               setTimeout(() => { try { conn.close(); } catch (e) {} syncConn = null; if (attempts >= 3) startHost(); }, 400);
               return;
             }
             setSyncStatus('wait', 'Connected to ' + peerName + ' — syncing…');
             conn.joinerDevice = msg.deviceId ? String(msg.deviceId).slice(0, 32) : null;
-            conn.send({ t: 'welcome', userId: u.id });
+            conn.send({ t: 'welcome', userId: u.id, email: u.email });
           } else if (msg.t === 'push') {
             const remote = msg.data || {};
             const merged = mergeUser(state.user, remote.user, state.user.id);
@@ -4472,18 +4497,128 @@ async function openSyncHost() {
 }
 
 /* ---- JOIN: device that scans the QR / types the code ---- */
+const PEER_CDN = 'https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js';
+function parseSyncText(txt) {
+  const m = /sync=([A-Za-z0-9]{6})(?:-([a-z0-9]{8,40}))?/.exec(String(txt || ''));
+  return m ? { code: m[1].toUpperCase(), token: m[2] || null } : null;
+}
+
+/* Core join flow. creds = { token } or { email, passHash }.
+   ui = { status(kind,text), fail(text), done(text) } */
+async function runJoin(code, creds, ui) {
+  let Peer;
+  try { Peer = await loadVendor('./vendor/peerjs.min.js', 'Peer').catch(() => loadVendor(PEER_CDN, 'Peer')); }
+  catch (err) { return ui.fail('Could not load sync tools. Check your internet connection.'); }
+  syncCleanup();
+  ui.status('wait', 'Connecting to your other device…');
+  const peer = syncPeer = new Peer({ debug: 0 });
+  syncTimer = setTimeout(() => ui.fail('Couldn’t reach the other device. Keep the QR screen open there and make sure both devices are online (same Wi-Fi is best).'), 25000);
+  peer.on('error', function (err) {
+    if (err.type === 'peer-unavailable') ui.fail(creds.token ? 'This QR code is no longer active. Tap “New code” on the other device and scan again.' : 'Code not found. Check the code — it changes each time you open Sync.');
+    else ui.fail('Connection problem (' + err.type + '). Check your internet and try again.');
+  });
+  peer.on('open', function () {
+    const conn = syncConn = peer.connect(SYNC_PREFIX + code, { reliable: true });
+    let hostUid = null, hostEmail = null, localUser = null;
+    conn.on('open', function () {
+      ui.status('wait', 'Connected — verifying…');
+      conn.send(Object.assign({ t: 'hello', device: deviceName(), deviceId: myDeviceId() }, creds));
+    });
+    conn.on('data', async function (msg) {
+      try {
+        if (!msg || !msg.t) return;
+        if (msg.t === 'busy') return ui.fail('The other device is already syncing. Try again in a moment.');
+        if (msg.t === 'denied') return ui.fail(msg.why === 'token' ? 'This QR code has expired. Scan the new one shown on the other device.' : 'Email or password doesn’t match the account on the other device.');
+        if (msg.t === 'welcome') {
+          hostUid = msg.userId;
+          hostEmail = String(msg.email || creds.email || '').toLowerCase();
+          ui.status('wait', 'Sending this device’s data…');
+          const users = await DB.getAll('users') || [];
+          localUser = users.find(u => (u.email || '').toLowerCase() === hostEmail) || null;
+          const payload = localUser ? rekeyData(await exportUserData(localUser.id), hostUid)
+                                    : { user: null, routines: [], completions: [], skips: [], notes: [] };
+          conn.send({ t: 'push', data: payload });
+        } else if (msg.t === 'data') {
+          ui.status('wait', 'Saving…');
+          const data = msg.data;
+          if (localUser && localUser.id !== hostUid) {
+            for (const s of SYNC_STORES) {
+              for (const o of (await DB.getAll(s, 'userId', localUser.id) || [])) await DB.remove(s, o.id);
+            }
+            await DB.remove('users', localUser.id);
+          }
+          const user = Object.assign({}, data.user, { id: hostUid });
+          await (DB.putQuiet || DB.put)('users', user);
+          await mergeInto(hostUid, data);
+          if (msg.pair && msg.pair.id && msg.pair.key) {
+            upsertPair({ id: String(msg.pair.id).slice(0, 32), name: String(msg.pair.name || 'device').slice(0, 40), key: msg.pair.key, lastSync: Date.now() }, hostUid);
+          }
+          conn.send({ t: 'done' });
+          clearTimeout(syncTimer);
+          const st = syncStats(data);
+          const idChanged = !!state.user && state.user.id !== hostUid;
+          const switched = !!state.user && (state.user.email || '').toLowerCase() !== (user.email || '').toLowerCase();
+          ui.status('ok', 'Synced · ' + st.routines + ' routines, ' + st.days + ' days, ' + st.notes + ' notes');
+          setTimeout(async function () {
+            hideModal();
+            if (state.user && !idChanged) {
+              state.user = user;
+              await refreshAfterSync();
+              startLiveSync();
+            } else {
+              if (idChanged) { stopLiveSync(); clearReminderState(); }
+              await startSession(user);
+            }
+            toast((switched ? 'Switched to ' + user.email + ' · ' : 'Synced ✓ ') + st.routines + ' routines, ' + st.days + ' days · live sync on');
+          }, 700);
+        }
+      } catch (err) { ui.fail('Sync failed. Please try again.'); }
+    });
+  });
+}
+
+/* Direct join from a scanned QR (token) — no email / password */
+function joinWithToken(code, token) {
+  syncCleanup();
+  const other = state.user ? state.user.email : null;
+  showModal(
+    '<div class="key-hero"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h.01M17 20h4M20 17v4"/></svg></div>' +
+    '<h2 class="modal-title" style="text-align:center">Syncing with your other device</h2>' +
+    '<p class="modal-text" style="text-align:center">This device will open the same account and data as the device showing the QR.' +
+      (other ? ' If that’s a different account than <b>' + esc(other) + '</b>, this device switches to it — your current account stays saved here, separately.' : '') + '</p>' +
+    '<div id="syncStatus" class="sync-status wait"><span class="spinner"></span><span>Starting…</span></div>' +
+    '<div class="modal-actions"><button class="btn btn-ghost" data-act="cancel">Cancel</button>' +
+      '<button class="btn btn-primary" data-act="retry" id="retryBtn" hidden>Scan again</button></div>'
+  );
+  modalOnClose = syncCleanup;
+  $('#modal').onclick = function (e) {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    if (b.dataset.act === 'cancel') hideModal();
+    if (b.dataset.act === 'retry') openScanner();
+  };
+  runJoin(code, { token: token }, {
+    status: setSyncStatus,
+    fail: msg => { setSyncStatus('err', msg); const r = $('#retryBtn'); if (r) r.hidden = false; syncCleanup(); },
+  });
+}
+
+/* Manual: type code + email + password (or open the scanner) */
 function openSyncJoin(prefill) {
   syncCleanup();
-  const loggedIn = !!state.user;
-  const emailVal = loggedIn ? state.user.email : ($('#authEmail').value || '').trim();
+  const emailVal = state.user ? state.user.email : ($('#authEmail').value || '').trim();
   showModal(
     '<h2 class="modal-title">Sync from another device</h2>' +
-    '<p class="modal-text">On your other device open <b>Profile → Sync with another device</b>, then enter the code shown there. Both devices must be on the same Wi-Fi.</p>' +
+    '<p class="modal-text">On your other device open <b>Profile → Sync with another device</b>.</p>' +
+    '<button type="button" class="scan-cta" data-act="scan">' +
+      '<svg viewBox="0 0 24 24"><path d="M4 8V5.5A1.5 1.5 0 0 1 5.5 4H8M16 4h2.5A1.5 1.5 0 0 1 20 5.5V8M20 16v2.5a1.5 1.5 0 0 1-1.5 1.5H16M8 20H5.5A1.5 1.5 0 0 1 4 18.5V16"/><path d="M4 12h16"/></svg>' +
+      '<span><b>Scan QR code</b><small>Fastest — no email or password needed</small></span></button>' +
+    '<div class="or-sep"><span>or enter the code</span></div>' +
     '<form id="joinForm" novalidate>' +
       '<div class="field m-field"><label for="joinCode">Sync code</label>' +
         '<input class="text-input sync-code-input" id="joinCode" maxlength="7" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="ABC 123" value="' + esc(prefill ? prefill.slice(0, 3) + ' ' + prefill.slice(3) : '') + '"></div>' +
-      '<div class="field m-field"><label for="joinEmail">Account email</label>' +
-        '<input class="text-input" id="joinEmail" type="email" autocomplete="email" placeholder="you@example.com" value="' + esc(emailVal) + '"' + (loggedIn ? ' readonly' : '') + '></div>' +
+      '<div class="field m-field"><label for="joinEmail">Account email (on the other device)</label>' +
+        '<input class="text-input" id="joinEmail" type="email" autocomplete="email" placeholder="you@example.com" value="' + esc(emailVal) + '"></div>' +
       '<div class="field m-field"><label for="joinPass">Password (as on the other device)</label>' +
         '<div class="pw-wrap"><input class="text-input" id="joinPass" type="password" autocomplete="current-password">' +
         '<button type="button" class="pw-eye" data-eye="joinPass" aria-label="Show password"><svg viewBox="0 0 24 24"><path d="M2 12s3.6-7 10-7 10 7 10 7-3.6 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg></button></div></div>' +
@@ -4493,105 +4628,121 @@ function openSyncJoin(prefill) {
     '</form>'
   );
   modalOnClose = syncCleanup;
-  setTimeout(() => { try { (prefill ? (emailVal ? $('#joinPass') : $('#joinEmail')) : $('#joinCode')).focus(); } catch (e) {} }, 80);
   $('#joinCode').addEventListener('input', function () {
     const v = this.value.toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 6);
     this.value = v.length > 3 ? v.slice(0, 3) + ' ' + v.slice(3) : v;
   });
-  $('#modal').onclick = function (e) { if (e.target.closest('[data-act="cancel"]')) hideModal(); };
-
+  $('#modal').onclick = function (e) {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    if (b.dataset.act === 'cancel') hideModal();
+    if (b.dataset.act === 'scan') openScanner();
+  };
   $('#joinForm').addEventListener('submit', async function (e) {
     e.preventDefault();
     const code = $('#joinCode').value.toUpperCase().replace(/[^A-Z0-9]/g, '');
     const email = $('#joinEmail').value.trim().toLowerCase();
     const pass = $('#joinPass').value;
     if (code.length !== 6) return setSyncStatus('err', 'Enter the 6-character code from your other device.');
-    if (!/^\S+@\S+\.\S+$/.test(email)) return setSyncStatus('err', 'Enter your account email.');
+    if (!/^\S+@\S+\.\S+$/.test(email)) return setSyncStatus('err', 'Enter the account email used on the other device.');
     if (!pass) return setSyncStatus('err', 'Enter your password.');
     const btn = $('#joinBtn'); btn.disabled = true;
-    const fail = msg => { setSyncStatus('err', msg); btn.disabled = false; syncCleanup(); };
-
-    setSyncStatus('wait', 'Connecting…');
-    let Peer;
-    try { Peer = await loadVendor('./vendor/peerjs.min.js', 'Peer').catch(() => loadVendor('https://cdnjs.cloudflare.com/ajax/libs/peerjs/1.5.4/peerjs.min.js', 'Peer')); }
-    catch (err) { return fail('Could not load sync tools. Check your internet connection.'); }
-    const passHash = await hashPassword(pass);
-
-    syncCleanup();
-    const peer = syncPeer = new Peer({ debug: 0 });
-    syncTimer = setTimeout(() => fail('Couldn’t reach the other device. Make sure FLOW is showing the code there and both devices are on the same Wi-Fi.'), 25000);
-    peer.on('error', function (err) {
-      if (err.type === 'peer-unavailable') fail('Code not found. Check the code — it changes each time you open Sync.');
-      else fail('Connection problem (' + err.type + '). Check your internet and try again.');
-    });
-    peer.on('open', function () {
-      const conn = syncConn = peer.connect(SYNC_PREFIX + code, { reliable: true });
-      let hostUid = null, localUser = null;
-      conn.on('open', function () {
-        setSyncStatus('wait', 'Connected — verifying…');
-        conn.send({ t: 'hello', email: email, passHash: passHash, device: deviceName(), deviceId: myDeviceId() });
-      });
-      conn.on('data', async function (msg) {
-        try {
-          if (!msg || !msg.t) return;
-          if (msg.t === 'busy') return fail('The other device is already syncing. Try again in a moment.');
-          if (msg.t === 'denied') return fail('Email or password doesn’t match the account on the other device.');
-          if (msg.t === 'welcome') {
-            hostUid = msg.userId;
-            setSyncStatus('wait', 'Sending this device’s data…');
-            const users = await DB.getAll('users') || [];
-            localUser = users.find(u => (u.email || '').toLowerCase() === email) || null;
-            const payload = localUser ? rekeyData(await exportUserData(localUser.id), hostUid)
-                                      : { user: null, routines: [], completions: [], skips: [], notes: [] };
-            conn.send({ t: 'push', data: payload });
-          } else if (msg.t === 'data') {
-            setSyncStatus('wait', 'Saving…');
-            const data = msg.data;
-            /* replace a local copy that used a different account id */
-            if (localUser && localUser.id !== hostUid) {
-              for (const s of SYNC_STORES) {
-                for (const o of (await DB.getAll(s, 'userId', localUser.id) || [])) await DB.remove(s, o.id);
-              }
-              await DB.remove('users', localUser.id);
-            }
-            const user = Object.assign({}, data.user, { id: hostUid });
-            await (DB.putQuiet || DB.put)('users', user);
-            await mergeInto(hostUid, data);
-            if (msg.pair && msg.pair.id && msg.pair.key) {
-              upsertPair({ id: String(msg.pair.id).slice(0, 32), name: String(msg.pair.name || 'device').slice(0, 40), key: msg.pair.key, lastSync: Date.now() }, hostUid);
-            }
-            conn.send({ t: 'done' });
-            clearTimeout(syncTimer);
-            const st = syncStats(data);
-            setSyncStatus('ok', 'Synced · ' + st.routines + ' routines, ' + st.days + ' days, ' + st.notes + ' notes');
-            setTimeout(async function () {
-              hideModal();
-              if (state.user) {
-                state.user = user;
-                try { localStorage.setItem('flow_session', user.id); } catch (e) {}
-                await refreshAfterSync();
-                startLiveSync();
-              } else {
-                await startSession(user);
-              }
-              toast('Synced ✓ ' + st.routines + ' routines, ' + st.days + ' days, ' + st.notes + ' notes · live sync on');
-            }, 700);
-          }
-        } catch (err) { fail('Sync failed. Please try again.'); }
-      });
+    runJoin(code, { email: email, passHash: await hashPassword(pass) }, {
+      status: setSyncStatus,
+      fail: msg => { setSyncStatus('err', msg); const b2 = $('#joinBtn'); if (b2) b2.disabled = false; syncCleanup(); }
     });
   });
 }
 
+/* ---- In-app QR scanner (camera) ---- */
+let scanStream = null, scanRAF = null;
+function stopScanner() {
+  cancelAnimationFrame(scanRAF); scanRAF = null;
+  if (scanStream) { scanStream.getTracks().forEach(t => t.stop()); scanStream = null; }
+}
+async function openScanner() {
+  syncCleanup();
+  showModal(
+    '<h2 class="modal-title">Scan QR code</h2>' +
+    '<p class="modal-text">Point the camera at the QR shown on your other device (Profile → Sync with another device).</p>' +
+    '<div class="scan-box"><video id="scanVideo" playsinline muted></video><div class="scan-frame"><i></i><i></i><i></i><i></i><span class="scan-line"></span></div></div>' +
+    '<div id="syncStatus" class="sync-status wait"><span class="spinner"></span><span>Starting camera…</span></div>' +
+    '<div class="modal-actions"><button class="btn btn-ghost" data-act="cancel">Cancel</button><button class="btn btn-ghost" data-act="manual">Enter code instead</button></div>'
+  );
+  modalOnClose = stopScanner;
+  $('#modal').onclick = function (e) {
+    const b = e.target.closest('[data-act]');
+    if (!b) return;
+    if (b.dataset.act === 'cancel') hideModal();
+    if (b.dataset.act === 'manual') openSyncJoin('');
+  };
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+    return setSyncStatus('err', 'Camera isn’t available here. Use your camera app to scan, or enter the code.');
+  }
+  let detector = null, jsqr = null;
+  try {
+    if ('BarcodeDetector' in window && (await BarcodeDetector.getSupportedFormats()).indexOf('qr_code') !== -1) detector = new BarcodeDetector({ formats: ['qr_code'] });
+  } catch (e) {}
+  if (!detector) {
+    try { jsqr = await loadVendor('./vendor/jsQR.min.js', 'jsQR'); }
+    catch (e) { return setSyncStatus('err', 'Could not load the scanner. Use your camera app or enter the code.'); }
+  }
+  try {
+    scanStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1280 }, height: { ideal: 720 } }, audio: false });
+  } catch (e) {
+    return setSyncStatus('err', e && e.name === 'NotAllowedError' ? 'Camera permission was denied. Allow camera access, or enter the code.' : 'Couldn’t open the camera. Enter the code instead.');
+  }
+  const video = $('#scanVideo');
+  if (!video) { stopScanner(); return; }
+  video.srcObject = scanStream;
+  try { await video.play(); } catch (e) {}
+  setSyncStatus('wait', 'Looking for a FLOW QR code…');
+  const cv = document.createElement('canvas'), ctx = cv.getContext('2d', { willReadFrequently: true });
+  let last = 0, busy = false;
+  const tick = async function (t) {
+    if (!scanStream) return;
+    scanRAF = requestAnimationFrame(tick);
+    if (busy || t - last < 120 || video.readyState < 2) return;
+    last = t; busy = true;
+    try {
+      let text = null;
+      if (detector) {
+        const codes = await detector.detect(video);
+        if (codes && codes[0]) text = codes[0].rawValue;
+      } else {
+        const w = video.videoWidth, h = video.videoHeight, s = Math.min(1, 720 / Math.max(w, h));
+        cv.width = Math.round(w * s); cv.height = Math.round(h * s);
+        ctx.drawImage(video, 0, 0, cv.width, cv.height);
+        const img = ctx.getImageData(0, 0, cv.width, cv.height);
+        const r = jsqr(img.data, img.width, img.height, { inversionAttempts: 'dontInvert' });
+        if (r) text = r.data;
+      }
+      if (text) {
+        const s2 = parseSyncText(text);
+        if (s2) {
+          stopScanner();
+          if (navigator.vibrate) navigator.vibrate(40);
+          if (s2.token) joinWithToken(s2.code, s2.token); else openSyncJoin(s2.code);
+          return;
+        }
+        setSyncStatus('err', 'That’s not a FLOW sync code. Keep looking…');
+      }
+    } catch (e) {}
+    busy = false;
+  };
+  scanRAF = requestAnimationFrame(tick);
+}
+
 $('#syncBtn').addEventListener('click', openSyncHost);
-$('#syncLoginBtn').addEventListener('click', () => openSyncJoin(''));
-$('#syncJoinBtn').addEventListener('click', () => openSyncJoin(''));
+$('#syncLoginBtn').addEventListener('click', openScanner);
+$('#syncJoinBtn').addEventListener('click', openScanner);
+window.addEventListener('hashchange', checkSyncLink);
 
 function checkSyncLink() {
-  const m = /[#&]sync=([A-Za-z0-9]{6})/.exec(location.hash || '');
-  if (!m) return;
+  const s = parseSyncText(location.hash || '');
+  if (!s) return;
   try { history.replaceState(null, '', location.pathname + location.search); } catch (e) {}
-  setTimeout(() => openSyncJoin(m[1].toUpperCase()), 300);
+  setTimeout(() => { if (s.token) joinWithToken(s.code, s.token); else openSyncJoin(s.code); }, 300);
 }
 
 /* ============================================================
