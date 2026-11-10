@@ -1058,16 +1058,16 @@ label.set-row{cursor:pointer;}
 
 /* ============ AFFIRMATIONS ============ */
 .aff-banner{display:flex;align-items:center;gap:14px;width:100%;min-height:72px;flex-shrink:0;text-align:left;margin:4px 0 16px;padding:14px 16px;border-radius:16px;
-  color:var(--text);background:var(--surface);border:1px solid var(--border);transition:border-color .15s ease,background .15s ease,transform .15s ease;}
-.aff-banner:hover{border-color:var(--border-strong);}
+  color:#fff;background:radial-gradient(320px 140px at 100% 0%,rgba(255,255,255,.14),transparent 70%),linear-gradient(120deg,#134e4a 0%,#0f766e 100%);
+  box-shadow:0 10px 26px -14px rgba(15,118,110,.7);transition:transform .15s ease,box-shadow .15s ease;}
+.aff-banner:hover{box-shadow:0 14px 30px -14px rgba(15,118,110,.85);}
 .aff-banner:active{transform:scale(.99);}
-.aff-banner .ab-ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none;}
-.aff-banner .ab-ico svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.9;stroke-linecap:round;stroke-linejoin:round;}
+.aff-banner .ab-ico{width:42px;height:42px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.16);color:#fff;flex:none;}
+.aff-banner .ab-ico svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}
 .aff-banner .ab-txt{flex:1;min-width:0;}
-.aff-banner .ab-t{font-weight:650;font-size:15px;line-height:1.3;}
-.aff-banner .ab-s{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.3;}
-.aff-banner .ab-go{font-weight:650;font-size:13px;padding:9px 15px;border-radius:10px;background:var(--accent);color:var(--on-accent);flex:none;}
-.aff-banner.done .ab-go{background:transparent;color:var(--text);border:1px solid var(--border-strong);}
+.aff-banner .ab-t{font-weight:700;font-size:15px;line-height:1.3;}
+.aff-banner .ab-s{font-size:12.5px;color:rgba(255,255,255,.82);margin-top:3px;line-height:1.3;}
+.aff-banner .ab-go{font-weight:700;font-size:13px;padding:9px 16px;border-radius:999px;background:#fff;color:#0f766e;flex:none;}
 
 .aff-hero{border-radius:18px;padding:24px 22px;margin-bottom:18px;color:var(--text);position:relative;overflow:hidden;
   background:radial-gradient(420px 200px at 100% 0%,rgba(var(--accent-rgb),.10),transparent 70%),var(--surface);border:1px solid var(--border);}
