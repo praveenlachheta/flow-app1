@@ -25,7 +25,7 @@
 </script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&family=Geist+Mono:wght@500;600&family=Inter:wght@400;500;600;700&display=swap">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400..800&family=Geist+Mono:wght@500;600&family=Inter:wght@400;500;600;700&family=Fraunces:ital,opsz,wght@0,9..144,400..600;1,9..144,400..500&display=swap">
 <style>
 :root{
   --bg:#ffffff;
@@ -1050,6 +1050,85 @@ label.set-row{cursor:pointer;}
 @media (min-width:1700px) and (min-height:820px){
   body{background:radial-gradient(1200px 600px at 50% -20%,rgba(var(--accent-rgb),.08),transparent 60%),var(--chrome);}
 }
+
+/* ============ AFFIRMATIONS ============ */
+.aff-banner{display:flex;align-items:center;gap:14px;width:100%;text-align:left;margin:4px 0 16px;padding:16px 18px;border-radius:16px;
+  color:#fff;background:linear-gradient(120deg,#312e81 0%,#6d28d9 55%,#c2410c 130%);box-shadow:0 10px 28px -12px rgba(76,29,149,.55);
+  position:relative;overflow:hidden;transition:transform .15s ease;}
+.aff-banner:active{transform:scale(.985);}
+.aff-banner::after{content:"";position:absolute;inset:0;background:radial-gradient(300px 120px at 85% 0%,rgba(253,224,171,.35),transparent 70%);pointer-events:none;}
+.aff-banner .ab-ico{width:40px;height:40px;border-radius:12px;display:grid;place-items:center;background:rgba(255,255,255,.16);font-size:19px;flex:none;}
+.aff-banner .ab-t{font-weight:700;font-size:15px;}
+.aff-banner .ab-s{font-size:12.5px;opacity:.82;margin-top:2px;}
+.aff-banner .ab-go{margin-left:auto;font-weight:700;font-size:13px;padding:8px 13px;border-radius:999px;background:#fff;color:#4c1d95;flex:none;position:relative;z-index:1;}
+.aff-banner.done{background:linear-gradient(120deg,#134e4a,#0f766e);box-shadow:none;}
+.aff-banner.done .ab-go{color:#0f766e;}
+
+.aff-hero{border-radius:20px;padding:26px 22px;margin-bottom:18px;color:#fff;position:relative;overflow:hidden;
+  background:linear-gradient(135deg,#1e1b4b 0%,#4c1d95 50%,#9a3412 120%);}
+.aff-hero::before{content:"";position:absolute;width:260px;height:260px;right:-60px;top:-90px;border-radius:50%;background:radial-gradient(circle,rgba(251,191,36,.38),transparent 65%);}
+.aff-hero > *{position:relative;}
+.aff-hero .ah-k{font-size:11.5px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;opacity:.75;}
+.aff-hero .ah-q{font-family:'Fraunces',Georgia,serif;font-style:italic;font-size:22px;line-height:1.35;margin:10px 0 18px;max-width:30ch;}
+.aff-hero .ah-row{display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+.aff-hero .ah-btn{background:#fff;color:#3b0764;font-weight:750;font-size:14.5px;padding:12px 20px;border-radius:999px;box-shadow:0 8px 22px -8px rgba(0,0,0,.45);}
+.aff-hero .ah-btn:active{transform:scale(.97);}
+.aff-hero .ah-stat{font-size:13px;opacity:.9;}
+.aff-hero .ah-stat b{font-size:15px;}
+
+.aff-add{display:flex;gap:10px;align-items:flex-end;margin-bottom:22px;}
+.aff-add textarea{flex:1;resize:none;min-height:52px;padding:13px 14px;border-radius:14px;border:1px solid var(--border);background:var(--surface);color:var(--text);
+  font:inherit;font-size:15px;line-height:1.4;outline:none;transition:border-color .15s,box-shadow .15s;}
+.aff-add textarea:focus{border-color:var(--accent);box-shadow:var(--ring);}
+.aff-add .btn{height:52px;padding:0 20px;}
+
+.aff-list{list-style:none;margin:0 0 30px;padding:0;display:flex;flex-direction:column;gap:10px;}
+.aff-item{display:flex;align-items:flex-start;gap:12px;padding:15px 14px 15px 16px;border-radius:14px;background:var(--surface);border:1px solid var(--border);}
+.aff-item .ai-n{font-family:'Fraunces',Georgia,serif;font-size:14px;color:#a855f7;min-width:18px;padding-top:2px;font-weight:600;}
+.aff-item .ai-t{flex:1;font-family:'Fraunces',Georgia,serif;font-size:16.5px;line-height:1.45;word-break:break-word;}
+.aff-item .ai-acts{display:flex;gap:2px;flex:none;}
+.aff-item .ai-acts button{width:32px;height:32px;border-radius:9px;color:var(--muted);display:grid;place-items:center;font-size:14px;}
+.aff-item .ai-acts button:hover{background:var(--surface-2);color:var(--text);}
+.aff-item .ai-acts button:disabled{opacity:.25;pointer-events:none;}
+.aff-item textarea{flex:1;font-family:'Fraunces',Georgia,serif;font-size:16px;line-height:1.45;border:1px solid var(--accent);border-radius:10px;padding:8px 10px;background:var(--bg);color:var(--text);resize:vertical;min-height:64px;outline:none;}
+@media (max-width:560px){
+  .aff-item{flex-wrap:wrap;row-gap:4px;}
+  .aff-item .ai-t{flex:1 1 calc(100% - 40px);}
+  .aff-item .ai-acts{width:100%;justify-content:flex-end;margin:-2px -4px -6px 0;}
+}
+.aff-empty{padding:26px 18px;text-align:center;color:var(--muted);border:1px dashed var(--border-strong);border-radius:16px;font-size:14px;line-height:1.6;}
+.aff-empty b{color:var(--text);}
+
+/* full-screen reader: everything on one page */
+#affReader{position:fixed;inset:0;z-index:300;color:#fdf8f0;background:#0c0a1d;opacity:0;transition:opacity .45s ease;}
+#affReader.open{opacity:1;}
+#affReader .ar-bg{position:absolute;inset:0;overflow:hidden;pointer-events:none;
+  background:radial-gradient(1200px 700px at 50% -10%,#3b1d6e 0%,transparent 60%),linear-gradient(180deg,#120c2b 0%,#0c0a1d 55%,#170b14 100%);}
+#affReader .ar-bg i{position:absolute;border-radius:50%;filter:blur(70px);opacity:.55;animation:arFloat 18s ease-in-out infinite alternate;}
+#affReader .ar-bg i:nth-child(1){width:46vmax;height:46vmax;left:-12vmax;top:-8vmax;background:#6d28d9;}
+#affReader .ar-bg i:nth-child(2){width:38vmax;height:38vmax;right:-14vmax;top:30vh;background:#be185d;opacity:.32;animation-duration:22s;}
+#affReader .ar-bg i:nth-child(3){width:40vmax;height:40vmax;left:20vw;bottom:-22vmax;background:#d97706;opacity:.28;animation-duration:26s;}
+@keyframes arFloat{from{transform:translate(0,0) scale(1);}to{transform:translate(4vmax,3vmax) scale(1.12);}}
+#affReader .ar-close{position:fixed;top:calc(14px + env(safe-area-inset-top));right:16px;z-index:2;width:42px;height:42px;border-radius:50%;
+  background:rgba(255,255,255,.1);color:#fff;font-size:16px;-webkit-backdrop-filter:blur(10px);backdrop-filter:blur(10px);border:1px solid rgba(255,255,255,.14);}
+#affReader .ar-scroll{position:absolute;inset:0;overflow-y:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;}
+#affReader .ar-page{max-width:760px;margin:0 auto;padding:calc(64px + env(safe-area-inset-top)) 26px calc(56px + env(safe-area-inset-bottom));text-align:center;}
+#affReader .ar-kicker{font-size:11.5px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:#fcd34d;opacity:.85;}
+#affReader .ar-title{font-family:'Fraunces',Georgia,serif;font-weight:500;font-style:italic;font-size:clamp(30px,5vw,44px);margin:10px 0 6px;letter-spacing:-.01em;
+  background:linear-gradient(90deg,#fde68a,#f9a8d4,#c4b5fd);-webkit-background-clip:text;background-clip:text;color:transparent;}
+#affReader .ar-orn{display:flex;align-items:center;justify-content:center;gap:12px;color:#fcd34d;opacity:.7;font-size:13px;margin:18px 0;}
+#affReader .ar-orn span{width:56px;height:1px;background:linear-gradient(90deg,transparent,rgba(252,211,77,.7),transparent);}
+#affReader .ar-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:clamp(18px,2.6vh,28px);}
+#affReader .ar-list li{font-family:'Fraunces',Georgia,serif;font-weight:400;font-size:clamp(20px,2.3vw + 10px,30px);line-height:1.42;letter-spacing:-.005em;
+  text-wrap:balance;color:#fdf8f0;text-shadow:0 2px 18px rgba(0,0,0,.35);opacity:0;transform:translateY(14px);filter:blur(4px);
+  transition:opacity .9s ease,transform .9s cubic-bezier(.2,.8,.2,1),filter .9s ease;}
+#affReader.open .ar-list li{opacity:1;transform:none;filter:none;}
+#affReader .ar-hint{font-size:13.5px;color:rgba(253,248,240,.6);margin:6px 0 22px;}
+#affReader .ar-done{font-weight:750;font-size:15.5px;padding:15px 28px;border-radius:999px;color:#2e1065;
+  background:linear-gradient(90deg,#fde68a,#fbcfe8);box-shadow:0 12px 30px -10px rgba(251,191,36,.55);transition:transform .15s;}
+#affReader .ar-done:active{transform:scale(.97);}
+#affReader .ar-done.is-done{background:rgba(255,255,255,.12);color:#fff;box-shadow:none;border:1px solid rgba(255,255,255,.2);}
+@media (prefers-reduced-motion: reduce){ #affReader .ar-bg i{animation:none;} #affReader .ar-list li{filter:none;} }
 </style>
 </head>
 <body>
@@ -1136,6 +1215,10 @@ label.set-row{cursor:pointer;}
           <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
           Diary
         </button>
+        <button class="nav-item-desk" data-view="affirm">
+          <svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.8L19 9.2l-4 3.4 1.2 5.2L12 15.1l-4.2 2.7L9 12.6 5 9.2l5.1-1.4z"/></svg>
+          Affirmations
+        </button>
         <button class="nav-item-desk" data-view="progress">
           <svg viewBox="0 0 24 24"><path d="M3.5 20.5h17"/><path d="M6 20.5V12M12 20.5V5M18 20.5v-5.5"/></svg>
           Progress
@@ -1172,6 +1255,8 @@ label.set-row{cursor:pointer;}
 
           <p class="quote">“Action speaks louder than words.”</p>
 
+          <button type="button" class="aff-banner" id="affBanner" hidden></button>
+
           <div class="card progress-ring-card">
             <div class="circular-progress" id="circularProgress">
               <svg viewBox="0 0 100 100">
@@ -1205,6 +1290,24 @@ label.set-row{cursor:pointer;}
             <button class="btn btn-primary btn-small" id="newNoteBtn">＋ New</button>
           </div>
           <ul class="diary-list" id="diaryList"></ul>
+        </section>
+
+        <!-- ---------- AFFIRMATIONS ---------- -->
+        <section id="view-affirm" class="view" hidden>
+          <div class="app-brand">
+            <div class="app-logo-box">
+              <svg viewBox="0 0 24 24"><path d="M4 12.6l5.2 5.2L20 7"/></svg>
+            </div>
+            <span class="app-brand-name">FLOW</span>
+          </div>
+          <div class="view-head"><h1 class="view-title">Affirmations</h1></div>
+          <div class="aff-hero" id="affHero"></div>
+          <form class="aff-add" id="affAddForm" autocomplete="off">
+            <textarea id="affInput" rows="2" maxlength="300" placeholder="Write one in the present tense — “I am…”, “I have…”"></textarea>
+            <button class="btn btn-primary" type="submit">Add</button>
+          </form>
+          <p class="section-label" id="affListLabel">Your affirmations</p>
+          <ul class="aff-list" id="affList"></ul>
         </section>
 
         <!-- ---------- PROGRESS ---------- -->
@@ -1398,7 +1501,7 @@ label.set-row{cursor:pointer;}
 
           <p class="section-label shortcuts-label">Keyboard shortcuts</p>
           <div class="card shortcuts-card">
-            <div class="kbd-row"><span>Switch views</span><span><kbd>1</kbd>–<kbd>5</kbd></span></div>
+            <div class="kbd-row"><span>Switch views</span><span><kbd>1</kbd>–<kbd>6</kbd></span></div>
             <div class="kbd-row"><span>New diary entry</span><kbd>N</kbd></div>
             <div class="kbd-row"><span>Add routine</span><kbd>A</kbd></div>
             <div class="kbd-row"><span>Close dialog</span><kbd>Esc</kbd></div>
@@ -1483,6 +1586,10 @@ label.set-row{cursor:pointer;}
         <svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2.5"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
         <span>Diary</span>
       </button>
+      <button class="nav-item" data-view="affirm">
+        <svg viewBox="0 0 24 24"><path d="M12 3l1.9 4.8L19 9.2l-4 3.4 1.2 5.2L12 15.1l-4.2 2.7L9 12.6 5 9.2l5.1-1.4z"/></svg>
+        <span>Affirm</span>
+      </button>
       <button class="nav-item" data-view="progress">
         <svg viewBox="0 0 24 24"><path d="M3.5 20.5h17"/><path d="M6 20.5V12M12 20.5V5M18 20.5v-5.5"/></svg>
         <span>Progress</span>
@@ -1521,6 +1628,23 @@ label.set-row{cursor:pointer;}
     <div class="editor-foot">
       <span id="editorDate">—</span>
       <button class="btn btn-ghost btn-small" id="editorDelete">Delete</button>
+    </div>
+  </div>
+
+  <!-- ---------- AFFIRMATION READER (full screen) ---------- -->
+  <div id="affReader" hidden role="dialog" aria-modal="true" aria-label="Read your affirmations">
+    <div class="ar-bg"><i></i><i></i><i></i></div>
+    <button class="ar-close" id="arClose" aria-label="Close">✕</button>
+    <div class="ar-scroll" id="arScroll">
+      <div class="ar-page">
+        <div class="ar-kicker" id="arKicker">—</div>
+        <h2 class="ar-title">My affirmations</h2>
+        <div class="ar-orn"><span></span>✦<span></span></div>
+        <ol class="ar-list" id="arList"></ol>
+        <div class="ar-orn"><span></span>✦<span></span></div>
+        <p class="ar-hint">Read each line slowly. Breathe. Feel it as already true.</p>
+        <button class="ar-done" id="arDone">✓ I’ve read them today</button>
+      </div>
     </div>
   </div>
 
@@ -1879,8 +2003,14 @@ async function loadUserData() {
     state.skips[s.dateKey + '|' + s.routineId] = s;
   });
 
-  state.notes = (await DB.getAll('notes', 'userId', u) || []).filter(n => !n.deleted);
+  /* the notes store also holds affirmations (kind:'aff') and daily read logs (kind:'affday') —
+     this way they sync between devices exactly like diary notes */
+  const allNotes = (await DB.getAll('notes', 'userId', u) || []).filter(n => !n.deleted);
+  state.notes = allNotes.filter(n => !n.kind);
   state.notes.sort((a, b) => b.createdAt - a.createdAt);
+  state.affs = allNotes.filter(n => n.kind === 'aff').sort((a, b) => (a.order || 0) - (b.order || 0) || a.createdAt - b.createdAt);
+  state.affDays = {};
+  allNotes.filter(n => n.kind === 'affday').forEach(n => { state.affDays[n.dateKey] = n; });
 }
 
 /* ============================================================
@@ -2128,6 +2258,7 @@ function switchView(name) {
 
   if (name === 'today') renderToday();
   else if (name === 'diary') renderDiary();
+  else if (name === 'affirm') renderAffirm();
   else if (name === 'progress') renderProgress();
   else if (name === 'manage') renderManage();
   else if (name === 'profile') renderProfile();
@@ -2137,6 +2268,7 @@ function switchView(name) {
    TODAY VIEW
    ============================================================ */
 function renderToday() {
+  renderAffBanner();
   const dk = state.selectedDate;
   const tk = todayKey();
   const readOnly = dk < tk;
@@ -2365,6 +2497,151 @@ function renderDiary() {
       '</button>' +
     '</li>';
   }).join('');
+}
+
+/* ============================================================
+   AFFIRMATIONS
+   ============================================================ */
+function affList() { return state.affs || []; }
+function affReadOn(dk) { const d = (state.affDays || {})[dk]; return !!(d && d.count); }
+function affStreak() {
+  const d = new Date();
+  if (!affReadOn(dateKey(d))) d.setDate(d.getDate() - 1);   /* today not read yet — streak still alive */
+  let n = 0;
+  while (affReadOn(dateKey(d)) && n < 3650) { n++; d.setDate(d.getDate() - 1); }
+  return n;
+}
+function affTotalDays() { return Object.keys(state.affDays || {}).filter(affReadOn).length; }
+
+function renderAffBanner() {
+  const b = $('#affBanner');
+  if (!b) return;
+  const list = affList();
+  if (!list.length || state.selectedDate !== todayKey()) { b.hidden = true; return; }
+  const done = affReadOn(todayKey()), st = affStreak();
+  b.hidden = false;
+  b.classList.toggle('done', done);
+  b.innerHTML = '<span class="ab-ico">' + (done ? '✓' : '✨') + '</span>' +
+    '<span><div class="ab-t">' + (done ? 'Affirmations read today' : 'Your daily affirmations') + '</div>' +
+    '<div class="ab-s">' + list.length + ' affirmation' + (list.length > 1 ? 's' : '') +
+      (st ? ' · 🔥 ' + st + '-day streak' : ' · start your streak') + '</div></span>' +
+    '<span class="ab-go">' + (done ? 'Read again' : 'Read now') + '</span>';
+}
+
+function renderAffirm() {
+  const list = affList(), done = affReadOn(todayKey()), st = affStreak();
+  $('#affHero').innerHTML =
+    '<div class="ah-k">' + (done ? '✓ Read today' : 'Today’s practice') + '</div>' +
+    '<div class="ah-q">' + (list.length ? 'What you repeat every day, you slowly become.' : 'Write the life you are creating — in the present tense.') + '</div>' +
+    '<div class="ah-row">' +
+      (list.length ? '<button class="ah-btn" id="affStart">' + (done ? 'Read again' : '✨ Read my affirmations') + '</button>' : '') +
+      '<span class="ah-stat">🔥 <b>' + st + '</b> day streak · <b>' + affTotalDays() + '</b> ' + (affTotalDays() === 1 ? 'day' : 'days') + ' total</span>' +
+    '</div>';
+  $('#affListLabel').hidden = !list.length;
+  const ul = $('#affList');
+  if (!list.length) {
+    ul.innerHTML = '<li class="aff-empty"><b>No affirmations yet.</b><br>Add them above, one at a time.<br>' +
+      'Tips: start with “I am” or “I have”, keep it positive and in the present, and make it personal.</li>';
+    return;
+  }
+  ul.innerHTML = list.map(function (a, i) {
+    return '<li class="aff-item" data-aff="' + esc(a.id) + '">' +
+      '<span class="ai-n">' + (i + 1) + '</span>' +
+      '<span class="ai-t">' + esc(a.text) + '</span>' +
+      '<span class="ai-acts">' +
+        '<button data-a="up" title="Move up" aria-label="Move up"' + (i === 0 ? ' disabled' : '') + '>↑</button>' +
+        '<button data-a="down" title="Move down" aria-label="Move down"' + (i === list.length - 1 ? ' disabled' : '') + '>↓</button>' +
+        '<button data-a="edit" title="Edit" aria-label="Edit">✎</button>' +
+        '<button data-a="del" title="Delete" aria-label="Delete">🗑</button>' +
+      '</span></li>';
+  }).join('');
+}
+
+function saveAff(a) {
+  a.updatedAt = Date.now();
+  return queueWrite(() => DB.put('notes', a));
+}
+function addAff(text) {
+  text = text.trim().replace(/\s+/g, ' ');
+  if (!text) return;
+  const list = affList();
+  const a = { id: uid(), userId: state.user.id, kind: 'aff', text: text,
+    order: list.length ? (list[list.length - 1].order || 0) + 1 : 1, createdAt: Date.now(), updatedAt: Date.now() };
+  state.affs = list.concat([a]);
+  saveAff(a);
+  renderAffirm();
+}
+function moveAff(id, dir) {
+  const list = affList().slice(), i = list.findIndex(a => a.id === id), j = i + dir;
+  if (i < 0 || j < 0 || j >= list.length) return;
+  const t = list[i]; list[i] = list[j]; list[j] = t;
+  list.forEach((a, k) => { if (a.order !== k + 1) { a.order = k + 1; saveAff(a); } });
+  state.affs = list;
+  renderAffirm();
+}
+function deleteAff(id) {
+  const a = affList().find(x => x.id === id);
+  if (!a) return;
+  confirmModal('Delete this affirmation?', a.text, 'Delete', function () {
+    state.affs = affList().filter(x => x.id !== id);
+    queueWrite(() => DB.put('notes', { id: a.id, userId: a.userId, kind: 'aff', createdAt: a.createdAt, updatedAt: Date.now(), deleted: true, text: '' }));
+    renderAffirm();
+    toast('Affirmation deleted');
+  });
+}
+function editAff(li) {
+  const a = affList().find(x => x.id === li.dataset.aff);
+  if (!a || li.querySelector('textarea')) return;
+  const t = li.querySelector('.ai-t');
+  const ta = document.createElement('textarea');
+  ta.value = a.text; ta.maxLength = 300;
+  t.replaceWith(ta);
+  li.querySelector('.ai-acts').innerHTML = '<button data-a="save" title="Save" aria-label="Save" style="color:var(--accent)">✓</button><button data-a="cancel" title="Cancel" aria-label="Cancel">✕</button>';
+  ta.focus(); ta.setSelectionRange(ta.value.length, ta.value.length);
+  ta.addEventListener('keydown', function (e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); li.querySelector('[data-a="save"]').click(); }
+    if (e.key === 'Escape') renderAffirm();
+  });
+}
+
+function markAffRead() {
+  const dk = todayKey(), id = state.user.id + '|affday|' + dk;
+  const first = !affReadOn(dk);
+  const prev = (state.affDays || {})[dk];
+  const rec = { id: id, userId: state.user.id, kind: 'affday', dateKey: dk, count: (prev && prev.count || 0) + 1,
+    createdAt: prev ? prev.createdAt : Date.now(), updatedAt: Date.now() };
+  state.affDays = Object.assign({}, state.affDays, { [dk]: rec });
+  queueWrite(() => DB.put('notes', rec));
+  return first;
+}
+
+let arPrevFocus = null;
+function openAffReader() {
+  const list = affList();
+  if (!list.length) { switchView('affirm'); return; }
+  const r = $('#affReader');
+  $('#arKicker').textContent = new Date().toLocaleDateString(undefined, { weekday: 'long', day: 'numeric', month: 'long' });
+  $('#arList').innerHTML = list.map((a, i) => '<li style="transition-delay:' + (0.15 + i * 0.12).toFixed(2) + 's">' + esc(a.text) + '</li>').join('');
+  const done = affReadOn(todayKey());
+  const btn = $('#arDone');
+  btn.classList.toggle('is-done', done);
+  btn.textContent = done ? '✓ Read today · Close' : '✓ I’ve read them today';
+  arPrevFocus = document.activeElement;
+  r.hidden = false;
+  $('#arScroll').scrollTop = 0;
+  document.documentElement.style.overflow = 'hidden';
+  requestAnimationFrame(() => requestAnimationFrame(() => r.classList.add('open')));
+  setTimeout(() => $('#arClose').focus({ preventScroll: true }), 50);
+}
+function closeAffReader() {
+  const r = $('#affReader');
+  if (r.hidden) return;
+  r.classList.remove('open');
+  document.documentElement.style.overflow = '';
+  setTimeout(() => { r.hidden = true; }, 450);
+  if (arPrevFocus && arPrevFocus.focus) try { arPrevFocus.focus({ preventScroll: true }); } catch (e) {}
+  if (state.view === 'affirm') renderAffirm();
+  renderAffBanner();
 }
 
 let draftTimer = null;
@@ -3062,6 +3339,45 @@ $('#diaryList').addEventListener('click', function (e) {
   if (item) openEditor(item.dataset.note);
 });
 
+$('#affBanner').addEventListener('click', openAffReader);
+$('#affHero').addEventListener('click', function (e) { if (e.target.closest('#affStart')) openAffReader(); });
+$('#affAddForm').addEventListener('submit', function (e) {
+  e.preventDefault();
+  const ta = $('#affInput');
+  if (!ta.value.trim()) { ta.focus(); return; }
+  addAff(ta.value); ta.value = ''; ta.focus();
+});
+$('#affInput').addEventListener('keydown', function (e) {
+  if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); $('#affAddForm').requestSubmit(); }
+});
+$('#affList').addEventListener('click', function (e) {
+  const b = e.target.closest('[data-a]'), li = e.target.closest('[data-aff]');
+  if (!b || !li) return;
+  const id = li.dataset.aff, act = b.dataset.a;
+  if (act === 'up') moveAff(id, -1);
+  else if (act === 'down') moveAff(id, 1);
+  else if (act === 'del') deleteAff(id);
+  else if (act === 'edit') editAff(li);
+  else if (act === 'cancel') renderAffirm();
+  else if (act === 'save') {
+    const a = affList().find(x => x.id === id), v = li.querySelector('textarea').value.trim().replace(/\s+/g, ' ');
+    if (a && v && v !== a.text) { a.text = v; saveAff(a); toast('Saved'); }
+    renderAffirm();
+  }
+});
+$('#arClose').addEventListener('click', closeAffReader);
+$('#arDone').addEventListener('click', function () {
+  if (affReadOn(todayKey())) { closeAffReader(); return; }
+  markAffRead();
+  const st = affStreak();
+  closeAffReader();
+  celebrate();
+  toast(st > 1 ? '🔥 ' + st + '-day affirmation streak!' : '✨ Affirmations done for today');
+});
+document.addEventListener('keydown', function (e) {
+  if (e.key === 'Escape' && !$('#affReader').hidden) closeAffReader();
+});
+
 $('#editorBack').addEventListener('click', function () { closeEditor(false); });
 $('#editorSave').addEventListener('click', saveNote);
 $('#editorDelete').addEventListener('click', deleteCurrentNote);
@@ -3178,9 +3494,9 @@ document.addEventListener('keydown', function (e) {
   if (!state.user || e.ctrlKey || e.metaKey || e.altKey) return;
   const t = e.target;
   if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
-  if (!$('#modalBackdrop').hidden || !$('#editorSheet').hidden) return;
-  const views = ['today', 'diary', 'progress', 'manage', 'profile'];
-  if (e.key >= '1' && e.key <= '5') { e.preventDefault(); switchView(views[+e.key - 1]); }
+  if (!$('#modalBackdrop').hidden || !$('#editorSheet').hidden || !$('#affReader').hidden) return;
+  const views = ['today', 'diary', 'affirm', 'progress', 'manage', 'profile'];
+  if (e.key >= '1' && e.key <= '6') { e.preventDefault(); switchView(views[+e.key - 1]); }
   else if (e.key === 'n' || e.key === 'N') { e.preventDefault(); switchView('diary'); openEditor(null); }
   else if (e.key === 'a' || e.key === 'A') { e.preventDefault(); switchView('manage'); addRoutine(); }
 });
@@ -4373,7 +4689,7 @@ function syncStats(data) {
   return {
     routines: (data.routines || []).filter(r => !r.deletedKey).length,
     days: days.size,
-    notes: (data.notes || []).filter(n => !n.deleted).length
+    notes: (data.notes || []).filter(n => !n.deleted && !n.kind).length
   };
 }
 async function refreshAfterSync() {
