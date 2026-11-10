@@ -1051,7 +1051,8 @@ label.set-row{cursor:pointer;}
   #view-today{display:grid;grid-template-columns:300px minmax(0,1fr);column-gap:28px;align-content:start;}
   #view-today > *{grid-column:1 / -1;max-width:none;width:100%;}
   #view-today > .progress-ring-card{grid-column:1;grid-row:span 6;align-self:start;position:sticky;top:0;margin:0;}
-  #view-today > .today-meta,#view-today > .quote{grid-column:2;}
+  #view-today > .today-meta{grid-column:2;}
+  #view-today > .quote{margin-bottom:18px;}
   #view-today > .today-meta{margin-top:0;}
   #view-today > .readonly-note,#view-today > .skipped-note,#view-today > .routine-list{grid-column:2;}
   #view-today > .readonly-note,#view-today > .skipped-note{margin-top:0;margin-bottom:12px;}
@@ -1256,6 +1257,8 @@ label.set-row{cursor:pointer;}
 
           <button type="button" class="aff-banner" id="affBanner" hidden></button>
 
+          <p class="quote">“Action speaks louder than words.”</p>
+
           <div class="card progress-ring-card">
             <div class="circular-progress" id="circularProgress">
               <svg viewBox="0 0 100 100">
@@ -1272,7 +1275,6 @@ label.set-row{cursor:pointer;}
             <button class="sync-pill" id="syncPill" hidden></button>
           </header>
 
-          <p class="quote">“Action speaks louder than words.”</p>
 
           <p class="readonly-note" id="readonlyNote" hidden>Past dates are read-only.</p>
           <div class="skipped-note" id="skippedNote" hidden>
