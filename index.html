@@ -984,6 +984,11 @@ label.set-row{cursor:pointer;}
 .pair-list{margin-bottom:10px;}
 .pair-row{display:flex;align-items:center;gap:14px;padding:12px 16px;}
 .pair-row + .pair-row{border-top:1px solid var(--border);}
+.pair-row .set-txt{flex:1;min-width:0;}
+.pair-acts{display:flex;gap:8px;flex:none;margin-left:auto;}
+.pair-acts .btn{white-space:nowrap;display:inline-flex;align-items:center;gap:6px;}
+.pair-acts .spinner{width:12px;height:12px;}
+@media (max-width:480px){ .pair-row{flex-wrap:wrap;} .pair-acts{width:100%;justify-content:flex-end;} }
 .pair-dot{width:10px;height:10px;border-radius:50%;background:var(--border-strong);flex:none;margin:0 13px;}
 .pair-dot.live{background:var(--st-full);box-shadow:0 0 0 4px rgba(34,197,94,.18);}
 
@@ -5300,12 +5305,52 @@ function renderDevices() {
       '<span class="pair-dot' + (live ? ' live' : '') + '"></span>' +
       '<span class="set-txt"><span class="row-title">' + esc(p.name) + '</span>' +
       '<span class="row-sub">' + (live ? 'Connected · changes sync instantly' : 'Offline · last synced ' + timeAgo(p.lastSync)) + '</span></span>' +
-      '<button class="btn btn-ghost btn-small" data-unpair="' + esc(p.id) + '">Unlink</button>' +
+      '<span class="pair-acts">' +
+        (live ? '' : '<button class="btn btn-primary btn-small" data-reconnect="' + esc(p.id) + '"' + (reconnecting[p.id] ? ' disabled' : '') + '>' +
+          (reconnecting[p.id] ? '<span class="spinner"></span> Connecting…' : '↻ Reconnect') + '</button>') +
+        '<button class="btn btn-ghost btn-small" data-unpair="' + esc(p.id) + '">Unlink</button>' +
+      '</span>' +
     '</div>';
   }).join('');
 }
 
+/* Manual reconnect: refresh the link to the pairing service, dial the device again, and report the result */
+const reconnecting = {};
+async function reconnectDevice(id) {
+  if (reconnecting[id]) return;
+  const p = getPairs().find(x => x.id === id);
+  if (!p) return;
+  if (!navigator.onLine) { toast('You are offline. Connect to the internet and try again.'); return; }
+  reconnecting[id] = true; renderDevices();
+  try {
+    const old = liveConns[id];
+    if (old && !old.open) { try { old.close(); } catch (e) {} delete liveConns[id]; }
+    if (livePeer && !livePeer.destroyed && livePeer.open && !livePeer.disconnected) connectPairs();
+    else if (livePeer && !livePeer.destroyed && livePeer.disconnected) { try { livePeer.reconnect(); } catch (e) { stopLiveSync(); } }
+    if (!livePeer || livePeer.destroyed) await startLiveSync();
+    const t0 = Date.now();
+    let dialled = Date.now();
+    while (Date.now() - t0 < 15000) {
+      if (liveConns[id] && liveConns[id].open) break;
+      if (livePeer && livePeer.open && Date.now() - dialled > 5000) { connectPairs(); dialled = Date.now(); }
+      await new Promise(r => setTimeout(r, 400));
+    }
+  } catch (e) {}
+  delete reconnecting[id];
+  renderDevices(); renderSyncPill();
+  if (liveConns[id] && liveConns[id].open) toast('✓ Connected to ' + p.name.split(' · ')[0]);
+  else showModal(
+    '<h2 class="modal-title">Couldn’t reach ' + esc(p.name.split(' · ')[0]) + '</h2>' +
+    '<p class="modal-text">Make sure FLOW is <b>open on that device</b> (not in the background) and it has internet. ' +
+    'Then tap Reconnect again — it also reconnects by itself every few seconds while both are open.</p>' +
+    '<p class="modal-text">Still not working? Use <b>Sync with another device</b> and scan the QR again.</p>' +
+    '<div class="modal-actions"><button class="btn btn-primary" data-act="ok">OK</button></div>'
+  ), $('#modal').onclick = function (e) { if (e.target.closest('[data-act]')) hideModal(); };
+}
+
 $('#pairList').addEventListener('click', function (e) {
+  const r = e.target.closest('[data-reconnect]');
+  if (r) { reconnectDevice(r.dataset.reconnect); return; }
   const b = e.target.closest('[data-unpair]');
   if (!b) return;
   const id = b.dataset.unpair;
