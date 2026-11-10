@@ -616,6 +616,9 @@ body{
 /* Headings */
 .user-name,.view-title{font-weight:700;letter-spacing:-.03em;}
 .today-date{font-weight:500;}
+.today-meta{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin:0 0 14px;}
+.today-meta .today-date{margin:0;font-size:14px;color:var(--text);font-weight:600;}
+.today-meta .sync-pill{margin-top:0;}
 .quote{font-style:normal;font-size:14.5px;color:var(--muted);opacity:1;padding-left:12px;border-left:2px solid var(--accent);}
 .section-label{font-size:12px;font-weight:600;letter-spacing:.04em;}
 
@@ -1047,7 +1050,9 @@ label.set-row{cursor:pointer;}
   /* Today: ring left, routines right on wide screens */
   #view-today{display:grid;grid-template-columns:300px minmax(0,1fr);column-gap:28px;align-content:start;}
   #view-today > *{grid-column:1 / -1;max-width:none;width:100%;}
-  #view-today > .progress-ring-card{grid-column:1;grid-row:span 4;align-self:start;position:sticky;top:0;margin:0;}
+  #view-today > .progress-ring-card{grid-column:1;grid-row:span 6;align-self:start;position:sticky;top:0;margin:0;}
+  #view-today > .today-meta,#view-today > .quote{grid-column:2;}
+  #view-today > .today-meta{margin-top:0;}
   #view-today > .readonly-note,#view-today > .skipped-note,#view-today > .routine-list{grid-column:2;}
   #view-today > .readonly-note,#view-today > .skipped-note{margin-top:0;margin-bottom:12px;}
   #view-today{max-width:1040px;margin:0 auto;width:100%;}
@@ -1247,13 +1252,7 @@ label.set-row{cursor:pointer;}
             <span class="app-brand-name">FLOW</span>
           </div>
 
-          <header style="margin-bottom:14px;">
-            <h1 class="user-name" id="userNameAndGreeting">Good evening, User</h1>
-            <p class="today-date" id="todayDate">—</p>
-            <button class="sync-pill" id="syncPill" hidden></button>
-          </header>
-
-          <p class="quote">“Action speaks louder than words.”</p>
+          <h1 class="user-name" id="userNameAndGreeting" hidden>Good evening, User</h1>
 
           <button type="button" class="aff-banner" id="affBanner" hidden></button>
 
@@ -1267,6 +1266,13 @@ label.set-row{cursor:pointer;}
             </div>
             <div class="progress-subtext" id="progressCount">0 / 0 completed</div>
           </div>
+
+          <header class="today-meta">
+            <p class="today-date" id="todayDate">—</p>
+            <button class="sync-pill" id="syncPill" hidden></button>
+          </header>
+
+          <p class="quote">“Action speaks louder than words.”</p>
 
           <p class="readonly-note" id="readonlyNote" hidden>Past dates are read-only.</p>
           <div class="skipped-note" id="skippedNote" hidden>
