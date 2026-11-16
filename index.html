@@ -5462,7 +5462,7 @@ boot().catch(function (err) {
   const screen = document.getElementById('authScreen');
   if (screen) screen.hidden = false;
 });
-/* --- CAMERA, GALLERY & PHOTO ATTACHMENT LOGIC --- */
+/* --- CAMERA, GALLERY & PHOTO ATTACHMENT LOGIC (COMPLETE & FINAL) --- */
   let currentEditorPhotos = [];
 
   function renderEditorPhotos() {
@@ -5499,13 +5499,13 @@ boot().catch(function (err) {
     // Gallery option selected
     if (e.target.closest('#pickGallery')) {
       if (typeof hideModal === 'function') hideModal();
-      document.getElementById('galleryFileInput').click(); // Pehli baar click par allow permission maangega
+      document.getElementById('galleryFileInput').click(); 
     }
     
     // Camera option selected
     if (e.target.closest('#pickCamera')) {
       if (typeof hideModal === 'function') hideModal();
-      openLiveCamera(); // Pehli baar click par allow camera permission maangega
+      openLiveCamera(); 
     }
     
     // Delete photo from editor
@@ -5513,11 +5513,11 @@ boot().catch(function (err) {
     if (del) {
       const idx = parseInt(del.dataset.delPhoto, 10);
       currentEditorPhotos.splice(idx, 1);
-      renderEditorPhotos();
+      renderEditorPhotos(); 
     }
   });
 
-  // Gallery file change handler
+  // Gallery file change handler (Ensures instant preview)
   document.getElementById('galleryFileInput').addEventListener('change', function(e) {
     const files = e.target.files;
     if (!files || !files.length) return;
@@ -5525,24 +5525,34 @@ boot().catch(function (err) {
       const reader = new FileReader();
       reader.onload = function(evt) {
         currentEditorPhotos.push(evt.target.result);
-        renderEditorPhotos();
+        renderEditorPhotos(); 
       };
       reader.readAsDataURL(file);
     });
     e.target.value = '';
   });
 
-  // Live camera stream
+  // Live camera stream with fallback & permission check
   let cameraStream = null;
   async function openLiveCamera() {
     const camModal = document.getElementById('cameraModal');
     const video = document.getElementById('cameraVideo');
+    
+    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
+      alert('Camera is not supported on this browser or device. Please use Gallery.');
+      return;
+    }
+
     try {
-      cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      cameraStream = await navigator.mediaDevices.getUserMedia({ 
+        video: { facingMode: 'user' }, 
+        audio: false 
+      });
       video.srcObject = cameraStream;
       camModal.hidden = false;
     } catch (err) {
-      alert('Camera access permission denied or unavailable.');
+      console.warn('Camera error:', err);
+      alert('Camera access was blocked or denied. Please check your browser site settings to allow camera access, or use "Choose from Gallery" instead.');
     }
   }
 
@@ -5564,7 +5574,6 @@ boot().catch(function (err) {
     if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
     document.getElementById('cameraModal').hidden = true;
 
-    // Show confirmation with Accept / Retake
     if (typeof showModal === 'function') {
       showModal(
         '<h2 class="modal-title" style="text-align:center; margin-bottom:12px;">Confirm Photo</h2>' +
@@ -5586,7 +5595,7 @@ boot().catch(function (err) {
       } else if (evt.target.closest('#camAccept')) {
         if (typeof hideModal === 'function') hideModal();
         currentEditorPhotos.push(dataUrl);
-        renderEditorPhotos();
+        renderEditorPhotos(); 
       }
     };
   });
