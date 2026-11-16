@@ -1632,9 +1632,16 @@ label.set-row{cursor:pointer;}
         <button type="button" data-mood="5" title="Great">😄</button>
       </div>
     </div>
+    <div style="padding: 0 18px 6px; font-size: 13px; color: var(--muted);" id="editorDate"></div>
+    <div id="editorPhotosContainer" class="editor-photos-grid" style="display:flex; gap:8px; padding:0 18px 12px; flex-wrap:wrap;" hidden></div>
     <textarea id="editorBody" class="editor-body" placeholder="Write your thoughts…"></textarea>
     <div class="editor-foot">
+      <div style="display:flex; align-items:center; gap:10px;">
       <span id="editorDate">—</span>
+        <button type="button" class="icon-btn small" id="openPhotoPickerBtn" title="Add Photo">
+          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+        </button>
+        </div>
       <button class="btn btn-ghost btn-small" id="editorDelete">Delete</button>
     </div>
   </div>
@@ -5455,8 +5462,144 @@ boot().catch(function (err) {
   const screen = document.getElementById('authScreen');
   if (screen) screen.hidden = false;
 });
+/* --- CAMERA, GALLERY & PHOTO ATTACHMENT LOGIC --- */
+  let currentEditorPhotos = [];
 
+  function renderEditorPhotos() {
+    const container = document.getElementById('editorPhotosContainer');
+    if (!container) return;
+    if (!currentEditorPhotos || !currentEditorPhotos.length) {
+      container.innerHTML = ''; 
+      container.hidden = true; 
+      return;
+    }
+    container.hidden = false;
+    container.innerHTML = currentEditorPhotos.map((img, idx) =>
+      '<div style="position:relative;width:68px;height:68px;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:var(--surface);">' +
+        '<img src="' + img + '" style="width:100%;height:100%;object-fit:cover;">' +
+        '<button type="button" data-del-photo="' + idx + '" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.65);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;">×</button>' +
+      '</div>'
+    ).join('');
+  }
+
+  // Photo button click -> Action sheet (Camera vs Gallery)
+  document.addEventListener('click', function(e) {
+    if (e.target.closest('#openPhotoPickerBtn')) {
+      if (typeof showModal === 'function') {
+        showModal(
+          '<h2 class="modal-title" style="margin-bottom:14px;">Add Photo</h2>' +
+          '<div style="display:flex;flex-direction:column;gap:10px;">' +
+            '<button type="button" id="pickCamera" style="padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--border);font-weight:600;text-align:left;cursor:pointer;">📸 Take Photo (Camera)</button>' +
+            '<button type="button" id="pickGallery" style="padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--border);font-weight:600;text-align:left;cursor:pointer;">🖼️ Choose from Gallery</button>' +
+          '</div>'
+        );
+      }
+    }
+    
+    // Gallery option selected
+    if (e.target.closest('#pickGallery')) {
+      if (typeof hideModal === 'function') hideModal();
+      document.getElementById('galleryFileInput').click(); // Pehli baar click par allow permission maangega
+    }
+    
+    // Camera option selected
+    if (e.target.closest('#pickCamera')) {
+      if (typeof hideModal === 'function') hideModal();
+      openLiveCamera(); // Pehli baar click par allow camera permission maangega
+    }
+    
+    // Delete photo from editor
+    const del = e.target.closest('[data-del-photo]');
+    if (del) {
+      const idx = parseInt(del.dataset.delPhoto, 10);
+      currentEditorPhotos.splice(idx, 1);
+      renderEditorPhotos();
+    }
+  });
+
+  // Gallery file change handler
+  document.getElementById('galleryFileInput').addEventListener('change', function(e) {
+    const files = e.target.files;
+    if (!files || !files.length) return;
+    Array.from(files).forEach(file => {
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        currentEditorPhotos.push(evt.target.result);
+        renderEditorPhotos();
+      };
+      reader.readAsDataURL(file);
+    });
+    e.target.value = '';
+  });
+
+  // Live camera stream
+  let cameraStream = null;
+  async function openLiveCamera() {
+    const camModal = document.getElementById('cameraModal');
+    const video = document.getElementById('cameraVideo');
+    try {
+      cameraStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'user' }, audio: false });
+      video.srcObject = cameraStream;
+      camModal.hidden = false;
+    } catch (err) {
+      alert('Camera access permission denied or unavailable.');
+    }
+  }
+
+  document.getElementById('camCloseBtn').addEventListener('click', function() {
+    if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+    document.getElementById('cameraModal').hidden = true;
+  });
+
+  // Capture photo inside camera
+  document.getElementById('camCaptureBtn').addEventListener('click', function() {
+    const video = document.getElementById('cameraVideo');
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 640;
+    canvas.height = video.videoHeight || 480;
+    const ctx = canvas.getContext('2d');
+    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
+
+    if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
+    document.getElementById('cameraModal').hidden = true;
+
+    // Show confirmation with Accept / Retake
+    if (typeof showModal === 'function') {
+      showModal(
+        '<h2 class="modal-title" style="text-align:center; margin-bottom:12px;">Confirm Photo</h2>' +
+        '<div style="width:100%; max-height:50dvh; border-radius:14px; overflow:hidden; margin-bottom:18px;">' +
+          '<img src="' + dataUrl + '" style="width:100%; height:auto; display:block;">' +
+        '</div>' +
+        '<div style="display:flex; gap:12px; justify-content:center;">' +
+          '<button type="button" id="camRetake" style="flex:1; padding:12px; border-radius:12px; background:transparent; border:1px solid #e11d48; color:#e11d48; font-weight:600; cursor:pointer;">✕ Retake</button>' +
+          '<button type="button" id="camAccept" style="flex:1; padding:12px; border-radius:12px; background:var(--text); color:var(--bg); font-weight:600; cursor:pointer;">✓ Use Photo</button>' +
+        '</div>'
+      );
+    }
+
+    const modalElem = document.getElementById('modal') || document.body;
+    modalElem.onclick = function(evt) {
+      if (evt.target.closest('#camRetake')) {
+        if (typeof hideModal === 'function') hideModal();
+        openLiveCamera();
+      } else if (evt.target.closest('#camAccept')) {
+        if (typeof hideModal === 'function') hideModal();
+        currentEditorPhotos.push(dataUrl);
+        renderEditorPhotos();
+      }
+    };
+  });
 })();
 </script>
+  <input type="file" id="galleryFileInput" accept="image/*" multiple style="display:none;">
+  <div id="cameraModal" hidden style="position:fixed;inset:0;z-index:250;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:20px;">
+    <video id="cameraVideo" autoplay playsinline style="width:100%;max-width:480px;height:70dvh;object-fit:cover;border-radius:20px;"></video>
+    <div class="camera-controls" style="display:flex;align-items:center;justify-content:center;gap:30px;width:100%;">
+      <button type="button" id="camCloseBtn" style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.2);color:#fff;font-size:24px;border:none;cursor:pointer;">✕</button>
+      <button type="button" id="camCaptureBtn" style="width:64px;height:64px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,0.4);cursor:pointer;"></button>
+      <div style="width:52px;"></div>
+    </div>
+  </div>
 </body>
 </html>
