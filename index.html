@@ -1135,6 +1135,50 @@ label.set-row{cursor:pointer;}
 #affReader .ar-done:active{transform:scale(.97);}
 #affReader .ar-done.is-done{background:var(--surface);color:var(--text);border:1px solid var(--border-strong);}
 @media (prefers-reduced-motion: reduce){ #affReader .ar-bg i{animation:none;} #affReader .ar-list li{filter:none;} }
+/* ============ DIARY PHOTOS ============ */
+.editor-foot-l{display:flex;align-items:center;gap:12px;min-width:0;}
+.photo-add-btn{display:inline-flex;align-items:center;gap:6px;}
+.photo-add-btn svg{width:16px;height:16px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.editor-photos{display:flex;gap:10px;overflow-x:auto;padding:4px max(18px, calc((100% - 760px) / 2)) 12px;scrollbar-width:thin;flex:none;}
+.ep-item{position:relative;flex:none;width:96px;height:96px;border-radius:14px;overflow:hidden;border:1px solid var(--border);background:var(--surface-2);}
+.ep-item img{width:100%;height:100%;object-fit:cover;display:block;cursor:zoom-in;}
+.ep-del{position:absolute;top:5px;right:5px;width:24px;height:24px;border-radius:50%;display:grid;place-items:center;font-size:12px;line-height:1;
+  color:#fff;background:rgba(0,0,0,.6);-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px);}
+.ep-add{flex:none;width:96px;height:96px;border-radius:14px;border:1.5px dashed var(--border-strong);color:var(--muted);display:grid;place-items:center;font-size:24px;}
+.ep-add:hover{border-color:var(--accent);color:var(--accent);}
+.ep-busy{flex:none;width:96px;height:96px;border-radius:14px;background:var(--surface-2);display:grid;place-items:center;}
+
+.photo-pick{display:flex;flex-direction:column;gap:10px;margin:4px 0 6px;}
+.photo-pick button{display:flex;align-items:center;gap:14px;width:100%;text-align:left;padding:14px 16px;border-radius:14px;background:var(--surface);border:1px solid var(--border);transition:border-color .15s,background .15s;}
+.photo-pick button:hover{border-color:var(--accent);}
+.photo-pick .pp-ico{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);flex:none;}
+.photo-pick .pp-ico svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;}
+.photo-pick b{display:block;font-size:14.5px;font-weight:650;}
+.photo-pick small{display:block;font-size:12.5px;color:var(--muted);margin-top:2px;}
+
+.diary-photos{display:flex;gap:6px;margin-top:10px;}
+.diary-photos img,.diary-photos span{width:52px;height:52px;border-radius:10px;object-fit:cover;border:1px solid var(--border);flex:none;}
+.diary-photos span{display:grid;place-items:center;font-size:12.5px;font-weight:650;color:var(--muted);background:var(--surface-2);}
+
+#cameraSheet{position:fixed;inset:0;z-index:320;background:#000;display:flex;flex-direction:column;}
+#cameraSheet .cam-stage{flex:1;min-height:0;display:grid;place-items:center;padding:calc(12px + env(safe-area-inset-top)) 12px 0;}
+#cameraSheet video,#cameraSheet #camShot{max-width:100%;max-height:100%;width:auto;height:100%;object-fit:contain;border-radius:18px;background:#111;}
+#cameraSheet video.mirror{transform:scaleX(-1);}
+#cameraSheet .cam-bar{display:flex;align-items:center;justify-content:center;gap:36px;padding:20px 20px calc(24px + env(safe-area-inset-bottom));}
+#cameraSheet .cam-round{width:50px;height:50px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:18px;display:grid;place-items:center;}
+#cameraSheet .cam-round svg{width:22px;height:22px;fill:none;stroke:#fff;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round;}
+#cameraSheet .cam-shutter{width:72px;height:72px;border-radius:50%;background:#fff;box-shadow:0 0 0 5px rgba(255,255,255,.28);transition:transform .1s;}
+#cameraSheet .cam-shutter:active{transform:scale(.92);}
+#cameraSheet .cam-btn{min-width:130px;}
+#cameraSheet #camRetake{color:#fff;border-color:rgba(255,255,255,.35);}
+
+#photoViewer{position:fixed;inset:0;z-index:330;background:rgba(0,0,0,.92);display:grid;place-items:center;}
+#photoViewer img{max-width:calc(100% - 32px);max-height:calc(100% - 120px);border-radius:12px;object-fit:contain;}
+#photoViewer .pv-btn{position:absolute;width:46px;height:46px;border-radius:50%;background:rgba(255,255,255,.14);color:#fff;font-size:22px;display:grid;place-items:center;}
+#photoViewer .pv-close{top:calc(14px + env(safe-area-inset-top));right:16px;font-size:16px;}
+#photoViewer .pv-prev{left:14px;top:50%;margin-top:-23px;}
+#photoViewer .pv-next{right:14px;top:50%;margin-top:-23px;}
+#photoViewer .pv-count{position:absolute;bottom:calc(20px + env(safe-area-inset-bottom));left:0;right:0;text-align:center;color:rgba(255,255,255,.75);font-size:13px;}
 </style>
 </head>
 <body>
@@ -1632,18 +1676,46 @@ label.set-row{cursor:pointer;}
         <button type="button" data-mood="5" title="Great">😄</button>
       </div>
     </div>
-    <div style="padding: 0 18px 6px; font-size: 13px; color: var(--muted);" id="editorDate"></div>
-    <div id="editorPhotosContainer" class="editor-photos-grid" style="display:flex; gap:8px; padding:0 18px 12px; flex-wrap:wrap;" hidden></div>
+    <div class="editor-photos" id="editorPhotos" hidden></div>
     <textarea id="editorBody" class="editor-body" placeholder="Write your thoughts…"></textarea>
     <div class="editor-foot">
-      <div style="display:flex; align-items:center; gap:10px;">
-      <span id="editorDate">—</span>
-        <button type="button" class="icon-btn small" id="openPhotoPickerBtn" title="Add Photo">
-          <svg viewBox="0 0 24 24" style="width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
+      <div class="editor-foot-l">
+        <span id="editorDate">—</span>
+        <button type="button" class="btn btn-ghost btn-small photo-add-btn" id="photoAddBtn" title="Add photo">
+          <svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="3"/><circle cx="9" cy="10" r="1.7"/><path d="M21 16l-5-5-9 8.5"/></svg>
+          Photo
         </button>
-        </div>
+      </div>
       <button class="btn btn-ghost btn-small" id="editorDelete">Delete</button>
     </div>
+  </div>
+
+  <!-- ---------- PHOTOS: pickers, camera, viewer ---------- -->
+  <input type="file" id="photoGalleryInput" accept="image/*" multiple hidden>
+  <input type="file" id="photoCameraInput" accept="image/*" capture="environment" hidden>
+  <div id="cameraSheet" hidden role="dialog" aria-modal="true" aria-label="Camera">
+    <div class="cam-stage">
+      <video id="camVideo" autoplay playsinline muted></video>
+      <img id="camShot" alt="Captured photo" hidden>
+    </div>
+    <div class="cam-bar" id="camLive">
+      <button type="button" class="cam-round" id="camClose" aria-label="Close camera">✕</button>
+      <button type="button" class="cam-shutter" id="camSnap" aria-label="Take photo"></button>
+      <button type="button" class="cam-round" id="camFlip" aria-label="Switch camera">
+        <svg viewBox="0 0 24 24"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><path d="M9.5 13.5a2.5 2.5 0 0 0 4.7 1.2M14.5 12.5a2.5 2.5 0 0 0-4.7-1.2"/></svg>
+      </button>
+    </div>
+    <div class="cam-bar" id="camReview" hidden>
+      <button type="button" class="btn btn-ghost cam-btn" id="camRetake">Retake</button>
+      <button type="button" class="btn btn-primary cam-btn" id="camUse">Use photo</button>
+    </div>
+  </div>
+  <div id="photoViewer" hidden role="dialog" aria-modal="true" aria-label="Photo">
+    <img id="pvImg" alt="">
+    <button type="button" class="pv-btn pv-close" id="pvClose" aria-label="Close">✕</button>
+    <button type="button" class="pv-btn pv-prev" id="pvPrev" aria-label="Previous photo">‹</button>
+    <button type="button" class="pv-btn pv-next" id="pvNext" aria-label="Next photo">›</button>
+    <div class="pv-count" id="pvCount"></div>
   </div>
 
   <!-- ---------- AFFIRMATION READER (full screen) ---------- -->
@@ -2026,6 +2098,10 @@ async function loadUserData() {
   state.affs = allNotes.filter(n => n.kind === 'aff').sort((a, b) => (a.order || 0) - (b.order || 0) || a.createdAt - b.createdAt);
   state.affDays = {};
   allNotes.filter(n => n.kind === 'affday').forEach(n => { state.affDays[n.dateKey] = n; });
+  /* diary photos are separate records (kind:'photo') so editing a note's text never re-sends its images */
+  state.photos = {};
+  allNotes.filter(n => n.kind === 'photo' && n.data).forEach(n => { (state.photos[n.noteId] = state.photos[n.noteId] || []).push(n); });
+  Object.keys(state.photos).forEach(k => state.photos[k].sort((a, b) => (a.order || 0) - (b.order || 0) || a.createdAt - b.createdAt));
 }
 
 /* ============================================================
@@ -2509,6 +2585,7 @@ function renderDiary() {
         '</div>' +
         '<div class="diary-meta">' + esc(meta) + '</div>' +
         (preview ? '<div class="diary-preview">' + esc(preview) + '</div>' : '') +
+        diaryPhotoStrip(n.id) +
       '</button>' +
     '</li>';
   }).join('');
@@ -2678,6 +2755,9 @@ function openEditor(noteId) {
   $('#editorDelete').hidden = !note;
   state.editor.mood = note ? (note.mood || 0) : 0;
   paintMood();
+  state.editor.photos = note ? notePhotos(note.id).map(p => ({ id: p.id, data: p.data, createdAt: p.createdAt, order: p.order, saved: true })) : [];
+  state.editor.removed = [];
+  renderEditorPhotos();
 
   const sheet = $('#editorSheet');
   sheet.hidden = false;
@@ -2714,8 +2794,13 @@ async function flushDraft() {
 
   const title = $('#editorTitle').value.trim();
   const body = $('#editorBody').value;
+  const hasPhotos = !!(ed.photos && ed.photos.length);
 
-  if (!title && !body.trim()) return;
+  if (!title && !body.trim() && !hasPhotos) {
+    const existing = ed.id && state.notes.find(n => n.id === ed.id);
+    if (existing && ed.removed && ed.removed.length) await persistPhotos(existing);
+    return;
+  }
 
   let note = ed.id ? state.notes.find(n => n.id === ed.id) : null;
 
@@ -2742,6 +2827,7 @@ async function flushDraft() {
 
   try {
     await DB.put('notes', note);
+    await persistPhotos(note);
   } catch (e) {}
 
   updateEditorStatus();
@@ -2760,6 +2846,7 @@ async function closeEditor(skipFlush) {
   document.body.classList.remove('no-scroll');
   $('#editorTitle').value = '';
   $('#editorBody').value = '';
+  $('#editorPhotos').hidden = true; $('#editorPhotos').innerHTML = '';
   renderDiary();
 }
 
@@ -2773,8 +2860,8 @@ async function saveNote() {
   const title = $('#editorTitle').value.trim();
   const body = $('#editorBody').value;
 
-  if (!title && !body.trim()) {
-    toast('Write something first');
+  if (!title && !body.trim() && !(ed.photos && ed.photos.length)) {
+    toast('Write something or add a photo first');
     return;
   }
 
@@ -2801,6 +2888,7 @@ async function saveNote() {
 
   try {
     await DB.put('notes', note);
+    await persistPhotos(note);
   } catch (e) {
     toast('Could not save. Try again.');
     return;
@@ -2820,12 +2908,231 @@ function deleteCurrentNote() {
     try {
       const n = state.notes.find(x => x.id === id);
       if (n) await DB.put('notes', { id: n.id, userId: n.userId, createdAt: n.createdAt, updatedAt: Date.now(), deleted: true, title: '', body: '' });
+      for (const ph of notePhotos(id)) await DB.put('notes', photoTombstone(ph, id));
+      delete state.photos[id];
     } catch (e) {}
     state.notes = state.notes.filter(n => n.id !== id);
     await closeEditor(true);
     toast('Entry deleted');
   });
 }
+
+/* ============================================================
+   DIARY PHOTOS — camera / gallery, compressed, stored on this device
+   ============================================================ */
+const MAX_PHOTOS = 8, PHOTO_MAX_SIDE = 1600, PHOTO_QUALITY = 0.82;
+const isCoarse = () => !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
+function notePhotos(noteId) { return (state.photos && state.photos[noteId]) || []; }
+function photoTombstone(ph, noteId) {
+  return { id: ph.id, userId: state.user.id, kind: 'photo', noteId: noteId, deleted: true, data: '', createdAt: ph.createdAt || Date.now(), updatedAt: Date.now() };
+}
+function diaryPhotoStrip(noteId) {
+  const ps = notePhotos(noteId);
+  if (!ps.length) return '';
+  return '<div class="diary-photos">' + ps.slice(0, 4).map(p => '<img src="' + p.data + '" alt="" loading="lazy">').join('') +
+    (ps.length > 4 ? '<span>+' + (ps.length - 4) + '</span>' : '') + '</div>';
+}
+
+async function persistPhotos(note) {
+  const ed = state.editor;
+  if (!ed || !ed.photos) return;
+  for (let i = 0; i < ed.photos.length; i++) {
+    const ph = ed.photos[i];
+    if (ph.saved && ph.order === i) continue;
+    await DB.put('notes', { id: ph.id, userId: state.user.id, kind: 'photo', noteId: note.id, data: ph.data, order: i, createdAt: ph.createdAt, updatedAt: Date.now() });
+    ph.order = i; ph.saved = true;
+  }
+  for (const r of ed.removed || []) await DB.put('notes', photoTombstone(r, note.id));
+  ed.removed = [];
+  if (!state.photos) state.photos = {};
+  state.photos[note.id] = ed.photos.map((ph, i) => ({ id: ph.id, noteId: note.id, data: ph.data, order: i, createdAt: ph.createdAt }));
+  if (!state.photos[note.id].length) delete state.photos[note.id];
+}
+
+function renderEditorPhotos(busy) {
+  const ed = state.editor, box = $('#editorPhotos');
+  if (!ed) return;
+  const ps = ed.photos || [];
+  if (!ps.length && !busy) { box.hidden = true; box.innerHTML = ''; return; }
+  box.hidden = false;
+  box.innerHTML = ps.map((p, i) =>
+    '<div class="ep-item"><img src="' + p.data + '" alt="Photo ' + (i + 1) + '" data-view-photo="' + i + '">' +
+    '<button type="button" class="ep-del" data-del-photo="' + i + '" aria-label="Remove photo">✕</button></div>').join('') +
+    (busy ? '<div class="ep-busy"><span class="spinner"></span></div>' : '') +
+    (ps.length < MAX_PHOTOS && !busy ? '<button type="button" class="ep-add" data-add-photo aria-label="Add another photo">＋</button>' : '');
+}
+
+function loadImage(src) {
+  return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+}
+async function compressImage(src) {
+  const url = typeof src === 'string' ? src : URL.createObjectURL(src);
+  try {
+    const im = await loadImage(url);
+    const w = im.naturalWidth, h = im.naturalHeight, k = Math.min(1, PHOTO_MAX_SIDE / Math.max(w, h));
+    const c = document.createElement('canvas');
+    c.width = Math.round(w * k); c.height = Math.round(h * k);
+    const g = c.getContext('2d');
+    g.fillStyle = '#fff'; g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(im, 0, 0, c.width, c.height);
+    return c.toDataURL('image/jpeg', PHOTO_QUALITY);
+  } finally { if (typeof src !== 'string') URL.revokeObjectURL(url); }
+}
+async function addPhotos(sources) {
+  const ed = state.editor;
+  if (!ed) return;
+  let list = Array.from(sources || []);
+  const room = MAX_PHOTOS - ed.photos.length;
+  if (room <= 0) { toast('Up to ' + MAX_PHOTOS + ' photos per entry'); return; }
+  if (list.length > room) { toast('Only ' + room + ' more photo' + (room > 1 ? 's' : '') + ' can be added'); list = list.slice(0, room); }
+  let failed = 0;
+  for (const src of list) {
+    renderEditorPhotos(true);
+    try {
+      const data = await compressImage(src);
+      if (state.editor !== ed) return;
+      ed.photos.push({ id: uid(), data: data, createdAt: Date.now(), saved: false });
+    } catch (e) { failed++; }
+  }
+  renderEditorPhotos();
+  if (failed) toast(failed > 1 ? failed + ' photos couldn’t be opened' : 'This photo format isn’t supported');
+  scheduleDraftSave();
+}
+function removeEditorPhoto(i) {
+  const ed = state.editor;
+  if (!ed || !ed.photos[i]) return;
+  const ph = ed.photos.splice(i, 1)[0];
+  if (ph.saved) ed.removed.push(ph);
+  renderEditorPhotos();
+  scheduleDraftSave();
+}
+
+function openPhotoPicker() {
+  if (!state.editor) return;
+  if (state.editor.photos.length >= MAX_PHOTOS) { toast('Up to ' + MAX_PHOTOS + ' photos per entry'); return; }
+  showModal(
+    '<h2 class="modal-title">Add a photo</h2>' +
+    '<div class="photo-pick">' +
+      '<button type="button" data-pick="camera"><span class="pp-ico"><svg viewBox="0 0 24 24"><path d="M4 8h3l2-2.5h6L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.4"/></svg></span>' +
+        '<span><b>Take a photo</b><small>Use your camera</small></span></button>' +
+      '<button type="button" data-pick="gallery"><span class="pp-ico"><svg viewBox="0 0 24 24"><rect x="3" y="4.5" width="18" height="15" rx="3"/><circle cx="9" cy="10" r="1.7"/><path d="M21 16l-5-5-9 8.5"/></svg></span>' +
+        '<span><b>Choose from gallery</b><small>Pick one or more photos</small></span></button>' +
+    '</div>' +
+    '<p class="hint">Photos stay on your device and sync only to your paired devices.</p>' +
+    '<div class="modal-actions"><button class="btn btn-ghost" data-act="cancel">Cancel</button></div>'
+  );
+  $('#modal').onclick = function (e) {
+    const b = e.target.closest('[data-pick],[data-act]');
+    if (!b) return;
+    hideModal();
+    if (b.dataset.pick === 'gallery') $('#photoGalleryInput').click();
+    else if (b.dataset.pick === 'camera') { if (isCoarse()) $('#photoCameraInput').click(); else openCamera(); }
+  };
+}
+
+/* in-app camera for laptops / desktops; phones & iPads use their own camera app through the capture input */
+let camStream = null, camFacing = 'user', camShotData = null;
+function stopCamera() { if (camStream) camStream.getTracks().forEach(t => t.stop()); camStream = null; }
+async function startCameraStream() {
+  stopCamera();
+  camStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: camFacing, width: { ideal: 1920 }, height: { ideal: 1080 } }, audio: false });
+  const v = $('#camVideo');
+  v.srcObject = camStream;
+  v.classList.toggle('mirror', camFacing === 'user');
+  try { await v.play(); } catch (e) {}
+}
+function camMode(review) {
+  $('#camShot').hidden = !review; $('#camVideo').hidden = review;
+  $('#camLive').hidden = review; $('#camReview').hidden = !review;
+}
+async function openCamera() {
+  if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) { $('#photoCameraInput').click(); return; }
+  camShotData = null; camMode(false);
+  $('#cameraSheet').hidden = false;
+  try {
+    await startCameraStream();
+    let cams = [];
+    try { cams = (await navigator.mediaDevices.enumerateDevices()).filter(d => d.kind === 'videoinput'); } catch (e) {}
+    $('#camFlip').style.visibility = cams.length > 1 ? 'visible' : 'hidden';
+  } catch (err) {
+    closeCamera();
+    if (err && (err.name === 'NotAllowedError' || err.name === 'SecurityError')) {
+      showModal('<h2 class="modal-title">Camera blocked</h2><p class="modal-text">Allow camera access for this site in your browser settings (the camera icon in the address bar), or choose a photo from your gallery instead.</p>' +
+        '<div class="modal-actions"><button class="btn btn-ghost" data-act="cancel">Close</button><button class="btn btn-primary" data-act="gallery">Choose from gallery</button></div>');
+      $('#modal').onclick = function (e) { const b = e.target.closest('[data-act]'); if (!b) return; hideModal(); if (b.dataset.act === 'gallery') $('#photoGalleryInput').click(); };
+    } else { toast('No camera found — choose a photo instead'); $('#photoGalleryInput').click(); }
+  }
+}
+function closeCamera() { stopCamera(); $('#cameraSheet').hidden = true; camShotData = null; }
+
+/* full-screen photo viewer */
+let pvList = [], pvIdx = 0;
+function openViewer(list, idx) { pvList = list; pvIdx = idx; paintViewer(); $('#photoViewer').hidden = false; }
+function paintViewer() {
+  $('#pvImg').src = pvList[pvIdx];
+  const many = pvList.length > 1;
+  $('#pvPrev').hidden = $('#pvNext').hidden = !many;
+  $('#pvCount').textContent = many ? (pvIdx + 1) + ' / ' + pvList.length : '';
+}
+function stepViewer(d) { if (pvList.length > 1) { pvIdx = (pvIdx + d + pvList.length) % pvList.length; paintViewer(); } }
+function closeViewer() { $('#photoViewer').hidden = true; $('#pvImg').removeAttribute('src'); }
+
+$('#photoAddBtn').addEventListener('click', openPhotoPicker);
+$('#editorPhotos').addEventListener('click', function (e) {
+  const d = e.target.closest('[data-del-photo]');
+  if (d) { removeEditorPhoto(+d.dataset.delPhoto); return; }
+  if (e.target.closest('[data-add-photo]')) { openPhotoPicker(); return; }
+  const v = e.target.closest('[data-view-photo]');
+  if (v) openViewer(state.editor.photos.map(p => p.data), +v.dataset.viewPhoto);
+});
+['#photoGalleryInput', '#photoCameraInput'].forEach(function (sel) {
+  $(sel).addEventListener('change', function (e) {
+    const files = Array.from(e.target.files || []).filter(f => !f.type || /^image\//.test(f.type));
+    e.target.value = '';
+    if (files.length) addPhotos(files);
+  });
+});
+$('#camClose').addEventListener('click', closeCamera);
+$('#camFlip').addEventListener('click', async function () {
+  const prev = camFacing;
+  camFacing = camFacing === 'user' ? 'environment' : 'user';
+  try { await startCameraStream(); } catch (e) { camFacing = prev; try { await startCameraStream(); } catch (e2) {} }
+});
+$('#camSnap').addEventListener('click', function () {
+  const v = $('#camVideo');
+  if (!v.videoWidth) return;
+  const c = document.createElement('canvas');
+  c.width = v.videoWidth; c.height = v.videoHeight;
+  const g = c.getContext('2d');
+  if (camFacing === 'user') { g.translate(c.width, 0); g.scale(-1, 1); }   /* save selfies as seen in the preview */
+  g.drawImage(v, 0, 0);
+  camShotData = c.toDataURL('image/jpeg', 0.92);
+  $('#camShot').src = camShotData;
+  camMode(true);
+});
+$('#camRetake').addEventListener('click', function () { camShotData = null; camMode(false); });
+$('#camUse').addEventListener('click', function () {
+  const d = camShotData;
+  closeCamera();
+  if (d) addPhotos([d]);
+});
+$('#pvClose').addEventListener('click', closeViewer);
+$('#pvPrev').addEventListener('click', function (e) { e.stopPropagation(); stepViewer(-1); });
+$('#pvNext').addEventListener('click', function (e) { e.stopPropagation(); stepViewer(1); });
+$('#photoViewer').addEventListener('click', function (e) { if (e.target === this) closeViewer(); });
+document.addEventListener('keydown', function (e) {
+  if (!$('#photoViewer').hidden) {
+    if (e.key === 'Escape') { e.stopImmediatePropagation(); closeViewer(); }
+    else if (e.key === 'ArrowLeft') stepViewer(-1);
+    else if (e.key === 'ArrowRight') stepViewer(1);
+  } else if (!$('#cameraSheet').hidden && e.key === 'Escape') { e.stopImmediatePropagation(); closeCamera(); }
+}, true);
+(function () {
+  let x0 = null;
+  const pv = $('#photoViewer');
+  pv.addEventListener('touchstart', e => { x0 = e.touches[0].clientX; }, { passive: true });
+  pv.addEventListener('touchend', e => { if (x0 === null) return; const dx = e.changedTouches[0].clientX - x0; x0 = null; if (Math.abs(dx) > 50) stepViewer(dx < 0 ? 1 : -1); });
+})();
 
 /* ============================================================
    PROGRESS VIEW & DESKTOP SIDEBAR WIDGETS
@@ -5152,6 +5459,7 @@ function scheduleLiveRefresh() {
     if (v === 'today') renderToday();
     else if (v === 'diary' && !editorOpen) renderDiary();
     else if (v === 'progress') renderProgress();
+    else if (v === 'affirm') renderAffirm();
     else if (v === 'manage' && !document.querySelector('#manageList.is-dragging')) renderManage();
     else if (v === 'profile') renderProfile();
     renderDesktopSidebarWidgets();
@@ -5462,153 +5770,7 @@ boot().catch(function (err) {
   const screen = document.getElementById('authScreen');
   if (screen) screen.hidden = false;
 });
-/* --- CAMERA, GALLERY & PHOTO ATTACHMENT LOGIC (COMPLETE & FINAL) --- */
-  let currentEditorPhotos = [];
-
-  function renderEditorPhotos() {
-    const container = document.getElementById('editorPhotosContainer');
-    if (!container) return;
-    if (!currentEditorPhotos || !currentEditorPhotos.length) {
-      container.innerHTML = ''; 
-      container.hidden = true; 
-      return;
-    }
-    container.hidden = false;
-    container.innerHTML = currentEditorPhotos.map((img, idx) =>
-      '<div style="position:relative;width:68px;height:68px;border-radius:12px;overflow:hidden;border:1px solid var(--border);background:var(--surface);">' +
-        '<img src="' + img + '" style="width:100%;height:100%;object-fit:cover;">' +
-        '<button type="button" data-del-photo="' + idx + '" style="position:absolute;top:3px;right:3px;background:rgba(0,0,0,0.65);color:#fff;border:none;border-radius:50%;width:20px;height:20px;font-size:11px;cursor:pointer;">×</button>' +
-      '</div>'
-    ).join('');
-  }
-
-  // Photo button click -> Action sheet (Camera vs Gallery)
-  document.addEventListener('click', function(e) {
-    if (e.target.closest('#openPhotoPickerBtn')) {
-      if (typeof showModal === 'function') {
-        showModal(
-          '<h2 class="modal-title" style="margin-bottom:14px;">Add Photo</h2>' +
-          '<div style="display:flex;flex-direction:column;gap:10px;">' +
-            '<button type="button" id="pickCamera" style="padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--border);font-weight:600;text-align:left;cursor:pointer;">📸 Take Photo (Camera)</button>' +
-            '<button type="button" id="pickGallery" style="padding:14px;border-radius:14px;background:var(--surface);border:1px solid var(--border);font-weight:600;text-align:left;cursor:pointer;">🖼️ Choose from Gallery</button>' +
-          '</div>'
-        );
-      }
-    }
-    
-    // Gallery option selected
-    if (e.target.closest('#pickGallery')) {
-      if (typeof hideModal === 'function') hideModal();
-      document.getElementById('galleryFileInput').click(); 
-    }
-    
-    // Camera option selected
-    if (e.target.closest('#pickCamera')) {
-      if (typeof hideModal === 'function') hideModal();
-      openLiveCamera(); 
-    }
-    
-    // Delete photo from editor
-    const del = e.target.closest('[data-del-photo]');
-    if (del) {
-      const idx = parseInt(del.dataset.delPhoto, 10);
-      currentEditorPhotos.splice(idx, 1);
-      renderEditorPhotos(); 
-    }
-  });
-
-  // Gallery file change handler (Ensures instant preview)
-  document.getElementById('galleryFileInput').addEventListener('change', function(e) {
-    const files = e.target.files;
-    if (!files || !files.length) return;
-    Array.from(files).forEach(file => {
-      const reader = new FileReader();
-      reader.onload = function(evt) {
-        currentEditorPhotos.push(evt.target.result);
-        renderEditorPhotos(); 
-      };
-      reader.readAsDataURL(file);
-    });
-    e.target.value = '';
-  });
-
-  // Live camera stream with fallback & permission check
-  let cameraStream = null;
-  async function openLiveCamera() {
-    const camModal = document.getElementById('cameraModal');
-    const video = document.getElementById('cameraVideo');
-    
-    if (!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia) {
-      alert('Camera is not supported on this browser or device. Please use Gallery.');
-      return;
-    }
-
-    try {
-      cameraStream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user' }, 
-        audio: false 
-      });
-      video.srcObject = cameraStream;
-      camModal.hidden = false;
-    } catch (err) {
-      console.warn('Camera error:', err);
-      alert('Camera access was blocked or denied. Please check your browser site settings to allow camera access, or use "Choose from Gallery" instead.');
-    }
-  }
-
-  document.getElementById('camCloseBtn').addEventListener('click', function() {
-    if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
-    document.getElementById('cameraModal').hidden = true;
-  });
-
-  // Capture photo inside camera
-  document.getElementById('camCaptureBtn').addEventListener('click', function() {
-    const video = document.getElementById('cameraVideo');
-    const canvas = document.createElement('canvas');
-    canvas.width = video.videoWidth || 640;
-    canvas.height = video.videoHeight || 480;
-    const ctx = canvas.getContext('2d');
-    ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-    const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-
-    if (cameraStream) cameraStream.getTracks().forEach(t => t.stop());
-    document.getElementById('cameraModal').hidden = true;
-
-    if (typeof showModal === 'function') {
-      showModal(
-        '<h2 class="modal-title" style="text-align:center; margin-bottom:12px;">Confirm Photo</h2>' +
-        '<div style="width:100%; max-height:50dvh; border-radius:14px; overflow:hidden; margin-bottom:18px;">' +
-          '<img src="' + dataUrl + '" style="width:100%; height:auto; display:block;">' +
-        '</div>' +
-        '<div style="display:flex; gap:12px; justify-content:center;">' +
-          '<button type="button" id="camRetake" style="flex:1; padding:12px; border-radius:12px; background:transparent; border:1px solid #e11d48; color:#e11d48; font-weight:600; cursor:pointer;">✕ Retake</button>' +
-          '<button type="button" id="camAccept" style="flex:1; padding:12px; border-radius:12px; background:var(--text); color:var(--bg); font-weight:600; cursor:pointer;">✓ Use Photo</button>' +
-        '</div>'
-      );
-    }
-
-    const modalElem = document.getElementById('modal') || document.body;
-    modalElem.onclick = function(evt) {
-      if (evt.target.closest('#camRetake')) {
-        if (typeof hideModal === 'function') hideModal();
-        openLiveCamera();
-      } else if (evt.target.closest('#camAccept')) {
-        if (typeof hideModal === 'function') hideModal();
-        currentEditorPhotos.push(dataUrl);
-        renderEditorPhotos(); 
-      }
-    };
-  });
 })();
 </script>
-  <input type="file" id="galleryFileInput" accept="image/*" multiple style="display:none;">
-  <div id="cameraModal" hidden style="position:fixed;inset:0;z-index:250;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding:20px;">
-    <video id="cameraVideo" autoplay playsinline style="width:100%;max-width:480px;height:70dvh;object-fit:cover;border-radius:20px;"></video>
-    <div class="camera-controls" style="display:flex;align-items:center;justify-content:center;gap:30px;width:100%;">
-      <button type="button" id="camCloseBtn" style="width:52px;height:52px;border-radius:50%;background:rgba(255,255,255,0.2);color:#fff;font-size:24px;border:none;cursor:pointer;">✕</button>
-      <button type="button" id="camCaptureBtn" style="width:64px;height:64px;border-radius:50%;background:#fff;border:4px solid rgba(255,255,255,0.4);cursor:pointer;"></button>
-      <div style="width:52px;"></div>
-    </div>
-  </div>
 </body>
 </html>
